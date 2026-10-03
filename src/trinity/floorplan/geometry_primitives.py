@@ -3,7 +3,7 @@
 Each primitive maps ``xywh`` (plus per-block data) to one float: a continuous relaxation
 of one constraint (overlap, compactness, boundary, grouping, MIB, fixed / preplaced
 immutability). The continuous scorer (:mod:`trinity.floorplan.scoring.continuous`) is
-built from these; the training losses in ``trinity/losses/aux.py`` are their batched
+built from these; the training losses in ``trinity/losses/aux_terms.py`` are their batched
 torch counterparts.
 
 Conventions: ``xywh`` is ``(n, 4)`` lower-left ``(x, y, w, h)``; ``s = sqrt(sum area)``

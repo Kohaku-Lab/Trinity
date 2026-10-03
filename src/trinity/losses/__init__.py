@@ -6,11 +6,11 @@ Importing this package registers, in :data:`trinity.registry.LOSS`:
   ``pseudo_huber`` (:mod:`.diffusion`);
 * the per-constraint aux terms ``overlap``, ``group``, ``mib``,
   ``boundary``, ``wl``, ``area`` (:mod:`.constraint`, ``docs/physics.md``);
-* the ``ref_*`` aux terms of the FloorSet reference recipe (:mod:`.aux`).
+* the ``ref_*`` aux terms of the FloorSet reference recipe (:mod:`.aux_terms`).
 """
 
 from trinity.losses import (
-    aux,  # noqa: F401  (register: ref_* terms)
+    aux_terms,  # noqa: F401  (register: ref_* terms)
     constraint,  # noqa: F401  (register: per-constraint aux terms)
     diffusion,  # noqa: F401  (register: regression losses)
 )

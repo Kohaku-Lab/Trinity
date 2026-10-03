@@ -1,11 +1,11 @@
 # Trinity: One Differentiable Physics for Training, Refining and Scoring Generative Floorplanners
 
-**Shih-Ying Yeh**<sup>♠♡†</sup>, **Tzu-Sian Wang**<sup>♡</sup>, **Xuehai Wang**<sup>♣</sup>, **Jia-Hua Lee**<sup>★</sup>, **Daniel Z. Kaplan**<sup>◇</sup>, **Ming-Qi Xu**<sup>△</sup>, **Wuqian Tang**<sup>♡</sup>, **Chun-Yao Wang**<sup>♡</sup>, **Shang-Hong Lai**<sup>♡</sup>, **Chun-Yi Lee**<sup>★</sup>
+**Shih-Ying Yeh**<sup>♠♡†</sup>, **Tzu-Sian Wang**<sup>♡</sup>, **Xuehai Wang**<sup>♣△</sup>, **Jia-Hua Lee**<sup>♡</sup>, **Daniel Z. Kaplan**<sup>◇</sup>, **Ming-Qi Xu**<sup>♡</sup>, **Wuqian Tang**<sup>♡</sup>, **Chun-Yao Wang**<sup>♡</sup>, **Shang-Hong Lai**<sup>♡</sup>, **Chun-Yi Lee**<sup>★</sup>
 
-<sup>♠</sup>Kohaku Lab · <sup>♡</sup>National Tsing Hua University · <sup>♣</sup>[Affiliation of Xuehai Wang] · <sup>◇</sup>realiz.ai · <sup>△</sup>[Affiliation of Ming-Qi Xu] · <sup>★</sup>National Taiwan University
+<sup>♠</sup>Kohaku Lab · <sup>♡</sup>National Tsing Hua University · <sup>♣</sup>Karolinska Institutet · <sup>△</sup>Stockholm University · <sup>◇</sup>realiz.ai · <sup>★</sup>National Taiwan University
 <sup>†</sup>Corresponding author: kohaku@kblueleaf.net
 
-[Project page](https://kohaku-lab.github.io/Trinity/) · [arXiv (coming soon)](#) · [Models (coming soon)](#)
+[Project page](https://kohaku-lab.github.io/Trinity/) · [arXiv (coming soon)](#) · [Models](https://huggingface.co/KBlueLeaf/Trinity)
 
 ![Trinity sampling, refining and legalizing a 60-block FloorSet chip](assets/pipeline_n60.gif)
 
