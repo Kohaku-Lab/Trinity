@@ -1,0 +1,69 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "trinity"
+version = "0.1.0"
+description = "Trinity: One Differentiable Physics for Training, Refining and Scoring Generative Floorplanners"
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+authors = [
+    { name = "Shih-Ying Yeh (KohakuBlueLeaf)", email = "apolloyeh0123@gmail.com" },
+]
+requires-python = ">=3.13"
+dependencies = [
+    "torch>=2.12",
+    "numpy",
+    "scipy",
+    "shapely",
+    "ortools>=9.10",
+    "pylance",
+    "pyarrow",
+    "lightning",
+    "anyschedule",
+    "optimfactory",
+    "kohaku-engine>=0.5",
+    "wandb",
+    "safetensors",
+    "huggingface_hub",
+    "matplotlib",
+    "tqdm",
+]
+
+[project.optional-dependencies]
+# Input formats of the ported published placers (FlowPlace / ChipDiffusion / DiffPlace / MacroDiff+).
+baselines = ["torch_geometric>=2.5"]
+dev = [
+    "pytest",
+    "black>=26.3.0",
+    "ruff>=0.9.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/Kohaku-Lab/Trinity"
+Repository = "https://github.com/Kohaku-Lab/Trinity"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["trinity*", "trinity_baselines*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.black]
+target-version = ["py313"]
+
+[tool.ruff]
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["trinity", "trinity_baselines"]
