@@ -1,17 +1,59 @@
 # Trinity: One Differentiable Physics for Training, Refining and Scoring Generative Floorplanners
 
-[arXiv (coming soon)](#)
+**Shih-Ying Yeh**<sup>♠♡†</sup>, **Tzu-Sian Wang**<sup>♡</sup>, **Xuehai Wang**<sup>♣</sup>, **Jia-Hua Lee**<sup>★</sup>, **Daniel Z. Kaplan**<sup>◇</sup>, **Ming-Qi Xu**<sup>△</sup>, **Wuqian Tang**<sup>♡</sup>, **Chun-Yao Wang**<sup>♡</sup>, **Shang-Hong Lai**<sup>♡</sup>, **Chun-Yi Lee**<sup>★</sup>
 
-Trinity is a graph-conditioned diffusion model for SoC floorplanning on
-[FloorSet](https://github.com/IntelLabs/FloorSet). One set of six differentiable constraint
-terms (overlap, grouping, MIB, boundary, wirelength, area) is used three times:
+<sup>♠</sup>Kohaku Lab · <sup>♡</sup>National Tsing Hua University · <sup>♣</sup>[Affiliation of Xuehai Wang] · <sup>◇</sup>realiz.ai · <sup>△</sup>[Affiliation of Ming-Qi Xu] · <sup>★</sup>National Taiwan University
+<sup>†</sup>Corresponding author: kohaku@kblueleaf.net
 
-* **training** — as the auxiliary loss of the denoiser;
-* **refining** — as the energy a closed-form refiner descends on a finished sample;
-* **scoring** — as the soft metrics that evaluate a layout before legalization.
+[Project page](https://kohaku-lab.github.io/Trinity/) · [arXiv (coming soon)](#) · [Models (coming soon)](#)
+
+![Trinity sampling, refining and legalizing a 60-block FloorSet chip](assets/pipeline_n60.gif)
+
+Existing generative floorplanners train only to reproduce reference layouts and leave the rules
+of the chip to corrections bolted on afterwards: guidance in the sampler, post-hoc loops and a
+legalizer, each in its own form, with only the final layout ever scored. Trinity writes every
+constraint and objective of floorplanning once, as six differentiable functions of the layout
+(overlap, grouping, MIB, boundary, wirelength, area), and uses that one physics three times:
+
+* **training**: as a term of the denoiser's loss, so the network learns the correction and
+  sampling needs no guidance;
+* **refining**: as the energy a closed-form refiner descends on a finished sample;
+* **scoring**: as a soft cost that measures a layout at every stage, before legalization.
+
+![Prior pipelines against Trinity, and soft cost along refinement](assets/teaser.png)
+
+## Results
+
+Four recent diffusion placers (FlowPlace, ChipDiffusion, MacroDiff+, DiffPlace) re-implemented
+on the same data and training recipe, every model scored at every stage on 12,000 held-out
+FloorSet chips.
+
+![Raw soft cost against sampling steps, and our refiner against each placer's own loop](assets/results.png)
+
+| | |
+|---|---|
+| raw soft cost, physics term on vs. off (same transformer) | **−26%** |
+| steps for our refiner to match each placer's own loop | **16–660× fewer** |
+| refined soft cost vs. the best existing pipeline | **−36%** |
+| soft cost vs. hard cost, rank agreement across settings (Spearman) | **0.94** |
+| FloorSet validation set, mean hard cost (best of 48) | **1.014 at 1.63 s per chip** |
+
+The physics term needs no reference layout, so it keeps supervising where the data runs out.
+On GSRC, with chips beyond FloorSet's 21 to 120 blocks and a 10% dead-space outline:
+
+| GSRC | with physics: wirelength / fits | without physics: wirelength / fits | PARSAC |
+|---|---|---|---|
+| n100 | 294.7 mm / 36% of draws | 293.9 mm / 80% | 303.5 mm |
+| n200 | **554.9 mm / 100%** | 560.1 mm / 0% (outline 440 × 498 > 440 × 440) | 576.0 mm |
+| n300 | 681.3 mm / 0% | 679.8 mm / 0% | 705.2 mm |
+
+At 300 blocks no checkpoint fits the outline, an open limit of the generator on sizes far
+beyond training.
+
+![Architecture and pipeline](assets/arch.png)
 
 This repository holds the code of the paper: the model, its training, the sampler, the
-refiner, the legalizer, every evaluation, and every baseline. It contains no results.
+refiner, the legalizer, every evaluation, and every baseline. It contains no result files.
 
 ## Install
 
@@ -105,6 +147,18 @@ tests/                   pytest suite
 * [docs/legalizer.md](docs/legalizer.md) — the legalizer (`scale_pack`)
 * [docs/evaluation.md](docs/evaluation.md) — the evaluation chain and its metrics
 * [docs/baselines.md](docs/baselines.md) — regressors, ported published placers, classic solvers
+
+## Citation
+
+```bibtex
+@misc{trinity2026,
+  title  = {Trinity: One Differentiable Physics for Training, Refining and Scoring Generative Floorplanners},
+  author = {Yeh, Shih-Ying and Wang, Tzu-Sian and Wang, Xuehai and Lee, Jia-Hua and Kaplan, Daniel Z. and
+            Xu, Ming-Qi and Tang, Wuqian and Wang, Chun-Yao and Lai, Shang-Hong and Lee, Chun-Yi},
+  year   = {2026},
+  note   = {arXiv identifier to appear}
+}
+```
 
 ## License
 
