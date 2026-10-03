@@ -1,0 +1,35 @@
+Trinity
+Copyright 2026 the Trinity authors.
+
+Licensed under the Apache License, Version 2.0 (see LICENSE).
+
+This repository builds on, ports, or downloads the following third-party work. Each keeps
+its own license; nothing below is relicensed by this repository.
+
+Data
+----
+* FloorSet (Intel Labs) — https://github.com/IntelLabs/FloorSet — Apache-2.0.
+  Downloaded at run time by trinity.floorplan.data; not redistributed here.
+* GSRC and MCNC floorplanning benchmarks (bookshelf format), served by the University of
+  Michigan VLSI CAD group — http://vlsicad.eecs.umich.edu/BK/ — downloaded at run time;
+  not redistributed here.
+
+Classic solver
+--------------
+* PARSAC (Intel Labs) — https://github.com/IntelLabs/parsac — Apache-2.0.
+  Not vendored: scripts/baselines/build_parsac.sh clones it at a pinned commit and applies
+  scripts/baselines/parsac.patch (a modification of src/c_src/ca_sa.cpp).
+
+Ported published placers (src/trinity_baselines/{ported,ports,classical/sp_sa.py})
+--------------------------------------------------------------------------------
+These modules port the network backbones, post-hoc refiners, in-sampler guidance and
+sequence-pair annealer of the following works so they run under the Trinity interface.
+Each module names its source repository and file.
+
+* MacroDiff+ — https://github.com/jhy00n/MacroDiff-plus — MIT License,
+  Copyright (c) 2026 MacroDiff+ Authors.
+* BBOPlace-Bench — https://github.com/lamda-bbo/BBOPlace-Bench — MIT License (as stated in
+  its README).
+* ChipDiffusion — https://github.com/vint-1/chipdiffusion — no license declared upstream.
+* DiffPlace — https://github.com/HySonLab/DiffPlace — no license declared upstream.
+* FlowPlace — https://github.com/lamda-bbo/flowplace — no license declared upstream.

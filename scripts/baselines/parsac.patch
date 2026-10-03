@@ -1,0 +1,92 @@
+diff --git a/src/c_src/ca_sa.cpp b/src/c_src/ca_sa.cpp
+index 94ce21d..45264b5 100644
+--- a/src/c_src/ca_sa.cpp
++++ b/src/c_src/ca_sa.cpp
+@@ -241,7 +241,9 @@ int sw_corner, se_corner, nw_corner, ne_corner;
+ bool enable_floorplan_boundaries;
+ int floorplan_width;
+ int floorplan_height;
+-  
++double outline_slope = 0.0;//added: penalty slope per unit of relative excess over the outline (0 = original cost)
++double rotate_prob = 0.0;//added: probability of a rotation move in the SA loop (0 = the original swap / move set)
++
+ template <class T>
+ inline T abs(T val)
+ {
+@@ -984,10 +986,10 @@ Cost CalculateCost()
+ 
+ 
+     if (enable_floorplan_boundaries && width > floorplan_width) {
+-        width_penalty = ((double)width / floorplan_width);
++        width_penalty = ((double)width / floorplan_width) + outline_slope * ((double)(width - floorplan_width) / floorplan_width);
+     }
+     if (enable_floorplan_boundaries &&height > floorplan_height) {
+-        height_penalty = ((double)height / floorplan_height);
++        height_penalty = ((double)height / floorplan_height) + outline_slope * ((double)(height - floorplan_height) / floorplan_height);
+     }
+     c.width_penalty = width_penalty * floorplan_boundaries_weight;
+     c.height_penalty = height_penalty * floorplan_boundaries_weight;
+@@ -1465,11 +1467,21 @@ void SimulatedAnnealing()
+             int M;
+             if(ar_search)
+               M = 0;
++            else if (rotate_prob > 0.0 && (((double)rand()) / RAND_MAX) < rotate_prob)
++              M = 3;//added: rotation move
+             else
+               M = (rand() % 2) + 1;//commented AR search and rotate
+ 
+ 
+-            if (M == 0) {
++            if (M == 3) {
++                // rotate (added)
++                int node = rand() % num_hardblocks;
++                Rotate(node);
++                current_action.push_back(node);
++                current_action.push_back(-1);
++                current_action.push_back(3);
++            }
++            else if (M == 0) {
+                 // AR search
+               int node;
+               do {
+@@ -1565,7 +1577,7 @@ void SimulatedAnnealing()
+             else {
+                 reject++;
+                 root_block = prev_root_block;
+-                if (M == 0)
++                if (M == 0 || M == 3)
+                     hardblocks = hardblocks_temp;
+                 else
+                     btree = btree_temp;
+@@ -1879,7 +1891,19 @@ void set_floorplan_boundaries(int width,int height,double weight,bool enable)
+   floorplan_height = height;
+   floorplan_boundaries_weight = weight;
+ }
+-    
++
++//added: slope of the outline penalty per unit of relative excess (0 = the original step penalty)
++void set_outline_slope(double value)
++{
++  outline_slope = value;
++}
++
++//added: probability of a rotation move (0 = the original move set)
++void set_rotate_prob(double value)
++{
++  rotate_prob = value;
++}
++
+ 
+ //Function to compute cost and return ws, wirelength, area and total cost
+ std::vector<double> compute_cost() {
+@@ -2015,7 +2039,9 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
+     m.def("set_ws_ratio", &set_ws_ratio, "Set the value of ws ratio", py::arg("value"));
+ 
+     m.def("set_floorplan_boundaries", &set_floorplan_boundaries, "Set the value of ws ratio",
+-          py::arg("value"),py::arg("value"),py::arg("value"),py::arg("value"));    
++          py::arg("value"),py::arg("value"),py::arg("value"),py::arg("value"));
++    m.def("set_outline_slope", &set_outline_slope, "Set the slope of the outline penalty (added)", py::arg("value"));
++    m.def("set_rotate_prob", &set_rotate_prob, "Set the probability of a rotation move (added)", py::arg("value"));
+ 
+     m.def("get_btree", &get_btree, "Get the btree");
+     m.def("get_bpos", &getBlockPos, "Get the block positions and dimensions");
