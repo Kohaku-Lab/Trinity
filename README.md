@@ -7,7 +7,7 @@
 
 [Project page](https://kohaku-lab.github.io/Trinity/) · [arXiv (coming soon)](#) · [Models](https://huggingface.co/KBlueLeaf/Trinity)
 
-![Trinity sampling, refining and legalizing a 60-block FloorSet chip](assets/pipeline_n60.gif)
+![Trinity sampling, refining and legalizing a 60-block FloorSet chip](assets/pipeline_n60.webp)
 
 *Sampling (32 steps, no guidance), refinement (400 steps on the same physics) and legalization (one linear program) of a 60-block FloorSet chip. Left and right panels: the layout before and after each step.*
 
