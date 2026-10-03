@@ -1,0 +1,635 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Trinity: one differentiable physics for training, refining and scoring generative floorplanners.">
+<title>Trinity: One Differentiable Physics for Generative Floorplanners</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+:root {
+  --sapphire-l: #D6E3F8; --aquamarine-l: #D4EDE8; --aquamarine-s: #1B6B5A;
+  --taaffeite-l: #E8D5ED; --taaffeite-s: #6B4670; --amber: #D4920A;
+  --s-trinity: #C98500; --s-flow: #0F52BA; --s-chip: #1E8C70; --s-macro: #5A4FCF; --s-diff: #B05AA0; --s-plain: #8A8480;
+  --bg: #F7F5F2; --surface: #FFFFFF; --surface-alt: #EFECE7; --line: #E0DBD4;
+  --fg: #2A2724; --fg-soft: #4A4540; --muted: #6A645F; --grid: #E0DBD4;
+  --plate: #FFFFFF; --plate-line: #E0DBD4;
+  --link: #5A4FCF; --btn: #2A2724; --btn-fg: #F7F5F2; --trinity: #8B5E00;
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, Consolas, monospace;
+  --font-math: "STIX Two Text", "Cambria Math", "Times New Roman", serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1A1816; --surface: #252220; --surface-alt: #1E1C1A; --line: #3D3835;
+    --fg: #E8E0D8; --fg-soft: #C5BFB7; --muted: #8A8078; --grid: #3D3835;
+    --plate: #FBFAF8; --plate-line: #3D3835;
+    --link: #A99FF0; --btn: #E8E0D8; --btn-fg: #1A1816; --trinity: #F0B847;
+    --s-trinity: #F0B847; --s-flow: #6F9BE8; --s-chip: #4FBF9C; --s-macro: #958CF0; --s-diff: #D88CC9; --s-plain: #A09A92;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1A1816; --surface: #252220; --surface-alt: #1E1C1A; --line: #3D3835;
+  --fg: #E8E0D8; --fg-soft: #C5BFB7; --muted: #8A8078; --grid: #3D3835;
+  --plate: #FBFAF8; --plate-line: #3D3835;
+  --link: #A99FF0; --btn: #E8E0D8; --btn-fg: #1A1816; --trinity: #F0B847;
+  --s-trinity: #F0B847; --s-flow: #6F9BE8; --s-chip: #4FBF9C; --s-macro: #958CF0; --s-diff: #D88CC9; --s-plain: #A09A92;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-sans); font-size: 1.04rem; line-height: 1.7; padding-inline: clamp(16px, 4vw, 48px); padding-block: 0 3rem; }
+a { color: var(--link); text-underline-offset: 3px; }
+h1, h2, h3 { text-wrap: balance; margin: 0; line-height: 1.2; }
+p { margin: 0; }
+.container { max-width: 68rem; margin-inline: auto; }
+.text { display: grid; gap: 1rem; color: var(--fg-soft); }
+.text strong { color: var(--fg); }
+
+.hero { text-align: center; padding-block: 3.5rem 2rem; display: grid; gap: 1.2rem; justify-items: center; }
+.hero h1 { font-size: clamp(1.9rem, 4.2vw, 3rem); font-weight: 800; letter-spacing: -0.025em; }
+.hero h1 .name { color: var(--trinity); }
+.hero .pitch { font-size: 1.18rem; color: var(--fg-soft); }
+.authors { font-size: 1.05rem; display: grid; gap: 0.2rem; }
+.authors .aff { color: var(--muted); font-size: 0.95rem; }
+.links { display: flex; gap: 0.6rem; flex-wrap: wrap; justify-content: center; }
+.btn { display: inline-flex; align-items: center; padding: 0.55rem 1.15rem; border-radius: 999px; font-weight: 500; font-size: 0.95rem; text-decoration: none; background: var(--btn); color: var(--btn-fg); border: none; cursor: pointer; font-family: inherit; }
+.btn[aria-disabled="true"] { opacity: 0.5; cursor: default; }
+
+figure { margin: 0; display: grid; gap: 0.7rem; }
+.plate { background: var(--plate); border: 1px solid var(--plate-line); border-radius: 0.6rem; padding: clamp(0.4rem, 1.4vw, 1rem); overflow-x: auto; }
+.plate img, .plate video { display: block; width: 100%; height: auto; }
+figcaption { font-size: 0.95rem; color: var(--muted); }
+
+main { display: grid; gap: 5.5rem; margin-top: 1rem; }
+section { display: grid; gap: 1.8rem; }
+.kicker { font-family: var(--font-mono); font-size: 0.82rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+section > h2 { font-size: clamp(1.5rem, 3vw, 2.1rem); font-weight: 750; letter-spacing: -0.02em; margin-top: -1.2rem; }
+h3 { font-size: 1.15rem; font-weight: 650; }
+
+.split { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 2rem; align-items: center; }
+.legend-list { display: grid; gap: 0.7rem; margin: 0; padding: 0; list-style: none; color: var(--fg-soft); }
+.legend-list li { display: grid; grid-template-columns: 1.2rem minmax(0, 1fr); gap: 0.7rem; align-items: start; }
+.sw { width: 1.2rem; height: 1.2rem; border-radius: 3px; border: 1px solid #2A2724; margin-top: 0.25rem; }
+.legend-list b { color: var(--fg); }
+.group-head { display: block !important; font-family: var(--font-mono); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-top: 0.4rem; }
+
+.cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.1rem; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 0.8rem; padding: 1.3rem 1.4rem; display: grid; gap: 0.6rem; align-content: start; }
+.card p { color: var(--fg-soft); font-size: 0.98rem; }
+.tag { justify-self: start; font-family: var(--font-mono); font-size: 0.78rem; font-weight: 600; padding: 0.12rem 0.65rem; border-radius: 999px; }
+.tag.train { background: var(--sapphire-l); color: #082567; }
+.tag.refine { background: var(--aquamarine-l); color: var(--aquamarine-s); }
+.tag.score { background: var(--taaffeite-l); color: var(--taaffeite-s); }
+
+/* math */
+.math { font-family: var(--font-math); font-size: 1.22rem; color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 0.8rem; padding: 1.1rem 1.4rem; display: grid; gap: 0.8rem; overflow-x: auto; }
+.math .eq { display: flex; align-items: center; justify-content: center; gap: 0.4em; white-space: nowrap; }
+.math .note { font-family: var(--font-sans); font-size: 0.92rem; color: var(--muted); text-align: center; }
+.m { font-family: var(--font-math); font-style: italic; font-size: 1.08em; }
+.frac { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; font-size: 0.9em; }
+.frac > span:first-child { border-bottom: 1px solid currentColor; padding: 0 0.2em; }
+.hl { color: var(--trinity); }
+
+/* toy diffusion */
+.toy { background: var(--surface); border: 1px solid var(--line); border-radius: 0.8rem; padding: 1rem; display: grid; gap: 0.8rem; }
+.toy-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.toy-panel { display: grid; gap: 0.4rem; }
+.toy-panel h3 { font-size: 1rem; }
+.toy canvas { width: 100%; height: auto; aspect-ratio: 1.6; background: var(--surface-alt); border-radius: 0.5rem; display: block; }
+.toy .readout { font-family: var(--font-mono); font-size: 0.85rem; color: var(--muted); }
+.toy .bar { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; font-size: 0.9rem; color: var(--muted); }
+.toy button { font-family: var(--font-mono); font-size: 0.85rem; padding: 0.35rem 0.9rem; border-radius: 999px; border: 1px solid var(--line); background: var(--surface-alt); color: var(--fg-soft); cursor: pointer; }
+
+.cmp { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.cmp-col { background: var(--surface); border: 1px solid var(--line); border-radius: 0.8rem; padding: 1.1rem 1.3rem; display: grid; gap: 0.5rem; align-content: start; color: var(--fg); }
+.cmp-col .muted { color: var(--muted); font-size: 0.95rem; }
+.gsrc2 { display: grid; gap: 1.5rem; }
+.gsrc-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.gsrc-row .gn { grid-column: 1 / -1; font-family: var(--font-mono); font-size: 0.85rem; color: var(--muted); }
+.gsrc-row .plate img { max-height: 22rem; width: auto; max-width: 100%; margin-inline: auto; }
+.tbl-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 0.8rem; }
+.tbl { width: 100%; border-collapse: collapse; font-size: 0.92rem; font-variant-numeric: tabular-nums; }
+.tbl th, .tbl td { padding: 0.55rem 0.75rem; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.tbl th { font-weight: 600; color: var(--fg); font-size: 0.85rem; }
+.tbl th.grp { text-align: center; }
+.tbl td:first-child, .tbl th:first-child { text-align: left; }
+.tbl tbody tr:last-child td { border-bottom: none; }
+.tbl td { color: var(--fg-soft); font-family: var(--font-mono); font-size: 0.86rem; }
+.tbl td:first-child { font-family: var(--font-sans); font-size: 0.92rem; }
+.tbl .b { color: var(--trinity); font-weight: 600; }
+.tbl .bad { color: #D46B6B; }
+.tbl .in, .tbl .out { font-family: var(--font-mono); font-size: 0.72rem; padding: 0.05rem 0.45rem; border-radius: 999px; margin-left: 0.4rem; }
+.tbl .in { background: var(--aquamarine-l); color: var(--aquamarine-s); }
+.tbl .out { background: var(--taaffeite-l); color: var(--taaffeite-s); }
+.tnote { font-size: 0.9rem; color: var(--muted); }
+.chart { background: var(--surface); border: 1px solid var(--line); border-radius: 0.8rem; padding: 1rem 1.1rem 0.8rem; display: grid; gap: 0.5rem; }
+.chart h3 { font-size: 1.02rem; }
+.chart .sub { font-size: 0.88rem; color: var(--muted); }
+.chart svg { width: 100%; height: auto; display: block; overflow: visible; }
+.chart text { fill: var(--muted); font-family: var(--font-mono); font-size: 11px; }
+.chart .lbl { fill: var(--fg); font-family: var(--font-sans); font-size: 12px; font-weight: 600; }
+.chart .gl { stroke: var(--grid); stroke-width: 1; }
+.charts2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.2rem; }
+
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; }
+.stat { background: var(--surface); border: 1px solid var(--line); border-radius: 0.8rem; padding: 1.1rem 1.2rem; display: grid; gap: 0.3rem; align-content: start; }
+.stat .num { font-family: var(--font-mono); font-size: 1.7rem; font-weight: 600; color: var(--trinity); line-height: 1.15; }
+.stat p { font-size: 0.9rem; color: var(--fg-soft); }
+
+.gsrc { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+.gcase { background: var(--surface); border: 1px solid var(--line); border-radius: 0.8rem; padding: 1rem 1.2rem; display: grid; gap: 0.6rem; align-content: start; }
+.gcase .n { font-family: var(--font-mono); font-size: 0.85rem; color: var(--muted); }
+.fitrow { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr) 3rem; gap: 0.6rem; align-items: center; font-size: 0.9rem; color: var(--fg-soft); }
+.fitbar { height: 0.7rem; background: var(--surface-alt); border-radius: 999px; overflow: hidden; }
+.fitbar span { display: block; height: 100%; border-radius: 999px; }
+.fitrow .v { font-family: var(--font-mono); text-align: right; }
+.gcase p { font-size: 0.9rem; color: var(--muted); }
+
+.takeaways { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.1rem; }
+.take { border-left: 3px solid var(--amber); padding: 0.2rem 0 0.2rem 1rem; display: grid; gap: 0.4rem; }
+.take p { color: var(--fg-soft); }
+
+.cases { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.cases button { font-family: var(--font-mono); font-size: 0.85rem; padding: 0.35rem 0.95rem; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--fg-soft); cursor: pointer; }
+.cases button[aria-pressed="true"] { background: var(--amber); border-color: var(--amber); color: #1A1816; font-weight: 600; }
+
+.bib { position: relative; background: var(--surface-alt); border: 1px solid var(--line); border-radius: 0.7rem; }
+.bib pre { margin: 0; padding: 1.1rem 1.25rem; overflow-x: auto; font-family: var(--font-mono); font-size: 0.85rem; line-height: 1.55; color: var(--fg-soft); }
+.bib button { position: absolute; top: 0.6rem; right: 0.6rem; font-size: 0.8rem; padding: 0.3rem 0.8rem; }
+footer { max-width: 68rem; margin: 5rem auto 0; padding-top: 1.2rem; border-top: 1px solid var(--line); display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; font-size: 0.88rem; color: var(--muted); }
+
+@media (max-width: 900px) {
+  .split, .cards, .charts2, .takeaways, .cmp, .gsrc-row { grid-template-columns: minmax(0, 1fr); }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 480px) { .stats { grid-template-columns: minmax(0, 1fr); } }
+
+/* phones: every grid child may shrink below its content, wide content scrolls inside its own box */
+main > *, section > *, .split > *, .charts2 > *, .cards > *, .cmp > *, .toy-grid > *, .takeaways > *, .stats > *, figure, .plate, .math, .toy, .chart, .tbl-wrap { min-width: 0; }
+img, video, canvas, svg { max-width: 100%; }
+@media (max-width: 700px) {
+  body { font-size: 0.98rem; }
+  .math { font-size: 1.05rem; padding: 0.9rem 1rem; }
+  .math .eq { white-space: normal; flex-wrap: wrap; justify-content: flex-start; row-gap: 0.2em; }
+  .toy .bar { flex-direction: column; align-items: stretch; }
+  .toy input[type=range] { min-width: 0 !important; width: 100%; }
+  .hero { padding-block: 2rem 1.2rem; }
+  section > h2 { font-size: 1.4rem; }
+}
+</style>
+
+</head>
+<body>
+<div class="container">
+  <header class="hero">
+    <h1><span class="name">Trinity</span>: One Differentiable Physics for Training, Refining and Scoring Generative Floorplanners</h1>
+    <div class="authors">
+      <span><b>Shih-Ying Yeh</b><sup>♠♡†</sup>, <b>Tzu-Sian Wang</b><sup>♡</sup>, <b>Xuehai Wang</b><sup>♣</sup>, <b>Jia-Hua Lee</b><sup>★</sup>, <b>Daniel Z. Kaplan</b><sup>◇</sup>, <b>Ming-Qi Xu</b><sup>△</sup>, <b>Wuqian Tang</b><sup>♡</sup>, <b>Chun-Yao Wang</b><sup>♡</sup>, <b>Shang-Hong Lai</b><sup>♡</sup>, <b>Chun-Yi Lee</b><sup>★</sup></span>
+      <span class="aff"><sup>♠</sup>Kohaku Lab · <sup>♡</sup>National Tsing Hua University · <sup>♣</sup>[Affiliation of Xuehai Wang] · <sup>◇</sup>realiz.ai · <sup>△</sup>[Affiliation of Ming-Qi Xu] · <sup>★</sup>National Taiwan University</span>
+      <span class="aff"><sup>†</sup>Corresponding author: kohaku@kblueleaf.net</span>
+    </div>
+    <nav class="links" aria-label="Paper links">
+      <a class="btn" aria-disabled="true" role="link">Paper</a>
+      <a class="btn" aria-disabled="true" role="link">arXiv (soon)</a>
+      <a class="btn" href="https://github.com/Kohaku-Lab/Trinity">Code</a>
+      <a class="btn" href="#citation">BibTeX</a>
+    </nav>
+    <p class="pitch">Existing generative floorplanners learn layouts and leave the rules of the chip to corrections bolted on afterwards. Trinity teaches the rules to the model itself, and uses the same rules to refine and to measure every stage.</p>
+  </header>
+
+  <main>
+    <figure>
+      <div class="plate"><video src="assets/n60_pipeline.mp4" autoplay muted loop playsinline preload="auto" aria-label="Trinity generating, refining and legalizing a 60-block floorplan"></video></div>
+      <figcaption>A 60-block FloorSet chip from pure noise: the network's guess is already a floorplan at the first step, a refiner on the same physics clears the remaining overlaps (red), and one linear program makes it exactly legal. The result ties the reference layout.</figcaption>
+    </figure>
+
+    <!-- 1 -->
+    <section aria-labelledby="s1">
+      <span class="kicker">The problem</span>
+      <h2 id="s1">A floorplan is a negotiation between opposing forces</h2>
+      <div class="text">
+        <p>Early in chip design, every functional block gets a place and a shape. The inputs are the blocks, each with a target area, and the netlist of wires between them. Two <strong>objectives</strong> pull the blocks together: short wires between connected blocks and a small chip outline. A set of <strong>constraints</strong> holds them apart and pins them down. Good floorplans live exactly where these forces balance, on the edge of what the rules allow.</p>
+      </div>
+      <div class="split">
+        <figure>
+          <div class="plate"><img src="assets/floorplan.svg" alt="A 60-block reference floorplan from FloorSet, blocks coloured by the constraint each obeys, faint blue lines for wires." width="1570" height="1120"></div>
+          <figcaption>A real 60-block FloorSet floorplan. Faint blue lines are wires between blocks.</figcaption>
+        </figure>
+        <ul class="legend-list">
+          <li class="group-head">Hard rules, must hold</li>
+          <li><span class="sw" style="background:#EFECE7"></span><span><b>Area and no overlap.</b> Every block keeps its area, and no two blocks may intersect.</span></li>
+          <li><span class="sw" style="background:#E8D5ED"></span><span><b>Fixed shape.</b> Some blocks come with a width and height that cannot change.</span></li>
+          <li><span class="sw" style="background:#6A645F"></span><span><b>Pre-placed.</b> Some blocks are already nailed to a spot.</span></li>
+          <li class="group-head">Soft rules, counted and penalized</li>
+          <li><span class="sw" style="background:#F5E6C8"></span><span><b>Clusters.</b> Blocks of a group should touch each other.</span></li>
+          <li><span class="sw" style="background:#D4EDE8"></span><span><b>Multi-instance blocks.</b> Copies of one design should share one shape.</span></li>
+          <li><span class="sw" style="background:#D6E3F8"></span><span><b>Boundary blocks.</b> Some blocks must sit on a given edge of the chip.</span></li>
+        </ul>
+      </div>
+      <div class="text">
+        <p>Classical solvers such as simulated annealing face all of this inside their search, at the price of starting from scratch on every chip. Learning promises to amortize that search into a model, and a <strong>generative</strong> model fits the task: a chip admits many good floorplans rather than one, and a generator drafts complete layouts from that distribution in milliseconds.</p>
+      </div>
+    </section>
+
+    <!-- 2 -->
+    <section aria-labelledby="s2">
+      <span class="kicker">The catch</span>
+      <h2 id="s2">Existing generative placers put the rules everywhere except where the model learns, and score only the end</h2>
+      <div class="text">
+        <p>Existing diffusion placers train their networks only to reproduce reference layouts. The rules of the chip arrive afterwards, three times and in three different forms: a hand-tuned <strong>guidance</strong> term inside the sampler, <strong>post-hoc optimization loops</strong> of 500 to 5,000 iterations, and a <strong>legalizer</strong>. Compared with classical solvers, where every move faces the rules and the objectives together, the rules have migrated from the core of the search to the tail of a correction chain.</p>
+        <p>The way these pipelines are evaluated hides the consequences. Only the final legalized layout is scored, and every stage writes the rules in its own form, so the layouts in between have no common measure. <strong>A weak generator behind a strong correction looks identical to a strong generator behind a weak one</strong>, and nobody can tell what the generator contributes, or what each correction costs.</p>
+      </div>
+      <figure>
+        <div class="plate"><img src="assets/fig_teaser.png" alt="Left: existing pipelines with different constraint forms per stage and no constraints in training. Middle: Trinity with one physics across training, refinement and scoring. Right: soft cost against refinement budget." width="1800" height="504"></div>
+        <figcaption><b>Left:</b> existing pipelines, rules absent from training (dashed), different at every stage (≠), intermediate layouts never measured. <b>Middle:</b> Trinity, one physics through training, refinement and scoring. <b>Right:</b> soft cost along refinement for every generator.</figcaption>
+      </figure>
+    </section>
+
+    <!-- 3 -->
+    <section aria-labelledby="s3">
+      <span class="kicker">The idea</span>
+      <h2 id="s3">Write the rules once, as physics, and use them everywhere</h2>
+      <div class="text">
+        <p>Every rule of floorplanning is a geometric quantity of the layout, so each can be written as a smooth function of block positions and shapes that is zero when the rule holds: the overlap area of every pair, the gap inside each cluster, the shape spread of each multi-instance group, the distance of each boundary block to its edge, plus the wirelength and the outline area. Their weighted sum <span class="m">U</span> is one <strong>energy</strong>, a physics of the layout. Trinity uses that one energy three times, the middle of the figure above.</p>
+      </div>
+      <div class="cards">
+        <div class="card">
+          <span class="tag train">train</span>
+          <h3>A term of the training loss</h3>
+          <p>The energy is added to the flow-matching loss on the network's clean prediction, so the model learns the rules together with the data instead of having them imposed after it.</p>
+        </div>
+        <div class="card">
+          <span class="tag refine">refine</span>
+          <h3>The energy of the refiner</h3>
+          <p>After sampling, Adam descends the same energy with every gradient in closed form, about a millisecond per layout, on any generator's samples.</p>
+        </div>
+        <div class="card">
+          <span class="tag score">score</span>
+          <h3>The base of a soft cost</h3>
+          <p>The same quantities extend the contest's hard cost to layouts that still overlap, so raw, refined and legalized layouts finally share one scale.</p>
+        </div>
+      </div>
+      <figure>
+        <div class="plate"><img src="assets/fig_arch.png" alt="Architecture and pipeline of Trinity." width="1800" height="504" loading="lazy"></div>
+        <figcaption><b>Left:</b> the network, a plain transformer with one token per block; the netlist enters through the attention, a light graph layer and spectral coordinates. <b>Right:</b> generator, refiner and legalizer, one physics term shared by the loss and the refiner.</figcaption>
+      </figure>
+    </section>
+
+    <!-- 4 -->
+    <section aria-labelledby="s4">
+      <span class="kicker">Why in training</span>
+      <h2 id="s4">A physics term in the loss is guidance the model performs for free</h2>
+      <div class="text">
+        <p>Trinity trains with rectified flow: a clean layout <span class="m">x</span><sub>0</sub> and noise <span class="m">x</span><sub>1</sub> are mixed as <span class="m">x<sub>t</sub></span> = (1 − <span class="m">t</span>) <span class="m">x</span><sub>0</sub> + <span class="m">t x</span><sub>1</sub>, and the network predicts the clean layout <span class="m">x̂</span><sub>0</sub>. A network trained on references alone predicts the posterior mean <span class="m">x̄</span><sub>0</sub> = 𝔼[<span class="m">x</span><sub>0</sub> | <span class="m">x<sub>t</sub></span>], which can break the rules because legal layouts do not form a convex set. Adding the energy to the loss changes what the ideal network predicts:</p>
+      </div>
+      <div class="math">
+        <div class="eq"><span class="m">ℒ</span> = 𝔼 [ ‖ <span class="m">v̂</span> − <span class="m">v</span> ‖² + <span class="hl">λ <span class="m">U</span>(<span class="m">x̂</span><sub>0</sub>)</span> ]</div>
+        <div class="eq">⟹ &nbsp; <span class="m">x̂</span><sub>0</sub><sup>⋆</sup> = prox<sub><span class="m">γ<sub>t</sub> U</span></sub>(<span class="m">x̄</span><sub>0</sub>) = argmin<sub><span class="m">m</span></sub> ½‖<span class="m">m</span> − <span class="m">x̄</span><sub>0</sub>‖² + <span class="m">γ<sub>t</sub> U</span>(<span class="m">m</span>), &nbsp;&nbsp; <span class="hl"><span class="m">γ<sub>t</sub></span> = λ<span class="m">t</span>²/2</span></div>
+        <div class="note">The trained network takes the posterior mean and makes one proximal step toward the rules. The step is large when the layout is noisy and vanishes as t → 0.</div>
+      </div>
+      <div class="text">
+        <p>This is the correction existing placers apply by hand inside their samplers, but learned once, so <strong>sampling needs no guidance at all</strong>. And it fades in the right way. A loop of gradient steps inside the sampler applies the same push at every noise level. It substitutes a clean-space gradient for the exact guidance, an error that does not shrink as sampling ends, and it keeps moving a layout that already obeys the rules. The learned step shrinks as <span class="m">t</span>² and leaves a legal layout alone. After sampling, at <span class="m">t</span> = 0 where the learned step has vanished, the refiner simply continues descending the same <span class="m">U</span>.</p>
+      </div>
+      <div class="text">
+        <p><strong>Rules, not answers.</strong> The flow-matching loss compares the prediction with a reference layout, so it can only teach what the training chips show. The physics term compares the prediction with nothing: it checks the rules on the model's own output, using only the instance's constraints and netlist. It is a self-supervised signal, and it is just as valid on a chip the data never covered as on one it did. A model trained this way learns how a legal floorplan behaves, not only what the training floorplans looked like.</p>
+      </div>
+      <div class="cmp">
+        <div class="cmp-col">
+          <span class="tag" style="background:var(--surface-alt);color:var(--fg-soft)">flow-matching loss</span>
+          <p>‖ v̂ − v ‖², with v built from the <b>reference layout</b></p>
+          <p class="muted">Needs the answer. Teaches the distribution of training floorplans.</p>
+        </div>
+        <div class="cmp-col">
+          <span class="tag train">physics term</span>
+          <p>λ U(x̂₀), the <b>rules</b> evaluated on the model's own prediction</p>
+          <p class="muted">Needs no answer. Teaches the rules on every prediction, like a self-supervised loss.</p>
+        </div>
+      </div>
+      <div class="math">
+        <div class="eq"><span class="m">ℒ</span> = 𝔼<sub>(<span class="m">c</span>, <span class="m">x</span><sub>0</sub>) ∼ data</sub> [ ‖ <span class="m">v̂</span> − <span class="m">v</span>(<span class="m">x</span><sub>0</sub>) ‖² ] + <span class="hl">λ 𝔼<sub><span class="m">c</span></sub> [ <span class="m">U</span>(<span class="m">x̂</span><sub>0</sub> ; <span class="m">c</span>) ]</span></div>
+        <div class="note">The first term needs the reference layout x<sub>0</sub>. The second needs only the instance c, its constraints and netlist: the rules are a function of c, never of the answer.</div>
+        <div class="eq"><span class="m">x̂</span><sub>0</sub><sup>⋆</sup>(<span class="m">x<sub>t</sub></span>, <span class="m">c</span>) = prox<sub><span class="m">γ<sub>t</sub> U</span>( · ; <span class="m">c</span>)</sub> ( <span class="m">x̄</span><sub>0</sub>(<span class="m">x<sub>t</sub></span>, <span class="m">c</span>) )</div>
+        <div class="note">The data only teaches the posterior mean x̄<sub>0</sub>, which is unreliable where the data is thin. The proximal step is driven by the rule of the instance itself, so it points the right way for any c.</div>
+      </div>
+      <div class="toy">
+        <div class="bar"><span><b>A toy of the effect.</b> A "layout" is a point, the condition s is the chip size, and the rule says a legal layout lies on the circle of radius s, U(x; s) = (|x| − s)². Training data exists only for s from 1 to 2. Move s outside that range.</span></div>
+        <div class="bar">
+          <label for="toy-s">chip size s = <b id="toy-s-v">2.8</b> <span id="toy-s-tag"></span></label>
+          <input type="range" id="toy-s" min="1" max="3.5" step="0.05" value="2.8" style="flex:1">
+          <button type="button" id="toy-restart">Restart</button>
+        </div>
+        <div class="toy-grid">
+          <div class="toy-panel">
+            <h3>Trained on data only</h3>
+            <canvas id="toy-a" width="640" height="460" aria-label="Samples from the data-only model at the chosen chip size."></canvas>
+            <span class="readout" id="toy-a-r"></span>
+          </div>
+          <div class="toy-panel">
+            <h3>Trained with the physics term</h3>
+            <canvas id="toy-b" width="640" height="460" aria-label="Samples from the model with the physics term at the chosen chip size."></canvas>
+            <span class="readout" id="toy-b-r"></span>
+          </div>
+        </div>
+        <span class="readout">Dots: noisy states flowing from noise to samples. Dashed circle: where the rule says legal layouts are. Shaded band: the sizes covered by training data. The reference loss only supervises sizes that come with an answer, 1 to 2 here, so beyond them the data-only model keeps drawing a circle that is too small. The physics term needs no answer, so it supervises the model at whatever size it is given, and that model lands on the circle the rule requires. Inside the training range the two agree. This is an illustration of the mechanism, not a result; in Trinity the term acts on the training chips, and the effect on chips larger than any in training is measured below.</span>
+      </div>
+      <div class="text">
+        <p>The difference shows when the chips get bigger than anything in training. FloorSet chips have 21 to 120 blocks. On the GSRC benchmarks, soft blocks must fit a square outline with 10% dead space (red dashed square). Below are the best legalized layouts of the same model trained with and without the physics term, each the best of 4 seeds × 16 draws.</p>
+      </div>
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead>
+            <tr><th rowspan="2">GSRC case</th><th colspan="4" class="grp">With physics (Trinity)</th><th colspan="4" class="grp">Without physics (λ = 0)</th><th rowspan="2">PARSAC<br>WL</th></tr>
+            <tr><th>WL (mm)</th><th>W × H</th><th>Dead space</th><th>Draws fit</th><th>WL (mm)</th><th>W × H</th><th>Dead space</th><th>Draws fit</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>n100, outline 444 × 444 <span class="in">in range</span></td><td class="b">294.7</td><td>433 × 423</td><td>2.1%</td><td>36%</td><td>293.9</td><td>444 × 413</td><td>2.0%</td><td>80%</td><td>303.5</td></tr>
+            <tr><td>n200, outline 440 × 440 <span class="out">beyond</span></td><td class="b">554.9</td><td>434 × 407</td><td>0.7%</td><td class="b">100%</td><td>560.1</td><td class="bad">440 × 498</td><td>19.8%</td><td class="bad">0%</td><td>576.0</td></tr>
+            <tr><td>n300, outline 548 × 548 <span class="out">far beyond</span></td><td>681.3</td><td class="bad">708 × 448</td><td>13.8%</td><td class="bad">0%</td><td>679.8</td><td class="bad">648 × 503</td><td>16.2%</td><td class="bad">0%</td><td>705.2</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="tnote">Best legalized layout over 4 seeds × 16 draws (NFE 8, 400 refiner steps). W × H is its outline against the 10% dead-space square; red marks an outline that does not fit. At n300 no draw fits, so the row shows the best legal layout. FloorSet training chips have 21 to 120 blocks.</p>
+      <div class="text">
+        <p>Inside the training range the two models tie (n100: 294.7 against 293.9 mm), as expected when the data already covers the case. At 200 blocks, almost twice the largest training chip, the physics term is the difference between a floorplan that fits with 0.7% dead space and one that cannot fit at all, at shorter wirelength too. At 300 blocks neither fits. That residual is a known open problem of transformer generators on sizes far beyond training, not of the physics, and it is where we see the next step.</p>
+      </div>
+      <figure>
+        <div class="plate"><video src="assets/n60_sampling.mp4" autoplay muted loop playsinline preload="metadata" aria-label="Trinity sampling a 60-block case"></video></div>
+        <figcaption>The same effect on a real chip. Left: the noisy state. Right: Trinity's prediction x̂<sub>0</sub>, already a coherent floorplan at the first of 32 steps, with no guidance in the sampler.</figcaption>
+      </figure>
+    </section>
+
+    <!-- 5 -->
+    <section aria-labelledby="s5">
+      <span class="kicker">Stage by stage</span>
+      <h2 id="s5">With one scale, every stage shows what it contributes</h2>
+      <div class="text">
+        <p>We re-implemented four existing diffusion placers, FlowPlace, ChipDiffusion, MacroDiff+ and DiffPlace, on the same data and training recipe, and scored every model at every stage on 12,000 held-out FloorSet chips with the soft cost.</p>
+      </div>
+      <div class="charts2">
+        <div class="chart">
+          <h3>The physics term improves every rule of the raw samples</h3>
+          <span class="sub">Same plain transformer, physics term on (λ = 0.01) versus off: reduction of each quantity</span>
+          <svg viewBox="0 0 460 250" id="chart-terms" role="img" aria-label="Reductions with the physics term: boundary distance 69 percent, multi-instance spread 60, soft cost 25, cluster gap 14, overlap 7."></svg>
+        </div>
+        <div class="chart">
+          <h3>A usable floorplan from one network call</h3>
+          <span class="sub">Soft cost of raw samples against sampling steps (log scale, lower is better)</span>
+          <svg viewBox="0 0 460 250" id="chart-nfe" role="img" aria-label="Raw soft cost against sampling steps for five generators."></svg>
+        </div>
+      </div>
+      <div class="chart">
+        <h3>Our refiner against each placer's own loop, from the same raw samples</h3>
+        <span class="sub">Soft cost against refinement steps or loop iterations. Lines: our refiner on each generator. Triangles: each placer's own loop at its released iteration count. Log scales.</span>
+        <svg viewBox="0 0 900 340" id="chart-ref" role="img" aria-label="Soft cost along our refiner for five generators, and each placer's own loop endpoint."></svg>
+      </div>
+      <div class="text">
+        <p>Three things become visible. <strong>The training term governs the start:</strong> it lowers raw soft cost and keeps Trinity ahead at short refinement budgets. <strong>The refiner governs the end:</strong> after a few hundred steps every generator converges near one value, and each one ends below where its own loop leaves it, reaching that loop's cost 16 to 660 times sooner. So <strong>generators should be compared under one shared refiner</strong>; under their own loops, the loops drive most of the gap. And the soft cost ranks settings the way the contest's hard cost does (Spearman 0.94), so these budgets can be chosen without running the legalizer.</p>
+      </div>
+    </section>
+
+    <!-- 6 -->
+    <section aria-labelledby="s6">
+      <span class="kicker">End to end</span>
+      <h2 id="s6">Legal floorplans, fast</h2>
+      <div class="charts2">
+        <div class="chart">
+          <h3>After legalization</h3>
+          <span class="sub">Hard cost of the first legalized draw: each generator with its own loop versus with our refiner</span>
+          <svg viewBox="0 0 460 250" id="chart-loop" role="img" aria-label="Hard cost with own loop versus with our refiner for each generator."></svg>
+        </div>
+        <div class="stats" style="grid-template-columns: repeat(2, minmax(0, 1fr)); align-content: start">
+          <div class="stat"><span class="num">1.014</span><p>mean hard cost on the FloorSet validation set, best of 48 draws</p></div>
+          <div class="stat"><span class="num">1.63 s</span><p>per chip on one GPU, legalization in parallel</p></div>
+          <div class="stat"><span class="num">−36%</span><p>refined soft cost against the best existing pipeline</p></div>
+          <div class="stat"><span class="num">≈1 ms</span><p>per layout for 400 refiner steps in a batch</p></div>
+        </div>
+      </div>
+
+      <div class="text"><p><strong>More chips.</strong> The full pipeline on three FloorSet validation chips.</p></div>
+      <div class="cases" role="group" aria-label="Choose a chip">
+        <button type="button" data-case="30" aria-pressed="false">30 blocks</button>
+        <button type="button" data-case="60" aria-pressed="true">60 blocks</button>
+        <button type="button" data-case="100" aria-pressed="false">100 blocks</button>
+      </div>
+      <figure>
+        <div class="plate"><video id="vid-case" src="assets/n60_pipeline.mp4" autoplay muted loop playsinline preload="metadata" aria-label="Pipeline video for the selected chip"></video></div>
+      </figure>
+    </section>
+
+    <!-- 7 -->
+    <section aria-labelledby="s7">
+      <span class="kicker">Takeaways</span>
+      <h2 id="s7">What we hope carries over</h2>
+      <div class="takeaways">
+        <div class="take"><h3>Measure every stage, not just the end</h3><p>The endpoint of a correction chain hides who did the work. With one scale for raw, refined and legalized layouts, the generator's contribution becomes visible.</p></div>
+        <div class="take"><h3>Put the physics where the model learns</h3><p>A rule in the training loss becomes a correction the network performs for free, strongest when noisy and gone when clean. A rule in the sampler is a cruder substitute that keeps pushing on good layouts.</p></div>
+        <div class="take"><h3>Compare generators under one refiner</h3><p>Under a shared refiner generators converge, while their own loops differ widely. Most reported gaps between pipelines come from the loops.</p></div>
+        <div class="take"><h3>Choose budgets before the expensive step</h3><p>The soft cost ranks settings the way the legal hard cost does, so sampling and refinement budgets can be tuned without running the legalizer.</p></div>
+      </div>
+    </section>
+
+    <section id="citation" aria-labelledby="cite-h">
+      <span class="kicker">Citation</span>
+      <h2 id="cite-h">BibTeX</h2>
+      <div class="bib">
+        <button class="btn" id="copy-bib" type="button">Copy</button>
+<pre id="bibtex">@misc{trinity2026,
+  title  = {Trinity: One Differentiable Physics for Training, Refining
+            and Scoring Generative Floorplanners},
+  author = {Yeh, Shih-Ying and Wang, Tzu-Sian and Wang, Xuehai and Lee, Jia-Hua and Kaplan, Daniel Z. and
+            Xu, Ming-Qi and Tang, Wuqian and Wang, Chun-Yao and Lai, Shang-Hong and Lee, Chun-Yi},
+  year   = {2026},
+  note   = {arXiv identifier to appear}
+}</pre>
+      </div>
+    </section>
+  </main>
+</div>
+
+<footer>
+  <span>Published by Kohaku Lab</span>
+  <span>Code under Apache-2.0 · <a href="https://github.com/Kohaku-Lab/Trinity">Kohaku-Lab/Trinity</a></span>
+</footer>
+
+<script>
+(function () {
+  var NS = "http://www.w3.org/2000/svg";
+  function el(tag, attrs, parent, text) {
+    var e = document.createElementNS(NS, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    if (text !== undefined) e.textContent = text;
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  var C = { trinity: "var(--s-trinity)", flow: "var(--s-flow)", chip: "var(--s-chip)", macro: "var(--s-macro)", diff: "var(--s-diff)" };
+  var NAMES = { trinity: "Trinity", flow: "FlowPlace", chip: "ChipDiffusion", macro: "MacroDiff+", diff: "DiffPlace" };
+  function logScale(lo, hi, a, b) { return function (v) { return a + (Math.log(v) - Math.log(lo)) / (Math.log(hi) - Math.log(lo)) * (b - a); }; }
+
+  // physics term reductions
+  (function () {
+    var svg = document.getElementById("chart-terms"), rows = [["boundary distance", 69], ["multi-instance spread", 60], ["soft cost", 25], ["cluster gap", 14], ["overlap", 7]];
+    var L = 150, W = 460, R = 50, top = 14, bh = 26, gap = 14, max = 80;
+    var fx = function (v) { return L + v / max * (W - L - R); };
+    [0, 20, 40, 60, 80].forEach(function (v) { el("line", { x1: fx(v), x2: fx(v), y1: top - 4, y2: top + rows.length * (bh + gap) - gap + 4, "class": "gl" }, svg); el("text", { x: fx(v), y: top + rows.length * (bh + gap) + 12, "text-anchor": "middle" }, svg, v + "%"); });
+    rows.forEach(function (r, i) {
+      var y = top + i * (bh + gap);
+      el("text", { x: L - 10, y: y + bh / 2 + 4, "text-anchor": "end", "class": "lbl" }, svg, r[0]);
+      el("rect", { x: fx(0), y: y, width: fx(r[1]) - fx(0), height: bh, rx: 4, fill: "var(--s-trinity)" }, svg);
+      el("text", { x: fx(r[1]) + 6, y: y + bh / 2 + 4, "class": "lbl" }, svg, "−" + r[1] + "%");
+    });
+  })();
+
+  // raw soft cost against NFE
+  (function () {
+    var svg = document.getElementById("chart-nfe"), W = 460, H = 250, L = 46, R = 104, T = 12, B = 34;
+    var xs = [1, 4, 8, 32], fx = function (i) { return L + i * (W - L - R) / 3; }, fy = logScale(1.3, 160, H - B, T);
+    [1.5, 3, 10, 30, 100].forEach(function (v) { el("line", { x1: L, x2: W - R, y1: fy(v), y2: fy(v), "class": "gl" }, svg); el("text", { x: L - 6, y: fy(v) + 4, "text-anchor": "end" }, svg, v); });
+    xs.forEach(function (x, i) { el("text", { x: fx(i), y: H - B + 16, "text-anchor": "middle" }, svg, x); });
+    el("text", { x: (L + W - R) / 2, y: H - 2, "text-anchor": "middle" }, svg, "sampling steps (network calls)");
+    var S = [["trinity", [1.68, 1.63, 1.60, 1.51]], ["flow", [11.5, 5.09, 3.82, 2.46]], ["chip", [152, 11.9, 3.83, 2.80]], ["macro", [150, 71.7, 9.89, 3.85]], ["diff", [150, 99.5, 14.6, 6.23]]];
+    var ends = [];
+    S.forEach(function (s) {
+      el("path", { d: s[1].map(function (v, i) { return (i ? "L" : "M") + fx(i) + " " + fy(v); }).join(" "), fill: "none", stroke: C[s[0]], "stroke-width": s[0] === "trinity" ? 3 : 2 }, svg);
+      s[1].forEach(function (v, i) { var c = el("circle", { cx: fx(i), cy: fy(v), r: s[0] === "trinity" ? 4.5 : 3.5, fill: C[s[0]], stroke: "var(--surface)", "stroke-width": 1.5 }, svg); el("title", {}, c, NAMES[s[0]] + ", " + xs[i] + " steps: " + v); });
+      ends.push({ k: s[0], y: fy(s[1][3]) });
+    });
+    ends.sort(function (a, b) { return a.y - b.y; });
+    for (var i = 1; i < ends.length; i++) if (ends[i].y - ends[i - 1].y < 14) ends[i].y = ends[i - 1].y + 14;
+    ends.forEach(function (e) { el("text", { x: W - R + 8, y: e.y + 4, "class": "lbl", style: "fill:" + C[e.k] }, svg, NAMES[e.k]); });
+  })();
+
+  // our refiner against own loops
+  (function () {
+    var svg = document.getElementById("chart-ref"), W = 900, H = 340, L = 50, R = 150, T = 14, B = 40;
+    var xmax = 6000, fx = function (s) { return L + Math.log(1 + s) / Math.log(1 + xmax) * (W - L - R); }, fy = logScale(1.0, 7, H - B, T);
+    [1, 1.5, 2, 3, 5].forEach(function (v) { el("line", { x1: L, x2: W - R, y1: fy(v), y2: fy(v), "class": "gl" }, svg); el("text", { x: L - 6, y: fy(v) + 4, "text-anchor": "end" }, svg, v); });
+    [0, 10, 25, 100, 400, 500, 5000].forEach(function (s) { el("line", { x1: fx(s), x2: fx(s), y1: T, y2: H - B, "class": "gl" }, svg); el("text", { x: fx(s), y: H - B + 16, "text-anchor": "middle" }, svg, s); });
+    el("text", { x: (L + W - R) / 2, y: H - 4, "text-anchor": "middle" }, svg, "our refiner steps  |  own loop iterations");
+    var steps = [0, 25, 100, 400];
+    var S = [["trinity", [1.51, 1.22, 1.11, 1.06]], ["flow", [2.46, 1.42, 1.22, 1.11]], ["chip", [2.80, 1.52, 1.27, 1.13]], ["macro", [3.85, 1.71, 1.35, 1.17]], ["diff", [6.23, 2.61, 1.57, 1.20]]];
+    S.forEach(function (s) {
+      el("path", { d: s[1].map(function (v, i) { return (i ? "L" : "M") + fx(steps[i]) + " " + fy(v); }).join(" "), fill: "none", stroke: C[s[0]], "stroke-width": s[0] === "trinity" ? 3 : 2, "stroke-dasharray": s[0] === "trinity" ? "" : "6 4" }, svg);
+      s[1].forEach(function (v, i) { var c = el("circle", { cx: fx(steps[i]), cy: fy(v), r: s[0] === "trinity" ? 4.5 : 3.5, fill: C[s[0]], stroke: "var(--surface)", "stroke-width": 1.5 }, svg); el("title", {}, c, NAMES[s[0]] + " under our refiner, " + steps[i] + " steps: " + v); });
+    });
+    // own loops: released iteration counts and refined soft cost (Table 3)
+    [["chip", 5000, 2.05], ["macro", 500, 1.66], ["diff", 500, 3.91]].forEach(function (o) {
+      var x = fx(o[1]), y = fy(o[2]);
+      var t = el("path", { d: "M" + x + " " + (y - 8) + " L" + (x + 7) + " " + (y + 5) + " L" + (x - 7) + " " + (y + 5) + " Z", fill: C[o[0]], stroke: "var(--surface)", "stroke-width": 1.5 }, svg);
+      el("title", {}, t, NAMES[o[0]] + "'s own loop, " + o[1] + " iterations: " + o[2]);
+      el("text", { x: x + 11, y: y + 4, "class": "lbl", style: "fill:" + C[o[0]] }, svg, NAMES[o[0]] + " own loop " + o[2]);
+    });
+    var ends = S.map(function (s) { return { k: s[0], y: fy(s[1][3]) }; }).sort(function (a, b) { return a.y - b.y; });
+    for (var i = 1; i < ends.length; i++) if (ends[i].y - ends[i - 1].y < 14) ends[i].y = ends[i - 1].y + 14;
+    var lx = fx(400) + 8;
+    ends.forEach(function (e) { el("text", { x: lx, y: e.y + 4 + (e.k === "trinity" ? 0 : 0), "class": "lbl", style: "fill:" + C[e.k] }, svg, (e.k === "trinity" ? "Trinity" : NAMES[e.k] + " + ours")); });
+  })();
+
+  // hard cost: own loop against our refiner
+  (function () {
+    var svg = document.getElementById("chart-loop"), W = 460, L = 110, R = 30, top = 22, bh = 38;
+    var rows = [["flow", 1.567, 1.296, "no loop"], ["chip", 1.521, 1.322], ["diff", 1.537, 1.355], ["macro", 1.546, 1.352], ["trinity", null, 1.234]];
+    var lo = 1.2, hi = 1.6, fx = function (v) { return L + (v - lo) / (hi - lo) * (W - L - R); };
+    [1.2, 1.3, 1.4, 1.5, 1.6].forEach(function (v) { el("line", { x1: fx(v), x2: fx(v), y1: top - 10, y2: top + rows.length * bh - 14, "class": "gl" }, svg); el("text", { x: fx(v), y: top + rows.length * bh + 2, "text-anchor": "middle" }, svg, v.toFixed(1)); });
+    el("text", { x: (L + W - R) / 2, y: top + rows.length * bh + 20, "text-anchor": "middle" }, svg, "hard cost (lower is better)  ○ own loop  ● our refiner");
+    rows.forEach(function (r, i) {
+      var y = top + i * bh;
+      el("text", { x: L - 10, y: y + 4, "text-anchor": "end", "class": "lbl", style: "fill:" + C[r[0]] }, svg, NAMES[r[0]]);
+      if (r[1] !== null) {
+        el("line", { x1: fx(r[1]), x2: fx(r[2]), y1: y, y2: y, stroke: C[r[0]], "stroke-width": 2, "stroke-opacity": 0.5 }, svg);
+        el("circle", { cx: fx(r[1]), cy: y, r: 6, fill: "var(--surface)", stroke: C[r[0]], "stroke-width": 2 }, svg);
+        el("text", { x: fx(r[1]) + 10, y: y + 4 }, svg, r[1].toFixed(3) + (r[3] ? " (" + r[3] + ")" : ""));
+      }
+      el("circle", { cx: fx(r[2]), cy: y, r: 6.5, fill: C[r[0]], stroke: "var(--surface)", "stroke-width": 1.5 }, svg);
+      el("text", { x: fx(r[2]) - 10, y: y + 4, "text-anchor": "end" }, svg, r[2].toFixed(3));
+    });
+  })();
+
+  // toy: conditional generation on a ring of radius s; the data covers s in [1, 2]
+  (function () {
+    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var N = 220, STEPS = 110, LAM = 40, SIG = 0.06, K = 72, SCALE = 52;
+    var slider = document.getElementById("toy-s"), sv = document.getElementById("toy-s-v"), tag = document.getElementById("toy-s-tag");
+    // what a data-only model extrapolates: barely beyond the largest size it saw
+    function learnedRadius(s) { return s <= 2 ? s : 2 + 0.15 * (s - 2); }
+    // posterior mean of x0 on a thin ring of radius r under x_t = (1-t) x0 + t x1
+    function postMean(x, t, r) {
+      var a = 1 - t, v = a * a * SIG * SIG + t * t, best = -Infinity, ws = [], ms = [], k;
+      for (k = 0; k < K; k++) {
+        var th = 2 * Math.PI * k / K, px = r * Math.cos(th), py = r * Math.sin(th);
+        var dx = x[0] - a * px, dy = x[1] - a * py, w = -(dx * dx + dy * dy) / (2 * v);
+        ws.push(w); ms.push([px, py]); if (w > best) best = w;
+      }
+      var z = 0, mx = 0, my = 0;
+      for (k = 0; k < K; k++) { var e = Math.exp(ws[k] - best); z += e; mx += e * ms[k][0]; my += e * ms[k][1]; }
+      return [mx / z, my / z];
+    }
+    // prox of gamma_t U with U = (|x| - s)^2, gamma_t = lambda t^2 / 2
+    function prox(m, t, s) {
+      var g = LAM * t * t / 2, f = 2 * g / (1 + 2 * g), d = Math.hypot(m[0], m[1]) || 1e-9;
+      return [m[0] + f * (s * m[0] / d - m[0]), m[1] + f * (s * m[1] / d - m[1])];
+    }
+    function gauss() { var u = 1 - Math.random(), v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+    function stepAll(P, step, physics) {
+      var s = parseFloat(slider.value), t = Math.max(1 - step / STEPS, 1e-3), r = physics ? s : learnedRadius(s);
+      return P.map(function (p) {
+        var m = postMean(p, t, r);
+        if (physics) m = prox(m, t, s);
+        return [p[0] - (p[0] - m[0]) / t / STEPS, p[1] - (p[1] - m[1]) / t / STEPS];
+      });
+    }
+    var runs = [];
+    function make(id, physics) {
+      var cv = document.getElementById(id), ctx = cv.getContext("2d"), out = document.getElementById(id + "-r");
+      var W = cv.width, H = cv.height, ox = W / 2, oy = H / 2, P = [], step = 0, hold = 0;
+      function reset() { P = []; for (var i = 0; i < N; i++) P.push([gauss() * 2.4, gauss() * 2.4]); step = 0; hold = 0; }
+      function draw() {
+        var s = parseFloat(slider.value), t = Math.max(1 - step / STEPS, 0);
+        ctx.clearRect(0, 0, W, H);
+        ctx.beginPath(); ctx.arc(ox, oy, 2 * SCALE, 0, 2 * Math.PI); ctx.arc(ox, oy, 1 * SCALE, 0, 2 * Math.PI, true);
+        ctx.fillStyle = "rgba(76,153,137,0.16)"; ctx.fill("evenodd");
+        ctx.setLineDash([7, 5]); ctx.beginPath(); ctx.arc(ox, oy, s * SCALE, 0, 2 * Math.PI);
+        ctx.strokeStyle = "rgba(201,133,0,0.95)"; ctx.lineWidth = 2; ctx.stroke(); ctx.setLineDash([]);
+        var sum = 0;
+        P.forEach(function (p) {
+          ctx.beginPath(); ctx.arc(ox + p[0] * SCALE, oy - p[1] * SCALE, 2.4, 0, 2 * Math.PI);
+          ctx.fillStyle = physics ? "rgba(201,133,0,0.8)" : "rgba(15,82,186,0.7)"; ctx.fill();
+          sum += Math.hypot(p[0], p[1]);
+        });
+        ctx.fillStyle = "#6A645F"; ctx.font = "15px JetBrains Mono, monospace"; ctx.fillText("t = " + t.toFixed(2), 12, 22);
+        out.textContent = "mean radius of the samples " + (sum / N).toFixed(2) + ", required by the rule " + s.toFixed(2);
+      }
+      function finish() { while (step < STEPS) { P = stepAll(P, step, physics); step++; } draw(); }
+      function tick() {
+        if (step < STEPS) { P = stepAll(P, step, physics); step++; } else if (++hold > 60) reset();
+        draw();
+        setTimeout(function () { requestAnimationFrame(tick); }, 30);
+      }
+      reset();
+      if (reduce) finish(); else tick();
+      runs.push(function () { reset(); if (reduce) finish(); });
+    }
+    function label() { var s = parseFloat(slider.value); sv.textContent = s.toFixed(2); tag.textContent = s <= 2 ? "(inside the training range)" : "(outside the training range)"; }
+    make("toy-a", false); make("toy-b", true); label();
+    slider.addEventListener("input", function () { label(); runs.forEach(function (r) { r(); }); });
+    document.getElementById("toy-restart").addEventListener("click", function () { runs.forEach(function (r) { r(); }); });
+  })();
+
+  var btns = document.querySelectorAll(".cases button"), v = document.getElementById("vid-case");
+  btns.forEach(function (b) { b.addEventListener("click", function () {
+    btns.forEach(function (o) { o.setAttribute("aria-pressed", o === b ? "true" : "false"); });
+    v.src = "assets/n" + b.getAttribute("data-case") + "_pipeline.mp4"; v.play().catch(function () {});
+  }); });
+  document.getElementById("copy-bib").addEventListener("click", function () {
+    var btn = this, pre = document.getElementById("bibtex");
+    function done(m) { btn.textContent = m; setTimeout(function () { btn.textContent = "Copy"; }, 1600); }
+    function sel() { var r = document.createRange(); r.selectNodeContents(pre); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); done("Selected"); }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(pre.textContent).then(function () { done("Copied"); }, sel); else sel();
+  });
+})();
+</script>
+
+</body>
+</html>
