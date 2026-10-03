@@ -1,4 +1,4 @@
-"""The per-step time of every correction loop (theory T5).
+"""The per-step time of every correction loop.
 
 The closed-form refiner and the ported published refiners run ``STEPS`` steps on the first
 ``rows`` dev cases (padded to their largest block count) for every ``rows`` of ``ROWS``; the
@@ -20,8 +20,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from trinity.data.splits import load_or_make_splits
-from trinity.floorplan.data import LanceFloorplanStore, find_train_lance
+from trinity.data.splits import dev_split_cases
 from trinity.floorplan.parameterize import xywh_to_z
 from trinity.sampling.refine_case import build_refine_case
 from trinity.sampling.refine_closed import refine_closed
@@ -62,19 +61,6 @@ def git_sha() -> str:
         return subprocess.check_output(cmd, text=True).strip()
     except Exception:  # noqa: BLE001
         return "unknown"
-
-
-def dev_cases():
-    lance_path = find_train_lance(TRAIN_LANCE)
-    store = LanceFloorplanStore(str(lance_path))
-    splits = load_or_make_splits(
-        store.block_counts,
-        lance_path.parent / "splits.json",
-        per_n_k=DEV_PER_N_K,
-        random_size=DEV_RANDOM_SIZE,
-        seed=SPLIT_SEED,
-    )
-    return store.instances((splits.dev_per_n + splits.dev_random)[:N_CASES])
 
 
 def loop_runner(loop: str, z0: torch.Tensor, case):
@@ -121,7 +107,9 @@ def jittered_reference(group, case) -> torch.Tensor:
 
 def main():
     started = time.perf_counter()
-    cases = dev_cases()
+    cases, _, _ = dev_split_cases(
+        TRAIN_LANCE, DEV_PER_N_K, DEV_RANDOM_SIZE, SPLIT_SEED, N_CASES
+    )
     out = {}
     print(f"{len(cases)} cases; rows {list(ROWS)}; {STEPS} steps", flush=True)
     with torch.no_grad():

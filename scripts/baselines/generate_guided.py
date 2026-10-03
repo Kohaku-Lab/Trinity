@@ -18,8 +18,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from trinity.data.splits import load_or_make_splits
-from trinity.floorplan.data import LanceFloorplanStore, find_train_lance
+from trinity.data.splits import dev_split_cases
 from trinity.hub import load_model
 from trinity.registry import SAMPLER, build
 from trinity.sampling.refine_case import build_refine_case
@@ -33,7 +32,7 @@ GUIDANCE: str = "chipd_opt"  # "chipd_opt" | "diffplace" | "macrodiff"
 GUIDANCE_KWARGS: dict = {}
 PROJECTIONS: list | None = None  # sampler PROJECTION specs; None = the sampler default
 SHARD: str = "guided"  # shard file prefix
-TRAIN_LANCE: str | None = None  # None = data/floorset_lite.lance
+TRAIN_LANCE: str | None = None  # None = the project default path
 DEV_PER_N_K: int = 100
 DEV_RANDOM_SIZE: int = 2000
 SPLIT_SEED: int = 20090220
@@ -44,23 +43,6 @@ NOISE_SEED: int = 20260826
 DEVICE: str = "cuda"
 MAX_ROWS: int = 500  # rows (cases x K) per forward
 OUT_DIR: str = "outputs/gen"
-
-
-def dev_cases():
-    """The dev-split instances, their row ids and the split parameters."""
-    path = str(find_train_lance(TRAIN_LANCE))
-    store = LanceFloorplanStore(path)
-    splits = load_or_make_splits(
-        store.block_counts,
-        str(Path(path).parent / "splits.json"),
-        per_n_k=DEV_PER_N_K,
-        random_size=DEV_RANDOM_SIZE,
-        seed=SPLIT_SEED,
-    )
-    ids = splits.dev_per_n + splits.dev_random
-    if DEV_LIMIT > 0:
-        ids = ids[:DEV_LIMIT]
-    return store.instances(ids), ids, splits.params
 
 
 def git_sha() -> str:
@@ -88,7 +70,9 @@ def build_samplers(framing) -> dict:
 
 @torch.no_grad()
 def main():
-    cases, _, split_params = dev_cases()
+    cases, _, split_params = dev_split_cases(
+        TRAIN_LANCE, DEV_PER_N_K, DEV_RANDOM_SIZE, SPLIT_SEED, DEV_LIMIT
+    )
     print(
         f"dev cases: {len(cases)}; {NAME} <- {CKPT}; guidance {GUIDANCE} "
         f"{GUIDANCE_KWARGS}; NFE {list(NFE)} x K={K}",

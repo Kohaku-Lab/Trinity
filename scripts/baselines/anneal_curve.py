@@ -1,7 +1,7 @@
 """The cost-versus-time curve of a classical solver: anneal a case set at several budgets and
 seeds, snapshot the layout along every run, and score every snapshot.
 
-Per snapshot the record holds the soft metric vector of the raw layout, the contest cost of the
+Per snapshot the record holds the soft metric vector of the raw layout, the hard cost of the
 layout after ``LEGALIZE_ROUTE`` (for bookshelf cases: the net HPWL and the outline fit), the
 annealing seconds so far (scoring excluded) and the legalizer's milliseconds. Hard metrics are
 only ever taken on legalized layouts.
@@ -38,7 +38,7 @@ from pathlib import Path
 import numpy as np
 
 import trinity_baselines.classical  # noqa: F401  (register: parsac, sp_sa)
-from trinity.data.splits import load_or_make_splits
+from trinity.data.splits import dev_split_ids
 from trinity.floorplan.data import (
     GSRC_SIZES,
     MCNC_NAMES,
@@ -59,7 +59,7 @@ from trinity.floorplan.scoring.vector import COLS, metric_vector
 from trinity.floorplan.types import Placement
 from trinity_baselines.classical.parsac import engine, engine_available
 
-TRAIN_LANCE: str | None = None  # None = data/floorset_lite.lance
+TRAIN_LANCE: str | None = None  # None = the project default path
 DEV_PER_N_K: int = 100
 DEV_RANDOM_SIZE: int = 2000
 SPLIT_SEED: int = 20090220
@@ -89,16 +89,7 @@ _worker = {}
 
 def dev_ids_and_counts():
     """The dev-split row ids and their block counts."""
-    path = str(find_train_lance(TRAIN_LANCE))
-    store = LanceFloorplanStore(path)
-    splits = load_or_make_splits(
-        store.block_counts,
-        str(Path(path).parent / "splits.json"),
-        per_n_k=DEV_PER_N_K,
-        random_size=DEV_RANDOM_SIZE,
-        seed=SPLIT_SEED,
-    )
-    ids = splits.dev_per_n + splits.dev_random
+    store, ids, _ = dev_split_ids(TRAIN_LANCE, DEV_PER_N_K, DEV_RANDOM_SIZE, SPLIT_SEED)
     return ids, np.asarray(store.block_counts)[ids]
 
 
@@ -254,7 +245,7 @@ def score_bookshelf_snapshot(inst, xywh) -> dict:
 
 
 def score_snapshot(inst, xywh) -> dict:
-    """The soft vector of the raw layout and the contest cost of the legalized layout."""
+    """The soft vector of the raw layout and the hard cost of the legalized layout."""
     if inst.nets is not None:
         return score_bookshelf_snapshot(inst, xywh)
     soft = metric_vector(xywh.astype(np.float64), inst)

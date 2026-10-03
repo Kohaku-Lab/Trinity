@@ -1,4 +1,4 @@
-"""Refine a run's cached draws, legalize every draw, and report the contest (hard) cost.
+"""Refine a run's cached draws, legalize every draw, and report the hard cost.
 
 Per ``(NFE, steps)`` cell: the refiner (as in ``refine.py``) runs on the GPU over every cached
 draw; each refined draw goes through ``LEGALIZE_ROUTE`` (None = ``scale_pack`` with its
@@ -9,7 +9,7 @@ records, for every ``N`` in ``N_SELECT``:
 * ``best<N>`` -- the cheapest legalized cost over the first ``N`` draws,
 * ``soft<N>`` -- the legalized cost of the draw with the lowest pre-legalization ``soft_cost``.
 
-Each reports the mean cost, feasible rate and the block-count-weighted contest total. Writes
+Each reports the mean cost, feasible rate and the block-count-weighted hard-cost total. Writes
 ``OUT`` (JSON) and an ``.npz`` with the per-draw hard columns and soft vectors (and, with
 ``SAVE_LAYOUTS``, the refined latents and legalized boxes).
 
@@ -26,7 +26,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from trinity.data.splits import load_or_make_splits
+from trinity.data.splits import dev_split_cases
 from trinity.decode import z_to_xywh
 from trinity.floorplan.data import LanceFloorplanStore, find_train_lance
 from trinity.floorplan.legalize import apply_route, scale_pack
@@ -92,20 +92,6 @@ HARD = ("feasible", "cost", "hpwl_gap", "area_gap", "v_rel", "ms", "lam", "rung"
 
 # Per-worker state, set by ``init_worker``.
 _worker: dict = {}
-
-
-def dev_ids() -> list[int]:
-    lance_path = find_train_lance(TRAIN_LANCE)
-    store = LanceFloorplanStore(str(lance_path))
-    splits = load_or_make_splits(
-        store.block_counts,
-        lance_path.parent / "splits.json",
-        per_n_k=DEV_PER_N_K,
-        random_size=DEV_RANDOM_SIZE,
-        seed=SPLIT_SEED,
-    )
-    ids = splits.dev_per_n + splits.dev_random
-    return ids[:DEV_LIMIT] if DEV_LIMIT > 0 else ids
 
 
 def route_uses_scale_pack(route) -> bool:
@@ -221,7 +207,7 @@ def stack_draws(lat, offsets, bcount, k_all, k, indices, n_max) -> torch.Tensor:
 
 
 def summarize(cost, feasible, bcount) -> dict:
-    """Mean cost, feasible rate and the block-count-weighted contest total of per-case costs."""
+    """Mean cost, feasible rate and the block-count-weighted hard-cost total of per-case costs."""
     feasible_mask = feasible > 0.5
     return {
         "cost": float(cost.mean()),
@@ -338,8 +324,9 @@ def sweep_nfe(nfe, cases, order, bcount_all, pool, arrays) -> dict:
 
 
 def main():
-    ids = dev_ids()
-    cases = LanceFloorplanStore(str(find_train_lance(TRAIN_LANCE))).instances(ids)
+    cases, ids, _ = dev_split_cases(
+        TRAIN_LANCE, DEV_PER_N_K, DEV_RANDOM_SIZE, SPLIT_SEED, DEV_LIMIT
+    )
     order = sorted(range(len(cases)), key=lambda i: cases[i].block_count)
     bcount_all = np.array([case.block_count for case in cases])
     results, arrays = {}, {}

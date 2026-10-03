@@ -17,6 +17,8 @@ from pathlib import Path
 
 import numpy as np
 
+from trinity.floorplan.data import LanceFloorplanStore, find_train_lance
+
 
 @dataclass
 class DataSplits:
@@ -119,3 +121,42 @@ def load_or_make_splits(
     cache_path.parent.mkdir(parents=True, exist_ok=True)
     splits.to_json(cache_path)
     return splits
+
+
+def dev_split_ids(
+    train_lance: str | None = None,
+    per_n_k: int = 100,
+    random_size: int = 2000,
+    seed: int = 20090220,
+    limit: int = 0,
+) -> tuple[LanceFloorplanStore, list[int], dict]:
+    """The Lance store, the dev row ids and the split parameters.
+
+    The ids are ``dev_per_n`` then ``dev_random``; ``limit > 0`` keeps the first ``limit``.
+    The split is cached as ``splits.json`` next to the Lance set.
+    """
+    path = find_train_lance(train_lance)
+    store = LanceFloorplanStore(str(path))
+    splits = load_or_make_splits(
+        store.block_counts,
+        path.parent / "splits.json",
+        per_n_k=per_n_k,
+        random_size=random_size,
+        seed=seed,
+    )
+    ids = splits.dev_per_n + splits.dev_random
+    if limit > 0:
+        ids = ids[:limit]
+    return store, ids, splits.params
+
+
+def dev_split_cases(
+    train_lance: str | None = None,
+    per_n_k: int = 100,
+    random_size: int = 2000,
+    seed: int = 20090220,
+    limit: int = 0,
+) -> tuple[list, list[int], dict]:
+    """The dev-split instances, their row ids and the split parameters (see ``dev_split_ids``)."""
+    store, ids, params = dev_split_ids(train_lance, per_n_k, random_size, seed, limit)
+    return store.instances(ids), ids, params

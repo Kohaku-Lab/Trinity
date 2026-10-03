@@ -1,4 +1,4 @@
-"""The proximal correction against t (theory T1, Proposition 1).
+"""The proximal correction against t (Proposition 1).
 
 For every model of ``MODELS``, the raw network output on the rectified-flow interpolant
 ``x_t = (1 - t) z0 + t x1`` of the reference latent ``z0`` of the first ``N_CASES`` dev cases,
@@ -29,9 +29,8 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from trinity.data.splits import load_or_make_splits
+from trinity.data.splits import dev_split_ids
 from trinity.decode import z_to_xywh
-from trinity.floorplan.data import LanceFloorplanStore, find_train_lance
 from trinity.floorplan.parameterize import xywh_to_z
 from trinity.floorplan.scoring.vector import COLS
 from trinity.hub import load_model
@@ -104,17 +103,8 @@ def git_sha() -> str:
 
 def dev_cases():
     """The first ``N_CASES`` dev cases, their ids, and 3 x the train split's mean block count."""
-    lance_path = find_train_lance(TRAIN_LANCE)
-    store = LanceFloorplanStore(str(lance_path))
+    store, dev, _ = dev_split_ids(TRAIN_LANCE, DEV_PER_N_K, DEV_RANDOM_SIZE, SPLIT_SEED)
     block_counts = np.asarray(store.block_counts)
-    splits = load_or_make_splits(
-        block_counts,
-        lance_path.parent / "splits.json",
-        per_n_k=DEV_PER_N_K,
-        random_size=DEV_RANDOM_SIZE,
-        seed=SPLIT_SEED,
-    )
-    dev = splits.dev_per_n + splits.dev_random
     is_train = np.ones(len(block_counts), bool)
     is_train[np.asarray(dev)] = False
     ids = dev[:N_CASES]

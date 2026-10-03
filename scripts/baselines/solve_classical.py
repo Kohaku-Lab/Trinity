@@ -16,12 +16,12 @@ from pathlib import Path
 import numpy as np
 
 import trinity_baselines.classical  # noqa: F401  (register: parsac, sp_sa)
-from trinity.data.splits import load_or_make_splits
+from trinity.data.splits import dev_split_ids
 from trinity.floorplan.data import LanceFloorplanStore, find_train_lance
 from trinity.floorplan.parameterize import xywh_to_z
 from trinity.floorplan.registry import SOLVER, build
 
-TRAIN_LANCE: str | None = None  # None = data/floorset_lite.lance
+TRAIN_LANCE: str | None = None  # None = the project default path
 DEV_PER_N_K: int = 100
 DEV_RANDOM_SIZE: int = 2000
 SPLIT_SEED: int = 20090220
@@ -37,21 +37,6 @@ _worker_ids = None
 _worker_store = None
 _worker_spec = None
 _worker_k = None
-
-
-def dev_ids() -> list[int]:
-    """The dev-split row ids."""
-    path = str(find_train_lance(TRAIN_LANCE))
-    store = LanceFloorplanStore(path)
-    splits = load_or_make_splits(
-        store.block_counts,
-        str(Path(path).parent / "splits.json"),
-        per_n_k=DEV_PER_N_K,
-        random_size=DEV_RANDOM_SIZE,
-        seed=SPLIT_SEED,
-    )
-    ids = splits.dev_per_n + splits.dev_random
-    return ids[:DEV_LIMIT] if DEV_LIMIT > 0 else ids
 
 
 def init_worker(ids, spec, k, train_lance):
@@ -72,7 +57,9 @@ def solve_case(i: int):
 
 
 def main():
-    ids = dev_ids()
+    _, ids, _ = dev_split_ids(
+        TRAIN_LANCE, DEV_PER_N_K, DEV_RANDOM_SIZE, SPLIT_SEED, DEV_LIMIT
+    )
     out = Path(OUT_DIR) / NAME
     out.mkdir(parents=True, exist_ok=True)
     print(

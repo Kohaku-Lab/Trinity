@@ -1,4 +1,4 @@
-"""Theory T3: the motivation figure's snapshots. Needs the free-sampling generation caches of
+"""The motivation figure's snapshots. Needs the free-sampling generation caches of
 the flagship, ChipDiffusion and MacroDiff+ and the legalization caches of each published
 model through its own ported refiner at NFE 32 (``legalize.py`` with ``SAVE_LAYOUTS``).
 

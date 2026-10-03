@@ -1,6 +1,6 @@
 """ChipDiffusion samples through its own ported scheduled gradient legalizer (5000 iterations)
-at NFE 32, then ``scale_pack``: the published generator with its own refiner, in contest
-units (hard cost, single sample and best of 4). The layouts it stores feed theory T3.
+at NFE 32, then ``scale_pack``: the published generator with its own refiner, scored by the
+hard cost (single sample and best of 4). The layouts it stores feed the motivation figure.
 
 Run::
 

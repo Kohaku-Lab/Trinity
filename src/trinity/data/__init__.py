@@ -11,7 +11,13 @@ from trinity.data.dataset import (
     train_dataset,
     validation_dataset,
 )
-from trinity.data.splits import DataSplits, load_or_make_splits, make_splits
+from trinity.data.splits import (
+    DataSplits,
+    dev_split_cases,
+    dev_split_ids,
+    load_or_make_splits,
+    make_splits,
+)
 
 __all__ = [
     "FloorplanLatentDataset",
@@ -24,6 +30,8 @@ __all__ = [
     "train_dataset",
     "validation_dataset",
     "DataSplits",
+    "dev_split_cases",
+    "dev_split_ids",
     "load_or_make_splits",
     "make_splits",
 ]

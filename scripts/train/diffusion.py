@@ -52,7 +52,7 @@ TRAINER_RESUME: bool = False
 DATA: str = "train"
 # Directory holding LiteTensorDataTest/ (None: the project data/ directory).
 FLOORSET_ROOT: str | None = None
-# The Lance train set (None: data/floorset_lite.lance).
+# The Lance train set (None: data/floorset_lite_mibfix.lance).
 TRAIN_LANCE: str | None = None
 # Dev split: DEV_PER_N_K layouts per block count + DEV_RANDOM_SIZE random layouts.
 DEV_PER_N_K: int = 10

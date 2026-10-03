@@ -24,7 +24,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from trinity.data.splits import load_or_make_splits
+from trinity.data.splits import dev_split_cases
 from trinity.decode import z_to_xywh
 from trinity.floorplan.data import LanceFloorplanStore, find_train_lance
 from trinity.floorplan.parameterize import z_to_xywh as z_to_xywh_np
@@ -78,20 +78,6 @@ OUT: str = "outputs/eval/refine/flagship.json"
 
 # Per-worker state, set by ``init_worker``.
 _worker: dict = {}
-
-
-def dev_ids() -> list[int]:
-    lance_path = find_train_lance(TRAIN_LANCE)
-    store = LanceFloorplanStore(str(lance_path))
-    splits = load_or_make_splits(
-        store.block_counts,
-        lance_path.parent / "splits.json",
-        per_n_k=DEV_PER_N_K,
-        random_size=DEV_RANDOM_SIZE,
-        seed=SPLIT_SEED,
-    )
-    ids = splits.dev_per_n + splits.dev_random
-    return ids[:DEV_LIMIT] if DEV_LIMIT > 0 else ids
 
 
 def init_worker(ids, lance) -> None:
@@ -273,8 +259,9 @@ def write_outputs(ids, results, per_case, timing, seconds, n_cases) -> None:
 
 
 def main():
-    ids = dev_ids()
-    cases = LanceFloorplanStore(str(find_train_lance(TRAIN_LANCE))).instances(ids)
+    cases, ids, _ = dev_split_cases(
+        TRAIN_LANCE, DEV_PER_N_K, DEV_RANDOM_SIZE, SPLIT_SEED, DEV_LIMIT
+    )
     order = sorted(range(len(cases)), key=lambda i: cases[i].block_count)
     timing = {"refine_s": 0.0, "step_rows": 0.0}
     results, per_case = {}, {}

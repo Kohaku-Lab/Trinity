@@ -1,4 +1,4 @@
-"""Theory T2: every dev case's reference layout through the three ported refiners at their
+"""Every dev case's reference layout through the three ported refiners at their
 published step counts and through the closed-form refiner at the paper weights and at the
 training weights (every loop's defaults in the script).
 

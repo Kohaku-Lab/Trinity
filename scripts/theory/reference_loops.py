@@ -1,4 +1,4 @@
-"""Reference layouts through every correction loop (theory T2, Proposition 2(ii)).
+"""Reference layouts through every correction loop (Proposition 2(ii)).
 
 Every dev case's reference layout (its ground-truth latent) is the start of each loop of
 ``LOOPS``: the ported published refiners at their published settings and the closed-form
@@ -26,9 +26,8 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from trinity.data.splits import load_or_make_splits
+from trinity.data.splits import dev_split_cases
 from trinity.decode import z_to_xywh
-from trinity.floorplan.data import LanceFloorplanStore, find_train_lance
 from trinity.floorplan.parameterize import xywh_to_z
 from trinity.floorplan.scoring.vector import COLS
 from trinity.losses import constraint as C
@@ -123,21 +122,6 @@ def git_sha() -> str:
         return subprocess.check_output(cmd, text=True).strip()
     except Exception:  # noqa: BLE001
         return "unknown"
-
-
-def dev_cases():
-    lance_path = find_train_lance(TRAIN_LANCE)
-    store = LanceFloorplanStore(str(lance_path))
-    splits = load_or_make_splits(
-        store.block_counts,
-        lance_path.parent / "splits.json",
-        per_n_k=DEV_PER_N_K,
-        random_size=DEV_RANDOM_SIZE,
-        seed=SPLIT_SEED,
-    )
-    ids = splits.dev_per_n + splits.dev_random
-    ids = ids[:DEV_LIMIT] if DEV_LIMIT > 0 else ids
-    return store.instances(ids), ids
 
 
 def reference_latents(cases, max_n: int) -> torch.Tensor:
@@ -319,7 +303,9 @@ def reference_report(soft0, viol) -> dict:
 
 def main():
     started = time.perf_counter()
-    cases, ids = dev_cases()
+    cases, ids, _ = dev_split_cases(
+        TRAIN_LANCE, DEV_PER_N_K, DEV_RANDOM_SIZE, SPLIT_SEED, DEV_LIMIT
+    )
     order = sorted(range(len(cases)), key=lambda i: cases[i].block_count)
     store, timing = {}, {}
     soft0 = np.zeros((len(cases), len(COLS)), np.float32)

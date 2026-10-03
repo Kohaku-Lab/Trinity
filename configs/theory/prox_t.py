@@ -1,6 +1,11 @@
-"""Theory T1: the proximal correction against t on the first 2000 dev cases at 19 values of t,
-for the flagship (lambda = 0.01), the no-aux control (lambda = 0, the reference), a second
-and third training seed of each, lambda = 0.05, and the t-weighted lambda = 0.1 t.
+"""The proximal correction against t on the first 2000 dev cases at 19 values of t,
+for the flagship (lambda = 0.01, the released model) against the no-aux control (lambda = 0,
+the reference, trained with ``configs/train/no_aux.py``).
+
+The paper also measures more seeds of both models and other aux weights; train them from a
+copy of ``configs/train/flagship.py`` or ``no_aux.py`` with another ``SEED`` or other term
+weights and ``NAME``, and add one ``MODELS`` entry per run:
+``"<NAME>": ("outputs/train/<NAME>/checkpoints/last.ckpt", lambda, t_weighted)``.
 
 Run::
 
@@ -13,15 +18,10 @@ T_GRID = (
     0.15, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0,
 )  # fmt: skip
 MODELS = {
-    "flagship": ("outputs/train/flagship/checkpoints/last.ckpt", 0.01, False),
+    "flagship": ("KBlueLeaf/Trinity", 0.01, False),
     "no_aux": ("outputs/train/no_aux/checkpoints/last.ckpt", 0.0, False),
-    "flagship_s1": ("outputs/train/flagship_s1/checkpoints/last.ckpt", 0.01, False),
-    "flagship_s2": ("outputs/train/flagship_s2/checkpoints/last.ckpt", 0.01, False),
-    "no_aux_s1": ("outputs/train/no_aux_s1/checkpoints/last.ckpt", 0.0, False),
-    "no_aux_s2": ("outputs/train/no_aux_s2/checkpoints/last.ckpt", 0.0, False),
-    "aux_w0p05": ("outputs/train/aux_w0p05/checkpoints/last.ckpt", 0.05, False),
-    "aux_t0p1": ("outputs/train/aux_t0p1/checkpoints/last.ckpt", 0.1, True),
 }
+SCALES = {"flagship": "flagship"}
 REFERENCE = "no_aux"
 NOISE_SEED = 20260924
 MAX_ROWS = 256

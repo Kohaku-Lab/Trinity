@@ -19,8 +19,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from trinity.data.splits import load_or_make_splits
-from trinity.floorplan.data import LanceFloorplanStore, find_train_lance
+from trinity.data.splits import dev_split_ids
 
 NAME: str = "prior"
 SHARD: str = "free_nfe0"
@@ -48,20 +47,11 @@ def git_sha() -> str:
 
 def dev_block_counts():
     """The block count of every dev case, and the split params."""
-    lance_path = find_train_lance(TRAIN_LANCE)
-    store = LanceFloorplanStore(str(lance_path))
-    splits = load_or_make_splits(
-        store.block_counts,
-        lance_path.parent / "splits.json",
-        per_n_k=DEV_PER_N_K,
-        random_size=DEV_RANDOM_SIZE,
-        seed=SPLIT_SEED,
+    store, ids, params = dev_split_ids(
+        TRAIN_LANCE, DEV_PER_N_K, DEV_RANDOM_SIZE, SPLIT_SEED, DEV_LIMIT
     )
-    ids = splits.dev_per_n + splits.dev_random
-    if DEV_LIMIT > 0:
-        ids = ids[:DEV_LIMIT]
     block_counts = np.asarray(store.block_counts)[ids].astype(np.int32)
-    return block_counts, splits.params
+    return block_counts, params
 
 
 def starting_noise(bcount: np.ndarray) -> list[np.ndarray]:

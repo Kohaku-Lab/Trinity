@@ -45,7 +45,7 @@ TRAINER_RESUME: bool = False  # also resume optimizer, scheduler and global step
 # ---- Data ------------------------------------------------------------------
 DATA: str = "validation"  # "train" (1M Lance set) | "validation" (100 cases, debug)
 FLOORSET_ROOT: str | None = None  # None = the project data directory
-TRAIN_LANCE: str | None = None  # None = data/floorset_lite.lance
+TRAIN_LANCE: str | None = None  # None = the project default path
 DEV_PER_N_K: int = 10  # dev cases held out per block count
 DEV_RANDOM_SIZE: int = 7000  # dev cases held out at random
 SPLIT_SEED: int = 20090220

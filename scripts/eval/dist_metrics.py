@@ -19,7 +19,7 @@ from pathlib import Path
 
 import numpy as np
 
-from trinity.data.splits import load_or_make_splits
+from trinity.data.splits import dev_split_ids
 from trinity.floorplan.data import LanceFloorplanStore, find_train_lance
 from trinity.floorplan.parameterize import z_to_xywh
 from trinity.floorplan.scoring.descriptors import (
@@ -60,16 +60,8 @@ _worker: dict = {}
 
 
 def dev_ids() -> list[int]:
-    lance_path = find_train_lance(TRAIN_LANCE)
-    store = LanceFloorplanStore(str(lance_path))
-    splits = load_or_make_splits(
-        store.block_counts,
-        lance_path.parent / "splits.json",
-        per_n_k=DEV_PER_N_K,
-        random_size=DEV_RANDOM_SIZE,
-        seed=SPLIT_SEED,
-    )
-    return splits.dev_per_n + splits.dev_random
+    _, ids, _ = dev_split_ids(TRAIN_LANCE, DEV_PER_N_K, DEV_RANDOM_SIZE, SPLIT_SEED)
+    return ids
 
 
 def descriptor_names() -> list[str]:

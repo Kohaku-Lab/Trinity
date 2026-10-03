@@ -3,7 +3,7 @@
 For every setting ``(NFE, refiner steps, draws)`` of ``SETTINGS`` and every case on its own:
 sample the draws (one forward of that case alone), refine them with the closed-form refiner,
 legalize every draw in parallel on a pool of ``WORKERS`` processes (one job per draw), score
-with the contest cost and keep the cheapest draw (feasible first). Recorded per case: the
+with the hard cost and keep the cheapest draw (feasible first). Recorded per case: the
 wall time of every stage (sampling, refinement, decoding, legalization = the slowest draw),
 the legalizer's milliseconds per draw and the LP solver's seconds per draw. The
 ``torch.compile`` and pool warm-up runs once first and is reported separately.

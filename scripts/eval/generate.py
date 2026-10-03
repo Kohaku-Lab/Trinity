@@ -23,8 +23,7 @@ import numpy as np
 import torch
 
 from trinity.augment_ops import drop_wires
-from trinity.data.splits import load_or_make_splits
-from trinity.floorplan.data import LanceFloorplanStore, find_train_lance
+from trinity.data.splits import dev_split_cases
 from trinity.hub import TrinityModel, load_model
 
 torch.set_float32_matmul_precision("high")
@@ -64,25 +63,15 @@ def git_sha() -> str:
 
 def dev_cases():
     """The dev-split instances (wires dropped when ``WIRE_DROP > 0``) and the split params."""
-    lance_path = find_train_lance(TRAIN_LANCE)
-    store = LanceFloorplanStore(str(lance_path))
-    splits = load_or_make_splits(
-        store.block_counts,
-        lance_path.parent / "splits.json",
-        per_n_k=DEV_PER_N_K,
-        random_size=DEV_RANDOM_SIZE,
-        seed=SPLIT_SEED,
+    cases, _, params = dev_split_cases(
+        TRAIN_LANCE, DEV_PER_N_K, DEV_RANDOM_SIZE, SPLIT_SEED, DEV_LIMIT
     )
-    ids = splits.dev_per_n + splits.dev_random
-    if DEV_LIMIT > 0:
-        ids = ids[:DEV_LIMIT]
-    cases = store.instances(ids)
     if WIRE_DROP > 0:
         cases = [
             drop_wires(case, WIRE_DROP, np.random.default_rng(WIRE_DROP_SEED + i))
             for i, case in enumerate(cases)
         ]
-    return cases, splits.params
+    return cases, params
 
 
 def build_samplers(model: TrinityModel) -> dict[tuple[str, int], object]:

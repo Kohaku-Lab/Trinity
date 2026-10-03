@@ -8,7 +8,7 @@ directory.
 | dataset              | environment variable  | layout under the root                         |
 |----------------------|-----------------------|-----------------------------------------------|
 | FloorSet validation  | ``TRINITY_FLOORSET``  | ``LiteTensorDataTest/config_<21..120>/``      |
-| FloorSet train       | ``TRINITY_TRAIN_LANCE`` | ``floorset_lite.lance`` (built by a script) |
+| FloorSet train       | ``TRINITY_TRAIN_LANCE`` | ``floorset_lite_mibfix.lance`` (a script builds it) |
 | GSRC                 | ``TRINITY_GSRC``      | ``gsrc/{HARD,SOFT}/n<size>.{blocks,nets,pl}`` |
 | MCNC                 | ``TRINITY_MCNC``      | ``mcnc/{HARD,SOFT}/<name>.{blocks,nets,pl}``  |
 """
@@ -29,7 +29,7 @@ VALIDATION_URL = (
 )
 
 TRAIN_DIRNAME = "floorset_lite"
-TRAIN_LANCE_DIRNAME = "floorset_lite.lance"
+TRAIN_LANCE_DIRNAME = "floorset_lite_mibfix.lance"
 TRAIN_URL = (
     "https://huggingface.co/datasets/IntelLabs/FloorSet/resolve/main/"
     "LiteTensorData_v2.tar.gz"
@@ -159,7 +159,7 @@ def validation_case_path(
 
 
 def find_train_lance(override: str | None = None) -> Path:
-    """The transcoded 1M-layout train set ``floorset_lite.lance``.
+    """The transcoded 1M-layout train set ``floorset_lite_mibfix.lance``.
 
     Raises ``FileNotFoundError`` with the build command when it is absent; the Lance set is
     produced by ``scripts/data/transcode_floorset.py``, never downloaded.
@@ -172,7 +172,7 @@ def find_train_lance(override: str | None = None) -> Path:
         return local
     raise FileNotFoundError(
         f"train Lance dataset not found at {local}. Build it with:\n"
-        "  python scripts/data/transcode_floorset.py"
+        "  kogine run scripts/data/transcode_floorset.py"
     )
 
 

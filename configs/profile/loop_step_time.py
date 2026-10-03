@@ -1,4 +1,4 @@
-"""Theory T5: one per-step time per correction loop (the closed-form refiner and the three
+"""One per-step time per correction loop (the closed-form refiner and the three
 ported refiners) at 32 / 256 / 1000 layouts per forward on the first 2000 dev cases.
 
 Run::

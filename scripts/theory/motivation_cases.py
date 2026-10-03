@@ -1,4 +1,4 @@
-"""The motivation figure's snapshots (theory T3): one raw draw through a published loop and
+"""The motivation figure's snapshots: one raw draw through a published loop and
 through the closed-form refiner, on cases chosen by a stated rule.
 
 Selection: from the ported loops' legalization caches (``legalize.py`` outputs with
@@ -28,9 +28,8 @@ import numpy as np
 import torch
 
 from trinity.conditioning.features import build_b2b_dense, pin_edges
-from trinity.data.splits import load_or_make_splits
+from trinity.data.splits import dev_split_ids
 from trinity.decode import z_to_xywh
-from trinity.floorplan.data import LanceFloorplanStore, find_train_lance
 from trinity.floorplan.scoring.vector import COLS
 from trinity.sampling.refine_case import build_refine_case
 from trinity.sampling.refine_closed import refine_closed
@@ -93,19 +92,6 @@ def git_sha() -> str:
         return subprocess.check_output(cmd, text=True).strip()
     except Exception:  # noqa: BLE001
         return "unknown"
-
-
-def dev_store_and_ids():
-    lance_path = find_train_lance(TRAIN_LANCE)
-    store = LanceFloorplanStore(str(lance_path))
-    splits = load_or_make_splits(
-        store.block_counts,
-        lance_path.parent / "splits.json",
-        per_n_k=DEV_PER_N_K,
-        random_size=DEV_RANDOM_SIZE,
-        seed=SPLIT_SEED,
-    )
-    return store, splits.dev_per_n + splits.dev_random
 
 
 def case_rows(array, case_index: int, bcount, draws: int):
@@ -237,7 +223,7 @@ def run_row(loop: str, steps: int, snapshots, z0, case) -> dict[int, torch.Tenso
 
 def main():
     started = time.perf_counter()
-    store, ids = dev_store_and_ids()
+    store, ids, _ = dev_split_ids(TRAIN_LANCE, DEV_PER_N_K, DEV_RANDOM_SIZE, SPLIT_SEED)
     rows, bcount, draws, instances = candidate_table(store, ids)
     chosen = choose(rows)
     text = {
