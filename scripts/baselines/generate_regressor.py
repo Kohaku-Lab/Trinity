@@ -76,7 +76,7 @@ def generate(name: str, ckpt: str, cases: list, split_params: dict) -> None:
     latents = [None] * len(cases)
     started = time.perf_counter()
     with model._eval_mode():
-        placer = model._make_placer()
+        placer = model.make_placer()
         for start in range(0, len(order), MAX_ROWS):
             indices = order[start : start + MAX_ROWS]
             group = [cases[i] for i in indices]

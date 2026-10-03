@@ -163,7 +163,7 @@ def test_regression_placer_single_candidate():
         preset="DiT-S", arch_overrides={"feature_dim": 19}, head="z"
     )
     model.solve_cases([inst])
-    assert isinstance(model._make_placer(), RegressionPlacer)
+    assert isinstance(model.make_placer(), RegressionPlacer)
     assert len(model.last_candidate_costs[0]) == 1
     callback = ValidationCallback(
         shard_fn=lambda rank, world: [inst][rank::world], every_n_steps=1, num_render=0

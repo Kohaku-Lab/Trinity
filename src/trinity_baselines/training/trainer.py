@@ -325,7 +325,7 @@ class RegressorTrainer(pl.LightningModule):
         finally:
             self.backbone.train(was_training)
 
-    def _make_placer(self) -> RegressionPlacer:
+    def make_placer(self) -> RegressionPlacer:
         """A one-candidate placer over the current (EMA) regressor."""
         return RegressionPlacer(
             self.backbone,
@@ -356,7 +356,7 @@ class RegressorTrainer(pl.LightningModule):
         placements_ordered: list = []
         costs_ordered: list = []
         with self._eval_mode():
-            placer = self._make_placer()
+            placer = self.make_placer()
             with tqdm(
                 total=len(ordered), desc=desc, unit="case", disable=not show_bar
             ) as bar:
@@ -383,7 +383,7 @@ class RegressorTrainer(pl.LightningModule):
         per_chunk = max(1, self.eval_max_batch)
         out = [None] * len(instances)
         with self._eval_mode():
-            placer = self._make_placer()
+            placer = self.make_placer()
             for start in range(0, len(ordered), per_chunk):
                 group = ordered[start : start + per_chunk]
                 for gi, boxes in enumerate(placer.raw_sample_boxes(group)):
