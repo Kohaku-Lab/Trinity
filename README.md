@@ -9,6 +9,8 @@
 
 ![Trinity sampling, refining and legalizing a 60-block FloorSet chip](assets/pipeline_n60.gif)
 
+*Sampling (32 steps, no guidance), refinement (400 steps on the same physics) and legalization (one linear program) of a 60-block FloorSet chip. Left and right panels: the layout before and after each step.*
+
 Existing generative floorplanners train only to reproduce reference layouts and leave the rules
 of the chip to corrections bolted on afterwards: guidance in the sampler, post-hoc loops and a
 legalizer, each in its own form, with only the final layout ever scored. Trinity writes every
