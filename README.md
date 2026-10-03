@@ -1,6 +1,6 @@
 # Trinity: One Differentiable Physics for Training, Refining and Scoring Generative Floorplanners
 
-**Shih-Ying Yeh**<sup>♡*†</sup><sub>♠</sub>, **Tzu-Sian Wang**<sup>♡*</sup><sub>♠</sub>, **Xuehai Wang**<sup>♣</sup><sub>△</sub>, **Jia-Hua Lee**<sup>★</sup>, **Daniel Z. Kaplan**<sup>◇</sup>, **Ming-Qi Xu**<sup>♡</sup>, **Wuqian Tang**<sup>♡</sup>, **Chun-Yao Wang**<sup>♡</sup>, **Shang-Hong Lai**<sup>♡</sup>, **Chun-Yi Lee**<sup>★</sup>
+**Shih-Ying Yeh**<sup>♡♠</sup><sub>*†</sub>, **Tzu-Sian Wang**<sup>♡♠</sup><sub>*</sub>, **Xuehai Wang**<sup>♣</sup><sub>△</sub>, **Jia-Hua Lee**<sup>★</sup>, **Daniel Z. Kaplan**<sup>◇</sup>, **Ming-Qi Xu**<sup>♡</sup>, **Wuqian Tang**<sup>♡</sup>, **Chun-Yao Wang**<sup>♡</sup>, **Shang-Hong Lai**<sup>♡</sup>, **Chun-Yi Lee**<sup>★</sup>
 
 <sup>♡</sup>National Tsing Hua University · <sup>♠</sup>Kohaku Lab · <sup>♣</sup>Karolinska Institutet · <sup>△</sup>Stockholm University · <sup>◇</sup>realiz.ai · <sup>★</sup>National Taiwan University
 <sup>*</sup>Equal contribution · <sup>†</sup>Corresponding author: kohaku@kblueleaf.net
