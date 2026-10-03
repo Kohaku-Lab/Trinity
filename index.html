@@ -217,7 +217,7 @@ img, video, canvas, svg { max-width: 100%; }
 
   <main>
     <figure>
-      <div class="plate"><video src="assets/n60_pipeline.mp4" autoplay muted loop playsinline preload="auto" aria-label="Trinity generating, refining and legalizing a 60-block floorplan"></video></div>
+      <div class="plate"><video autoplay muted loop playsinline preload="auto" aria-label="Trinity generating, refining and legalizing a 60-block floorplan"><source src="assets/n60_pipeline.av1.mp4" type='video/mp4; codecs="av01.0.08M.08"'><source src="assets/n60_pipeline.mp4" type="video/mp4"></video></div>
       <figcaption>A 60-block FloorSet chip from pure noise: the network's guess is already a floorplan at the first step, a refiner on the same physics clears the remaining overlaps (red), and one linear program makes it exactly legal. The result ties the reference layout. The video plays three stages. <b>Sampling</b>, 32 Euler steps with no guidance: the noisy state (left) and the network's clean prediction (right). <b>Refinement</b>, 400 steps of Adam on the same six functions: the raw sample (left) and the refined layout (right). <b>Legalization</b>, one linear program: the refined layout (left) and the legal floorplan (right).</figcaption>
     </figure>
 
@@ -449,7 +449,7 @@ img, video, canvas, svg { max-width: 100%; }
         <button type="button" data-case="100" aria-pressed="false">100 blocks</button>
       </div>
       <figure>
-        <div class="plate"><video id="vid-case" src="assets/n60_pipeline.mp4" autoplay muted loop playsinline preload="metadata" aria-label="Pipeline video for the selected chip"></video></div>
+        <div class="plate"><video id="vid-case" autoplay muted loop playsinline preload="metadata" aria-label="Pipeline video for the selected chip"><source src="assets/n60_pipeline.av1.mp4" type='video/mp4; codecs="av01.0.08M.08"'><source src="assets/n60_pipeline.mp4" type="video/mp4"></video></div>
         <figcaption>The video plays three stages. <b>Sampling</b>, 32 Euler steps with no guidance: the noisy state (left) and the network's clean prediction (right). <b>Refinement</b>, 400 steps of Adam on the same six functions: the raw sample (left) and the refined layout (right). <b>Legalization</b>, one linear program: the refined layout (left) and the legal floorplan (right).</figcaption>
       </figure>
     </section>
@@ -730,7 +730,9 @@ img, video, canvas, svg { max-width: 100%; }
   var btns = document.querySelectorAll(".cases button"), v = document.getElementById("vid-case");
   btns.forEach(function (b) { b.addEventListener("click", function () {
     btns.forEach(function (o) { o.setAttribute("aria-pressed", o === b ? "true" : "false"); });
-    v.src = "assets/n" + b.getAttribute("data-case") + "_pipeline.mp4"; v.play().catch(function () {});
+    var n = b.getAttribute("data-case"), s = v.querySelectorAll("source");
+    s[0].src = "assets/n" + n + "_pipeline.av1.mp4"; s[1].src = "assets/n" + n + "_pipeline.mp4";
+    v.load(); v.play().catch(function () {});
   }); });
   document.getElementById("copy-bib").addEventListener("click", function () {
     var btn = this, pre = document.getElementById("bibtex");
