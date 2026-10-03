@@ -218,7 +218,7 @@ img, video, canvas, svg { max-width: 100%; }
   <main>
     <figure>
       <div class="plate"><video src="assets/n60_pipeline.mp4" autoplay muted loop playsinline preload="auto" aria-label="Trinity generating, refining and legalizing a 60-block floorplan"></video></div>
-      <figcaption>A 60-block FloorSet chip from pure noise: the network's guess is already a floorplan at the first step, a refiner on the same physics clears the remaining overlaps (red), and one linear program makes it exactly legal. The result ties the reference layout.</figcaption>
+      <figcaption>A 60-block FloorSet chip from pure noise: the network's guess is already a floorplan at the first step, a refiner on the same physics clears the remaining overlaps (red), and one linear program makes it exactly legal. The result ties the reference layout. The video plays three stages. <b>Sampling</b>, 32 Euler steps with no guidance: the noisy state (left) and the network's clean prediction (right). <b>Refinement</b>, 400 steps of Adam on the same six functions: the raw sample (left) and the refined layout (right). <b>Legalization</b>, one linear program: the refined layout (left) and the legal floorplan (right).</figcaption>
     </figure>
 
     <!-- 1 -->
@@ -454,6 +454,7 @@ img, video, canvas, svg { max-width: 100%; }
       </div>
       <figure>
         <div class="plate"><video id="vid-case" src="assets/n60_pipeline.mp4" autoplay muted loop playsinline preload="metadata" aria-label="Pipeline video for the selected chip"></video></div>
+        <figcaption>The video plays three stages. <b>Sampling</b>, 32 Euler steps with no guidance: the noisy state (left) and the network's clean prediction (right). <b>Refinement</b>, 400 steps of Adam on the same six functions: the raw sample (left) and the refined layout (right). <b>Legalization</b>, one linear program: the refined layout (left) and the legal floorplan (right).</figcaption>
       </figure>
     </section>
 
