@@ -24,7 +24,8 @@ class GraphBias(nn.Module):
         adjacency: torch.Tensor | None,
         key_pad_mask: torch.Tensor | None = None,
     ) -> torch.Tensor | None:
-        """``adjacency`` ``(B, N, N)``, ``key_pad_mask`` ``(B, N)`` bool (True = real key).
+        """``adjacency`` ``(B, N, N)``, ``key_pad_mask``
+        ``(B, N)`` bool (True = real key).
 
         Returns the bias ``(B, 1, N, N)``, or ``None`` with neither a bias nor a mask.
         """

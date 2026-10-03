@@ -3,7 +3,8 @@ ported refiners) at 32 / 256 / 1000 layouts per forward on the first 2000 dev ca
 
 Run::
 
-    kogine run scripts/profile/loop_step_time.py --config configs/profile/loop_step_time.py
+    kogine run scripts/profile/loop_step_time.py \\
+        --config configs/profile/loop_step_time.py
 """
 
 N_CASES = 2000

@@ -1,4 +1,5 @@
-"""A real token's output must not depend on padding: neither its amount nor its content."""
+"""A real token's output must not depend on
+padding: neither its amount nor its content."""
 
 import pytest
 import torch
@@ -8,7 +9,8 @@ from trinity.models import DenoiserCond, SetTransformerDenoiser, get_preset
 
 
 def _forward(model, z, feats, adj, n_pad, seed):
-    """Forward one case padded by ``n_pad`` junk tokens; return the real tokens' output."""
+    """Forward one case padded by ``n_pad`` junk
+    tokens; return the real tokens' output."""
     n = z.shape[1]
     g = torch.Generator().manual_seed(seed)
     zp = torch.cat([z, torch.randn(1, n_pad, 3, generator=g)], dim=1)

@@ -1,7 +1,8 @@
 """Generation cache of the flagship and its no-aux control over the 12k dev split.
 
-Free sampling (no projection), six NFEs x 4 draws per case: 288,000 layouts per checkpoint.
-Every later step of the flagship evaluation reads these shards (``free_nfe<k>.npz``).
+Free sampling (no projection), six NFEs x 4 draws per case: 288,000 layouts per
+checkpoint. Every later step of the flagship evaluation reads these shards
+(``free_nfe<k>.npz``).
 
 Run::
 

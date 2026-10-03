@@ -4,7 +4,8 @@ model through its own ported refiner at NFE 32 (``legalize.py`` with ``SAVE_LAYO
 
 Run::
 
-    kogine run scripts/theory/motivation_cases.py --config configs/theory/motivation_cases.py
+    kogine run scripts/theory/motivation_cases.py \\
+        --config configs/theory/motivation_cases.py
 """
 
 LEGALIZE_DIR = "outputs/eval/legalize"

@@ -1,8 +1,9 @@
 """Gates of the ``scale_pack`` legalizer.
 
-Overlap-free output on jittered legal layouts at the first rung, anchors and shapes untouched,
-cluster contact and boundary codes met, the pinned squeeze and a tangled layout feasible
-through the ladder, MIB shapes identical, and the meaning of the expansion factor.
+Overlap-free output on jittered legal layouts at the first rung, anchors and shapes
+untouched, cluster contact and boundary codes met, the pinned squeeze and a tangled
+layout feasible through the ladder, MIB shapes identical, and the meaning of the
+expansion factor.
 """
 
 import numpy as np
@@ -46,7 +47,8 @@ def _instance(
 
 
 def _grid_layout(rows, cols, seed, jitter=0.04):
-    """Random-size blocks abutting in a row-major grid, centres jittered by ``jitter`` of the scale."""
+    """Random-size blocks abutting in a row-major grid,
+    centres jittered by ``jitter`` of the scale."""
     rng = np.random.default_rng(seed)
     n = rows * cols
     w, h = rng.uniform(1.0, 3.0, n), rng.uniform(1.0, 3.0, n)

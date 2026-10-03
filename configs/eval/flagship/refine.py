@@ -1,6 +1,6 @@
-"""The NFE x refiner-steps grid of the flagship with the paper's closed-form refiner: linear
-decay from peak lr 1e-3, Adam betas (0, 0.99), overlap weight 10 and the other five terms at
-1, every cached draw, batched GPU scoring.
+"""The NFE x refiner-steps grid of the flagship with the paper's closed-form refiner:
+linear decay from peak lr 1e-3, Adam betas (0, 0.99), overlap weight 10 and the other
+five terms at 1, every cached draw, batched GPU scoring.
 
 Run::
 

@@ -1,18 +1,21 @@
-"""FlowPlace / ChipDiffusion ``AttGNN`` denoiser, ported to the ``(z_t, t, cond) -> out`` interface.
+"""FlowPlace / ChipDiffusion ``AttGNN`` denoiser,
+ported to the ``(z_t, t, cond) -> out`` interface.
 
 Source: https://github.com/lamda-bbo/flowplace (licenses: NOTICE). Copied from
 ``flow_matching/networks/gnn_unet.py``, ``networks/mlp.py``, ``networks/vit.py``
-(``AttentionBlock``, ``MultiHeadAttention``) and ``pos_encoding.py`` (``SinusoidContEncoding``),
-at the ``att-gnn.yaml`` + ``conv-layer/gat.yaml`` + ``size/large.yaml`` configuration.
-ChipDiffusion (https://github.com/vint-1/chipdiffusion) uses the identical network.
+(``AttentionBlock``, ``MultiHeadAttention``) and ``pos_encoding.py``
+(``SinusoidContEncoding``), at the ``att-gnn.yaml`` + ``conv-layer/gat.yaml`` +
+``size/large.yaml`` configuration. ChipDiffusion
+(https://github.com/vint-1/chipdiffusion) uses the identical network.
 
 Two changes from the original, both at the batch boundary:
 
 * ``BatchWrapper`` assumed one graph shared by the whole batch. Here a batch is a padded
-  ``(B, N)`` batch with a per-row dense adjacency, so :class:`RowGraphWrapper` builds each row's
-  own ``edge_index`` from ``cond.adjacency`` (nonzero entries) offset by ``row * N``.
-* Node features are the 19-D conditioning columns rather than their 2-D ``(w, h)``; the width is
-  a constructor argument.
+  ``(B, N)`` batch with a per-row dense adjacency, so :class:`RowGraphWrapper` builds
+  each row's own ``edge_index`` from ``cond.adjacency`` (nonzero entries) offset by
+  ``row * N``.
+* Node features are the 19-D conditioning columns rather than
+  their 2-D ``(w, h)``; the width is a constructor argument.
 
 Registered as ``BASELINE_BACKBONE["flowplace_attgnn"]``; a config selects it by name.
 """
@@ -155,8 +158,9 @@ class AttentionBlock(nn.Module):
 class RowGraphWrapper(nn.Module):
     """Run a PyG conv on a padded ``(B, N, F)`` batch whose rows are different graphs.
 
-    ``adjacency`` is ``(B, N, N)``; every nonzero entry is an edge. Row ``b``'s node ``i`` becomes
-    flat node ``b * N + i``. Edge attributes are the edge weights, expanded to ``edge_dim``.
+    ``adjacency`` is ``(B, N, N)``; every nonzero entry is an edge. Row ``b``'s node
+    ``i`` becomes flat node ``b * N + i``. Edge attributes are the edge weights,
+    expanded to ``edge_dim``.
     """
 
     def __init__(self, net: nn.Module, edge_dim: int) -> None:
@@ -185,7 +189,8 @@ def _gat(in_ch: int, out_ch: int, edge_dim: int, heads: int) -> RowGraphWrapper:
 
 
 class LinearEncoderLayer(nn.Module):
-    """Their input projection with the optional sinusoidal encoding of the spatial input."""
+    """Their input projection with the optional
+    sinusoidal encoding of the spatial input."""
 
     def __init__(self, in_features, out_features, input_encoding_dim=0) -> None:
         super().__init__()
@@ -215,7 +220,8 @@ class LinearEncoderLayer(nn.Module):
 
 
 class ResGNNBlock(nn.Module):
-    """Their ``ResGNNBlock``: ``num_layers`` GAT+LN+Linear stages, FiLM time on the last, residual."""
+    """Their ``ResGNNBlock``: ``num_layers`` GAT+LN+Linear
+    stages, FiLM time on the last, residual."""
 
     def __init__(
         self,
@@ -269,7 +275,8 @@ class ResGNNBlock(nn.Module):
 
 
 class AttGNNBlock(nn.Module):
-    """Their ``AttGNNBlock`` at ``num_layers=1``: one GAT, add embedded attention features, attention, out."""
+    """Their ``AttGNNBlock`` at ``num_layers=1``: one GAT,
+    add embedded attention features, attention, out."""
 
     def __init__(
         self,
@@ -310,8 +317,9 @@ class AttGNNBlock(nn.Module):
 class FlowPlaceAttGNN(nn.Module):
     """The full ``AttGNN`` at the paper configuration, over the conditioning.
 
-    ``latent_dim`` is the input/output width (2 for their ``(x, y)``; 3 for the 3-D latent) and
-    ``feature_dim`` the per-node conditioning width (their ``cond_node_features``).
+    ``latent_dim`` is the input/output width (2 for their ``(x, y)``; 3 for the 3-D
+    latent) and ``feature_dim`` the per-node conditioning width (their
+    ``cond_node_features``).
     """
 
     def __init__(

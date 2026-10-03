@@ -2,8 +2,8 @@
 
 Wraps :class:`trinity.models.SetTransformerDenoiser` and drives it with a constant input
 ``z_t = 0`` and time ``t = 0``, so the prediction depends on the conditioning only. The
-backbone's ``latent_dim`` is the head's ``out_dim`` (3 for ``z``, 4 for ``xywh``). Anchor
-values reach the network as conditioning feature columns; no clamp is applied.
+backbone's ``latent_dim`` is the head's ``out_dim`` (3 for ``z``, 4 for ``xywh``).
+Anchor values reach the network as conditioning feature columns; no clamp is applied.
 """
 
 import torch
@@ -14,7 +14,8 @@ from trinity.models.presets import DenoiserArchConfig
 
 
 class DirectRegressor(nn.Module):
-    """A set-transformer regressor: ``cond -> per-block layout prediction`` (no diffusion)."""
+    """A set-transformer regressor: ``cond ->
+    per-block layout prediction`` (no diffusion)."""
 
     def __init__(self, arch: DenoiserArchConfig, head) -> None:
         super().__init__()
@@ -38,6 +39,7 @@ class DirectRegressor(nn.Module):
         return z_t, t
 
     def forward(self, cond: DenoiserCond) -> torch.Tensor:
-        """Predict the per-block layout ``(B, N, out_dim)`` in the head's space from ``cond``."""
+        """Predict the per-block layout ``(B, N,
+        out_dim)`` in the head's space from ``cond``."""
         z_t, t = self._const_inputs(cond.features)
         return self.backbone(z_t, t, cond)

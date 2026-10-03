@@ -1,6 +1,8 @@
-"""The standard diffusion / flow framings, each with closed-form ``(a, b, c, d, a', b')``.
+"""The standard diffusion / flow framings, each
+with closed-form ``(a, b, c, d, a', b')``.
 
-* ``rectified_flow`` / ``gvp`` -- the linear and trigonometric interpolants, velocity target;
+* ``rectified_flow`` / ``gvp`` -- the linear and
+  trigonometric interpolants, velocity target;
 * ``ddpm_eps`` / ``ddpm_v`` / ``ddpm_x0`` -- the continuous VP schedule
   (``beta_min``, ``beta_max``) with an epsilon, v or x0 target;
 * ``ddpm_cosine_eps`` / ``ddpm_cosine_x0`` -- the cosine schedule with an epsilon or x0
@@ -96,8 +98,8 @@ def _cosine_alpha_sigma(
 ):
     """The cosine schedule at ``t``: ``(alpha, sigma, alpha_dot, sigma_dot)``.
 
-    ``abar(t) = f(t) / f(0)`` with ``f(s) = cos((s + offset) / (1 + offset) * pi / 2)^2``,
-    clamped to ``[abar_min, abar_max]``.
+    ``abar(t) = f(t) / f(0)`` with ``f(s) = cos((s + offset) / (1
+    + offset) * pi / 2)^2``, clamped to ``[abar_min, abar_max]``.
     """
     half_pi = math.pi / 2
     scale = half_pi / (1.0 + offset)

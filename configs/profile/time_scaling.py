@@ -1,6 +1,7 @@
 """Runtime against the block count: the flagship, its no-aux control and the four ported
-learned placers (per NFE), the closed-form refiner and the three ported refiners (per step),
-at 32 layouts per forward on one idle GPU; N up to 1200 through tiled synthetic cases.
+learned placers (per NFE), the closed-form refiner and the three ported refiners (per
+step), at 32 layouts per forward on one idle GPU; N up to 1200 through tiled synthetic
+cases.
 
 Run::
 
@@ -12,7 +13,9 @@ CHECKPOINTS = {
     "flagship": "outputs/train/flagship/checkpoints/last.ckpt",
     "no_aux": "outputs/train/no_aux/checkpoints/last.ckpt",
     "baseline-flowplace": "outputs/train/baseline-flowplace/checkpoints/last.ckpt",
-    "baseline-chipdiffusion": "outputs/train/baseline-chipdiffusion/checkpoints/last.ckpt",
+    "baseline-chipdiffusion": (
+        "outputs/train/baseline-chipdiffusion/checkpoints/last.ckpt"
+    ),
     "baseline-diffplace": "outputs/train/baseline-diffplace/checkpoints/last.ckpt",
     "baseline-macrodiff": "outputs/train/baseline-macrodiff/checkpoints/last.ckpt",
 }

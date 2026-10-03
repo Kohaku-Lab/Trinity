@@ -1,14 +1,16 @@
-"""Fixed-length, permutation-invariant layout descriptors for distribution-level metrics.
+"""Fixed-length, permutation-invariant layout
+descriptors for distribution-level metrics.
 
 Two embeddings of one layout ``xywh`` ``(n, 4)`` with its instance:
 
-* :func:`density_descriptor` -- occupancy density fields on a ``G x G`` grid: all blocks, soft
-  blocks only, fixed+preplaced blocks only, and the net-weight-weighted centre density
-  (``4 * G^2`` numbers). ``frame="bbox"`` rasterizes over the layout's own bounding box;
-  ``frame="fixed"`` over a square of side ``2s`` centred on the layout's bbox centre.
-* :func:`position_descriptor` -- moments of the block-centre cloud (covariance, skewness,
-  kurtosis, radius of gyration) and 16-bin histograms of nearest-neighbour and pairwise centre
-  distances, centres normalized by ``s`` and centred on the bbox centre.
+* :func:`density_descriptor` -- occupancy density fields on a ``G x G`` grid: all
+  blocks, soft blocks only, fixed+preplaced blocks only, and the net-weight-weighted
+  centre density (``4 * G^2`` numbers). ``frame="bbox"`` rasterizes over the layout's
+  own bounding box; ``frame="fixed"`` over a square of side ``2s`` centred on the
+  layout's bbox centre.
+* :func:`position_descriptor` -- moments of the block-centre cloud (covariance,
+  skewness, kurtosis, radius of gyration) and 16-bin histograms of nearest-neighbour and
+  pairwise centre distances, centres normalized by ``s`` and centred on the bbox centre.
 
 Both are plain functions of the geometry: no metric, no learned encoder.
 """
@@ -41,7 +43,8 @@ def _frame(xywh: np.ndarray, s: float, frame: str) -> tuple[float, float, float,
 
 
 def _coverage(xywh: np.ndarray, x0, y0, w, h, G: int) -> np.ndarray:
-    """Per-block fractional coverage of each cell: ``(n, G, G)`` with values in ``[0, 1]``."""
+    """Per-block fractional coverage of each cell:
+    ``(n, G, G)`` with values in ``[0, 1]``."""
     ex = x0 + np.arange(G + 1) * (w / G)
     ey = y0 + np.arange(G + 1) * (h / G)
     bx0, by0 = xywh[:, 0:1], xywh[:, 1:2]

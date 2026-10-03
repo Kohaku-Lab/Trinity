@@ -1,15 +1,17 @@
 """Distribution metrics of generation caches against the ground-truth dev layouts.
 
-Every cached draw of every run and shard, and the ground-truth layout of every dev case, is
-embedded with the density descriptors (grid ``G`` in ``GRIDS``, frame ``bbox`` / ``fixed``)
-and the position descriptor. Per ``run|shard`` and descriptor it reports the Fréchet distance
-to the ground truth (total, mean term, covariance term) and the unbiased RBF MMD²; for the
-descriptor ``TEST_DESC`` it adds a permutation p-value of ``MMD²(run) < MMD²(CONTROL)``.
-Embeddings are cached as ``.npy`` under ``EMB_DIR`` and reused by later runs.
+Every cached draw of every run and shard, and the ground-truth layout of every dev case,
+is embedded with the density descriptors (grid ``G`` in ``GRIDS``, frame ``bbox`` /
+``fixed``) and the position descriptor. Per ``run|shard`` and descriptor it reports the
+Fréchet distance to the ground truth (total, mean term, covariance term) and the
+unbiased RBF MMD²; for the descriptor ``TEST_DESC`` it adds a permutation p-value of
+``MMD²(run) < MMD²(CONTROL)``. Embeddings are cached as ``.npy`` under ``EMB_DIR`` and
+reused by later runs.
 
 Run::
 
-    kogine run scripts/eval/dist_metrics.py --config configs/eval/flagship/dist_metrics.py
+    kogine run scripts/eval/dist_metrics.py \\
+        --config configs/eval/flagship/dist_metrics.py
 """
 
 import json
@@ -98,8 +100,8 @@ def chunk_cases(chunk: int, n_cases: int):
 def embed_chunk(task):
     """Embed one chunk of one shard (of the ground truth when ``shard`` is None).
 
-    ``run`` holds the case count for the ground truth. Returns per descriptor an array of
-    rows (one per layout).
+    ``run`` holds the case count for the ground truth.
+    Returns per descriptor an array of rows (one per layout).
     """
     run, shard, chunk = task
     rows = [[] for _ in descriptor_names()]
@@ -127,7 +129,8 @@ def embedding_paths(run: str, shard: str | None) -> dict[str, Path]:
 
 
 def ensure_embeddings(pool, jobs, n_cases: int) -> None:
-    """Compute and cache the embeddings of every ``(run, shard)`` of ``jobs`` not on disk."""
+    """Compute and cache the embeddings of every
+    ``(run, shard)`` of ``jobs`` not on disk."""
     todo = [
         (run, shard)
         for run, shard in jobs
@@ -179,7 +182,8 @@ def list_runs() -> list[str]:
 
 
 def distances(runs, n_cases, rng) -> tuple[dict, dict, dict]:
-    """Fréchet and MMD² per ``run|shard`` and descriptor; also the scales and bandwidths."""
+    """Fréchet and MMD² per ``run|shard`` and
+    descriptor; also the scales and bandwidths."""
     gt_key = str(n_cases)
     gt = {name: load_embedding(gt_key, None, name) for name in descriptor_names()}
     scale = {name: gt[name].std(0) + 1e-9 for name in gt}
@@ -210,7 +214,8 @@ def distances(runs, n_cases, rng) -> tuple[dict, dict, dict]:
 
 
 def control_tests(runs, n_cases, scale, bandwidth, rng) -> dict:
-    """Permutation test of ``MMD²(run) < MMD²(CONTROL)`` on ``TEST_DESC`` per run and shard."""
+    """Permutation test of ``MMD²(run) < MMD²(CONTROL)``
+    on ``TEST_DESC`` per run and shard."""
     if CONTROL is None or CONTROL not in runs:
         return {}
     gt_std = load_embedding(str(n_cases), None, TEST_DESC) / scale[TEST_DESC]

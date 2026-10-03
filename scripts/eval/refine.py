@@ -1,15 +1,16 @@
 """The NFE x refiner-steps grid: refine a run's cached draws and score every cell.
 
-Reads the shards ``GEN_DIR/<RUN>/<SHARD_PREFIX>_nfe<k>.npz`` (or one fixed ``SHARD``) and
-refines their latents on the GPU with ``REFINER``: the closed-form refiner (``closed``, or
-``closed_positions`` for positions only) at ``WEIGHTS``, or a ported published refiner. Every
-step count of ``STEPS`` is one cell (0 = the raw cache): under a constant lr one descent
-yields every cell as a snapshot, under a decaying schedule each cell is its own descent.
+Reads the shards ``GEN_DIR/<RUN>/<SHARD_PREFIX>_nfe<k>.npz`` (or one fixed ``SHARD``)
+and refines their latents on the GPU with ``REFINER``: the closed-form refiner
+(``closed``, or ``closed_positions`` for positions only) at ``WEIGHTS``, or a ported
+published refiner. Every step count of ``STEPS`` is one cell (0 = the raw cache): under
+a constant lr one descent yields every cell as a snapshot, under a decaying schedule
+each cell is its own descent.
 
-Every cell is scored with the batched metric vector (mean over draws, then over cases); the
-cells in ``CPU_CHECK_STEPS`` are also scored with the numpy metric vector on a CPU pool as a
-cross-check. Writes ``OUT`` (JSON ``{nfe: {steps: {"soft": [...], "cpu": [...]}}}``) and an
-``.npz`` of the per-case vectors.
+Every cell is scored with the batched metric vector (mean over draws, then over cases);
+the cells in ``CPU_CHECK_STEPS`` are also scored with the numpy metric vector on a CPU
+pool as a cross-check. Writes ``OUT`` (JSON ``{nfe: {steps: {"soft": [...], "cpu":
+[...]}}}``) and an ``.npz`` of the per-case vectors.
 
 Run::
 
@@ -155,7 +156,8 @@ def shard_path(nfe: int) -> Path:
 
 
 def stack_draws(lat, offsets, bcount, k_all, k, indices, n_max) -> torch.Tensor:
-    """The first ``k`` cached draws of every case in ``indices``, padded to ``n_max``."""
+    """The first ``k`` cached draws of every
+    case in ``indices``, padded to ``n_max``."""
     z0 = torch.zeros(len(indices) * k, n_max, 3, device=DEVICE)
     for gi, ci in enumerate(indices):
         n = int(bcount[ci])
@@ -175,7 +177,8 @@ def format_cell(nfe: int, steps: int, v) -> str:
 
 
 def sweep_nfe(nfe, cases, order, pool, timing):
-    """Refine and score every cell of one NFE; return ``(cells, per-case GPU vectors)``."""
+    """Refine and score every cell of one NFE;
+    return ``(cells, per-case GPU vectors)``."""
     data = np.load(shard_path(nfe))
     lat, bcount, k_all = data["lat"], data["bcount"], int(data["k"])
     k = k_all if DRAWS <= 0 else min(DRAWS, k_all)

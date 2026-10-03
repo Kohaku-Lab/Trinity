@@ -168,7 +168,8 @@ def jitter_noise(
 def apply_jitter(
     placement: Placement, modes: list[str | dict], seed: int = 0
 ) -> tuple[Placement, list[str]]:
-    """Apply a configured list of jitter modes in order; return the broken layout + log."""
+    """Apply a configured list of jitter modes
+    in order; return the broken layout + log."""
     rng = np.random.default_rng(seed)
     current = placement.copy()
     log = []

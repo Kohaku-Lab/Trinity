@@ -1,9 +1,9 @@
 """The denoiser transformer block: pre-norm residual, optionally adaLN-Zero modulated.
 
 When ``modulated``, the block receives the per-layer modulation ``mod`` (six chunks:
-shift / scale / gate for attention and MLP) produced by the time-conditioning strategy and
-applies adaLN-Zero gated residuals; otherwise ``mod`` is ``None`` and the block is a plain
-pre-norm residual block. An optional graph-mix step runs first.
+shift / scale / gate for attention and MLP) produced by the time-conditioning strategy
+and applies adaLN-Zero gated residuals; otherwise ``mod`` is ``None`` and the block is a
+plain pre-norm residual block. An optional graph-mix step runs first.
 """
 
 import torch

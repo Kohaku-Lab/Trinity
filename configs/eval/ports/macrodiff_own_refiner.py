@@ -1,10 +1,11 @@
-"""MacroDiff+ samples through its own ported guidance loop (500 iterations) at NFE 32, then
-``scale_pack``: the published generator with its own refiner, scored by the hard cost
-(single sample and best of 4). The layouts it stores feed the motivation figure.
+"""MacroDiff+ samples through its own ported guidance loop (500 iterations) at NFE 32,
+then ``scale_pack``: the published generator with its own refiner, scored by the hard
+cost (single sample and best of 4). The layouts it stores feed the motivation figure.
 
 Run::
 
-    kogine run scripts/eval/legalize.py --config configs/eval/ports/macrodiff_own_refiner.py
+    kogine run scripts/eval/legalize.py \\
+        --config configs/eval/ports/macrodiff_own_refiner.py
 """
 
 RUN = "baseline-macrodiff"

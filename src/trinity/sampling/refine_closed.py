@@ -1,29 +1,32 @@
-"""The closed-form constraint refiner: the aux terms descended with hand-written gradients.
+"""The closed-form constraint refiner: the aux
+terms descended with hand-written gradients.
 
 The energy is ``refine_constraint.constraint_energy`` (the six terms of
 ``losses/constraint.py``, plus ``outline``) on the latent ``z = (cx/s, cy/s, rho)`` of a
 finished sample. Gradient path per step: decode ``z`` to boxes, accumulate every term's
-derivative with respect to the four box edges ``(L, B, R, T)``, convert to center + size,
-zero the frozen channels (``mob_pos`` / ``mob_shape``), map through the decode Jacobian to
-``dE/dz`` and zero the padding.
+derivative with respect to the four box edges ``(L, B, R, T)``, convert to center +
+size, zero the frozen channels (``mob_pos`` / ``mob_shape``), map through the decode
+Jacobian to ``dE/dz`` and zero the padding.
 
 Per-term edge derivatives (normalized units, ``s^2 = sum area``, ``s`` its root):
 
 * overlap  -- pair ``(i, j)`` with ``ox * oy > 0``: ``dE/dR_i = oy [R_i < R_j] / s^2``,
   ``dE/dL_i = -oy [L_i > L_j] / s^2``; ``y`` likewise with ``ox``.
-* group    -- every edge of the Prim tree with gap ``max(gx, gy) > 0``: on the active axis,
-  ``dE/dL_i = [L_i > L_j] / s``, ``dE/dR_i = -[R_i < R_j] / s`` (both endpoints).
+* group    -- every edge of the Prim tree with gap ``max(gx, gy) > 0``: on the active
+  axis, ``dE/dL_i = [L_i > L_j] / s``, ``dE/dR_i = -[R_i < R_j] / s`` (both endpoints).
 * mib      -- member ``i`` of a group of ``> 1``: ``dE/drho_i = sign(rho_i - median)``.
-* boundary -- coded block ``i``: ``dE/dL_i = [L] / s`` and ``dE/dL_{argmin L} -= [L] / s``;
-  right / top / bottom symmetric.
-* wl       -- ``dE/dcx_i = [sum_j a_ij sign(cx_i - cx_j) + sum_{p->i} w_p sign(cx_i - q_p)] / (s W)``.
-* area     -- ``dE/dL_{argmin L} = -H_bb / s^2``, ``dE/dR_{argmax R} = H_bb / s^2``; ``y`` with ``W_bb``.
-* outline  -- ``dE/dL_{argmin L} = -[W_bb > W] / s``, ``dE/dR_{argmax R} = [W_bb > W] / s``;
-  ``y`` with ``H`` (zero for a case without an outline).
+* boundary -- coded block ``i``: ``dE/dL_i = [L] / s`` and
+  ``dE/dL_{argmin L} -= [L] / s``; right / top / bottom symmetric.
+* wl       -- ``dE/dcx_i = [sum_j a_ij sign(cx_i -
+  cx_j) + sum_{p->i} w_p sign(cx_i - q_p)] / (s W)``.
+* area     -- ``dE/dL_{argmin L} = -H_bb / s^2``,
+  ``dE/dR_{argmax R} = H_bb / s^2``; ``y`` with ``W_bb``.
+* outline  -- ``dE/dL_{argmin L} = -[W_bb > W] / s``, ``dE/dR_{argmax R} =
+  [W_bb > W] / s``; ``y`` with ``H`` (zero for a case without an outline).
 
 The descent is Adam (``betas = (0, beta2)`` by default) or plain gradient steps, with a
-per-step lr vector from an AnySchedule config, anchored coordinates re-clamped after every
-step, and every ``chunk`` steps under one ``torch.compile``.
+per-step lr vector from an AnySchedule config, anchored coordinates re-clamped after
+every step, and every ``chunk`` steps under one ``torch.compile``.
 """
 
 import torch
@@ -48,7 +51,8 @@ _INF = float("inf")
 
 
 def _bbox_arg(g, mask):
-    """The bbox ``(xmin, ymin, xmax, ymax)`` over real blocks and the blocks attaining it."""
+    """The bbox ``(xmin, ymin, xmax, ymax)`` over
+    real blocks and the blocks attaining it."""
     x, y, xr, yt = C._edges(g)
     m = mask > 0.5
     big = 1e9
@@ -132,7 +136,8 @@ def _group_grad(g, cluster_id, mask, s, squared=False):
 
 
 def _mib_sign(g, mib_id, mask):
-    """``(B, N)`` ``sign(rho_i - group median rho)`` for members of MIB groups of ``> 1``."""
+    """``(B, N)`` ``sign(rho_i - group median
+    rho)`` for members of MIB groups of ``> 1``."""
     rho = torch.log(g[..., 2].clamp_min(C._EPS)) - torch.log(
         g[..., 3].clamp_min(C._EPS)
     )
@@ -223,10 +228,11 @@ def _outline_grad(g, mask, outline, s):
 
 
 def edge_grads(g, case: RefineCase, weights: dict[str, float]):
-    """``(gL, gB, gR, gT)``, each ``(B, N)``: the weighted energy's box-edge derivatives.
+    """``(gL, gB, gR, gT)``, each ``(B, N)``:
+    the weighted energy's box-edge derivatives.
 
-    ``weights`` may also carry ``overlap_margin``, ``group_squared`` and ``outline`` (the
-    latter active only when the case has an outline).
+    ``weights`` may also carry ``overlap_margin``, ``group_squared`` and
+    ``outline`` (the latter active only when the case has an outline).
     """
     pair = C._real_pairs(case.token_mask)
     s2, s = C._scales(case.area_norm, case.token_mask)
@@ -273,7 +279,8 @@ def edge_grads(g, case: RefineCase, weights: dict[str, float]):
 def latent_grad(
     z: torch.Tensor, case: RefineCase, weights: dict[str, float], shape: bool = True
 ) -> torch.Tensor:
-    """``dE/dz`` ``(B, N, 3)`` of the weighted energy, frozen channels and padding zeroed.
+    """``dE/dz`` ``(B, N, 3)`` of the weighted
+    energy, frozen channels and padding zeroed.
 
     ``shape=False`` also zeroes the ``rho`` channel (positions-only descent).
     """
@@ -376,7 +383,8 @@ def refine_closed(
     """Descend the constraint energy from ``z0`` ``(B, N, 3)`` for ``steps`` updates.
 
     ``optimizer`` is ``adam`` or ``sgd``; ``shape=False`` moves positions only. Returns
-    ``{step: z}`` at every step in ``snapshots`` (0 = the clamped input) and at ``steps``.
+    ``{step: z}`` at every step in ``snapshots`` (0 = the clamped input) and at
+    ``steps``.
     """
     want = sorted(set(snapshots) | {steps})
     lrs = torch.tensor(

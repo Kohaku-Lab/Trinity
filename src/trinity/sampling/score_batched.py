@@ -3,7 +3,8 @@
 ``metric_vector_batched`` scores ``(B, N, 4)`` decoded boxes in the refiner's normalized
 units (``scale = 1``, areas ``/ s^2``) against the per-row data of a ``RefineCase``: the
 same columns, in the same order, as the numpy ``metric_vector``. Group reductions run by
-scatter over the cluster / MIB ids; the bbox and the pairwise gaps are dense ``(B, N, N)``.
+scatter over the cluster / MIB ids; the bbox and the pairwise gaps are dense ``(B, N,
+N)``.
 """
 
 import torch
@@ -34,7 +35,8 @@ _INF = float("inf")
 def _pair_gap(g):
     """``(B, N, N)`` smallest axis translation to contact per pair.
 
-    ``gx`` when the y ranges overlap, ``gy`` when the x ranges overlap, else ``min(gx, gy)``.
+    ``gx`` when the y ranges overlap, ``gy`` when
+    the x ranges overlap, else ``min(gx, gy)``.
     """
     x, y, xr, yt = C._edges(g)
     gx = C._pair_gap(x, xr)
@@ -51,7 +53,8 @@ def _pair_gap(g):
 
 
 def _group_stats(values, ids, member):
-    """Per-id ``(sum, min, count)`` of ``values`` ``(B, N)`` over ``member`` rows, ids in ``[0, N]``."""
+    """Per-id ``(sum, min, count)`` of ``values`` ``(B,
+    N)`` over ``member`` rows, ids in ``[0, N]``."""
     b, n = ids.shape
     zeros = values.new_zeros(b, n + 1)
     total = zeros.scatter_add(
@@ -88,7 +91,8 @@ def _nearest_same_gap(g, ids, mask):
 
 
 def _boundary_terms(g, code, mask):
-    """Per coded block: ``(sum of |required side - bbox edge|, required-side count, coded)``."""
+    """Per coded block: ``(sum of |required side -
+    bbox edge|, required-side count, coded)``."""
     x, y, xr, yt = C._edges(g)
     x_min, y_min, x_max, y_max = C.bbox(g, mask)
     code = code.long()

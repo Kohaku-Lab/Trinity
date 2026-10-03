@@ -23,7 +23,8 @@ class NoGraphMix(nn.Module):
 
 @GRAPH_MIX.register("mp")
 class MessagePassingMix(nn.Module):
-    """``x + gate * W (A_hat X)``. ``normalize``: ``row`` (mean of neighbours) | ``sym`` | ``none``."""
+    """``x + gate * W (A_hat X)``. ``normalize``: ``row``
+    (mean of neighbours) | ``sym`` | ``none``."""
 
     def __init__(self, dim: int, normalize: str = "row", **_unused) -> None:
         super().__init__()

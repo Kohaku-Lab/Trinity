@@ -1,9 +1,10 @@
-"""Diffusion / flow regression losses: a weighted distance between ``pred`` and ``target``.
+"""Diffusion / flow regression losses: a weighted
+distance between ``pred`` and ``target``.
 
 Each distance (L2, L1, Huber, Charbonnier, pseudo-Huber) is a registered ``LossTerm``;
-``denoise`` is the masked L2. They share, through :class:`_RegressionLoss`, the per-sample
-weight ``w(t)``, the token mask (padding excluded), an optional anchor down-weight
-(``anchor_downweight``, default 0) and an optional cosine term.
+``denoise`` is the masked L2. They share, through :class:`_RegressionLoss`, the
+per-sample weight ``w(t)``, the token mask (padding excluded), an optional anchor
+down-weight (``anchor_downweight``, default 0) and an optional cosine term.
 """
 
 import torch
@@ -14,18 +15,20 @@ from trinity.registry import LOSS
 
 
 def _bcast_t(wt: torch.Tensor, ref: torch.Tensor) -> torch.Tensor:
-    """Reshape a per-sample ``(B,)`` weight to broadcast against ``ref`` ``(B, ...)``."""
+    """Reshape a per-sample ``(B,)`` weight to
+    broadcast against ``ref`` ``(B, ...)``."""
     return wt.reshape(wt.shape[0], *([1] * (ref.ndim - 1)))
 
 
 class _RegressionLoss(LossTerm):
-    """Weighted ``distance(pred, target)`` over the masked coordinates, plus optional cosine.
+    """Weighted ``distance(pred, target)`` over
+    the masked coordinates, plus optional cosine.
 
     Subclasses set ``name`` and implement ``_distance(pred, target)`` (per element).
     ``reduction``:
 
-    * ``"per_sample"`` -- each sample normalized by its own coordinate weight, weighted by
-      ``w(t)``, then averaged over the batch;
+    * ``"per_sample"`` -- each sample normalized by its own coordinate
+      weight, weighted by ``w(t)``, then averaged over the batch;
     * ``"global"`` -- one ``sum(err * w) / sum(w)`` over the batch, ``w(t)`` folded in.
 
     ``cosine_weight > 0`` adds ``1 - cos(pred, target)`` weighted by ``w(t)``.
@@ -47,7 +50,8 @@ class _RegressionLoss(LossTerm):
         raise NotImplementedError
 
     def _coord_weight(self, ctx: LossContext, like: torch.Tensor) -> torch.Tensor:
-        """Per-coordinate weight: 1, minus ``anchor_downweight`` on anchors, 0 on padding."""
+        """Per-coordinate weight: 1, minus
+        ``anchor_downweight`` on anchors, 0 on padding."""
         w = torch.ones_like(like)
         if ctx.anchor_mask is not None:
             w = w - self.anchor_downweight * ctx.anchor_mask

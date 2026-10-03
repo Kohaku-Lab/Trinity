@@ -1,11 +1,11 @@
-"""The proximal correction against t on the first 2000 dev cases at 19 values of t,
-for the flagship (lambda = 0.01, the released model) against the no-aux control (lambda = 0,
+"""The proximal correction against t on the first 2000 dev cases at 19 values of t, for
+the flagship (lambda = 0.01, the released model) against the no-aux control (lambda = 0,
 the reference, trained with ``configs/train/no_aux.py``).
 
-The paper also measures more seeds of both models and other aux weights; train them from a
-copy of ``configs/train/flagship.py`` or ``no_aux.py`` with another ``SEED`` or other term
-weights and ``NAME``, and add one ``MODELS`` entry per run:
-``"<NAME>": ("outputs/train/<NAME>/checkpoints/last.ckpt", lambda, t_weighted)``.
+The paper also measures more seeds of both models and other aux weights; train them from
+a copy of ``configs/train/flagship.py`` or ``no_aux.py`` with another ``SEED`` or other
+term weights and ``NAME``, and add one ``MODELS`` entry per run: ``"<NAME>":
+("outputs/train/<NAME>/checkpoints/last.ckpt", lambda, t_weighted)``.
 
 Run::
 

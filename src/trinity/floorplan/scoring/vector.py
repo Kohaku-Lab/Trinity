@@ -30,7 +30,8 @@ COLS = (
 
 
 def metric_vector(xywh, inst) -> list[float]:
-    """The ``COLS`` values of one decoded layout ``xywh (n, 4)`` of instance ``inst``."""
+    """The ``COLS`` values of one decoded layout
+    ``xywh (n, 4)`` of instance ``inst``."""
     placement = Placement(xywh=xywh, instance=inst)
     cont = score_continuous(placement)
     hpwl_base, area_base = gap_baselines(placement, fast_hpwl=True)

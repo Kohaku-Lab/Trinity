@@ -1,17 +1,18 @@
-"""Sequence-pair simulated annealing, ported from BBOPlace-Bench (``placer=sp``, ``algorithm=sa``).
+"""Sequence-pair simulated annealing, ported from
+BBOPlace-Bench (``placer=sp``, ``algorithm=sa``).
 
-Source: https://github.com/lamda-bbo/BBOPlace-Bench (MIT; licenses: NOTICE).
-Copied from ``src/placer/sp_placer.py`` (the decode), ``src/algorithm/sa/sa.py``
-(the annealing loop), ``src/operators/sampling.py`` (random permutation pair) and pymoo's
-``InversionMutation`` (reverse a random segment of each sequence), at ``config/algorithm/sa.yaml``
-(``T=100``, ``decay=0.99`` every ``update_freq=100`` evaluations) and ``default.yaml``
-(``max_evals=10000``). The DAG longest path is the same recurrence over the same topological
-order, in numpy instead of igraph. Fitness is the scorer's HPWL, which equals theirs at zero pin
-offset.
+Source: https://github.com/lamda-bbo/BBOPlace-Bench (MIT; licenses: NOTICE). Copied from
+``src/placer/sp_placer.py`` (the decode), ``src/algorithm/sa/sa.py`` (the annealing
+loop), ``src/operators/sampling.py`` (random permutation pair) and pymoo's
+``InversionMutation`` (reverse a random segment of each sequence), at
+``config/algorithm/sa.yaml`` (``T=100``, ``decay=0.99`` every ``update_freq=100``
+evaluations) and ``default.yaml`` (``max_evals=10000``). The DAG longest path is the
+same recurrence over the same topological order, in numpy instead of igraph. Fitness is
+the scorer's HPWL, which equals theirs at zero pin offset.
 
-A soft block enters at the square of its area; a fixed block at its shape. The layout the SA
-returns has no overlap by construction of the sequence pair. ``anneal`` records the best layout
-so far at the listed evaluation counts as checkpoints.
+A soft block enters at the square of its area; a fixed block at its shape. The layout
+the SA returns has no overlap by construction of the sequence pair. ``anneal`` records
+the best layout so far at the listed evaluation counts as checkpoints.
 """
 
 import time
@@ -25,7 +26,8 @@ from trinity_baselines.classical.anneal import AnnealResult, Checkpoint
 
 
 def _shapes(inst: FloorplanInstance) -> np.ndarray:
-    """Return ``(n, 2)`` block sizes: known ``(w, h)`` where given, else a square of the area."""
+    """Return ``(n, 2)`` block sizes: known ``(w,
+    h)`` where given, else a square of the area."""
     tp = inst.target_positions
     wh = np.zeros((inst.block_count, 2), dtype=np.float64)
     known = (tp[:, 2] >= 0) & (tp[:, 3] >= 0)
@@ -38,10 +40,12 @@ def _shapes(inst: FloorplanInstance) -> np.ndarray:
 def decode_sequence_pair(
     seq1: np.ndarray, seq2: np.ndarray, wh: np.ndarray, gap: tuple[float, float]
 ) -> np.ndarray:
-    """Return ``(n, 2)`` lower-left corners for sequence pair ``(seq1, seq2)`` by DAG longest path.
+    """Return ``(n, 2)`` lower-left corners for
+    sequence pair ``(seq1, seq2)`` by DAG longest path.
 
-    ``seq1`` / ``seq2`` are permutations; ``i`` precedes ``j`` horizontally when it precedes it in
-    both, vertically when it precedes in ``seq2`` only. ``gap`` is the spacing per axis.
+    ``seq1`` / ``seq2`` are permutations; ``i`` precedes ``j`` horizontally when it
+    precedes it in both, vertically when it precedes in ``seq2`` only. ``gap`` is the
+    spacing per axis.
     """
     n = wh.shape[0]
     pos1 = np.empty(n, dtype=np.int64)
@@ -110,7 +114,8 @@ class SequencePairSA:
         budget: int | None = None,
         seed: int | None = None,
     ) -> AnnealResult:
-        """Anneal for ``budget`` evaluations; the best layout so far is snapshotted at ``checkpoint_evals``."""
+        """Anneal for ``budget`` evaluations; the best layout
+        so far is snapshotted at ``checkpoint_evals``."""
         budget = self.max_evals if budget is None else budget
         rng = np.random.default_rng(self.seed if seed is None else seed)
         n = inst.block_count

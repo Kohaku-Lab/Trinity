@@ -1,9 +1,10 @@
-"""The sampler's starting noise as a generation cache (run ``prior``, shard ``free_nfe0``):
-the input of the refiner-only baseline.
+"""The sampler's starting noise as a generation cache (run ``prior``,
+shard ``free_nfe0``): the input of the refiner-only baseline.
 
 Run::
 
-    kogine run scripts/eval/generate_prior.py --config configs/eval/prior/generate_prior.py
+    kogine run scripts/eval/generate_prior.py \\
+        --config configs/eval/prior/generate_prior.py
 """
 
 NAME = "prior"

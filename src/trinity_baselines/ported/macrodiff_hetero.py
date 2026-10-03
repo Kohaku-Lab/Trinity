@@ -1,22 +1,25 @@
-"""MacroDiff+ ``MacroPlacer`` denoiser, ported to the ``(z_t, t, cond) -> out`` interface.
+"""MacroDiff+ ``MacroPlacer`` denoiser, ported
+to the ``(z_t, t, cond) -> out`` interface.
 
 Source: https://github.com/jhy00n/MacroDiff-plus (MIT; licenses: NOTICE). Copied from
-``models/{graph,trans,model}.py`` at the training configuration
-(``train.py``: hidden 64, 5 hetero GATv2 layers, 4 heads, edge_dim 2; ``TransConv`` with 32
-base channels, multipliers (1, 2, 4, 8), attention at levels 1 and 2; T = 200). The forward keeps
-their epsilon composition ``alpha * (dHPWL/dx)^T net_head + beta * cell_head`` (``diffuser.py``,
-``noise='full'``, alpha = beta = 1). Changes at the batch boundary:
+``models/{graph,trans,model}.py`` at the training configuration (``train.py``: hidden
+64, 5 hetero GATv2 layers, 4 heads, edge_dim 2; ``TransConv`` with 32 base channels,
+multipliers (1, 2, 4, 8), attention at levels 1 and 2; T = 200). The forward keeps their
+epsilon composition ``alpha * (dHPWL/dx)^T net_head + beta * cell_head``
+(``diffuser.py``, ``noise='full'``, alpha = beta = 1). Changes at the batch boundary:
 
-* their cell / net bipartite graph is built from the dense b2b adjacency: one net node per
-  nonzero pair (a 2-pin net), edges cell->net and net->cell, edge attribute ``(weight, 1)``;
-  pins enter through the per-block conditioning columns rather than as fixed IO cells;
-* cell features are the 3-D latent ``(cx, cy, rho)`` + the 19-D conditioning (theirs: position,
-  size, is_macro); net features are ``(net length at z_t, weight, degree)`` (theirs: length
-  delta, degree); the transformer's cross-attention context is the 19-D conditioning (theirs:
-  the macro sizes);
-* the HPWL derivative of a 2-pin net w.r.t. an endpoint is ``sign(p_i - p_j)`` per axis, so the
-  net head's contribution to a block is the signed sum over its nets; it enters the first two
-  output channels only; the integer timestep embedding receives ``t * 200``.
+* their cell / net bipartite graph is built from the dense b2b adjacency: one net node
+  per nonzero pair (a 2-pin net), edges cell->net and net->cell, edge attribute
+  ``(weight, 1)``; pins enter through the per-block conditioning columns rather than as
+  fixed IO cells;
+* cell features are the 3-D latent ``(cx, cy, rho)`` + the 19-D conditioning (theirs:
+  position, size, is_macro); net features are ``(net length at z_t, weight, degree)``
+  (theirs: length delta, degree); the transformer's cross-attention context is the 19-D
+  conditioning (theirs: the macro sizes);
+* the HPWL derivative of a 2-pin net w.r.t. an endpoint is ``sign(p_i - p_j)`` per axis,
+  so the net head's contribution to a block is the signed sum over its nets; it enters
+  the first two output channels only; the integer timestep embedding receives ``t *
+  200``.
 
 Registered as ``BASELINE_BACKBONE["macrodiff_hetero"]``.
 """
@@ -65,8 +68,9 @@ def _gatv2(hidden: int, edge_dim: int, heads: int, dropout: float):
 
 
 class GraphConv(nn.Module):
-    """Their hetero GNN: per layer a cell->net and a net->cell GATv2 (mean over relation types),
-    residual, LayerNorm, ELU, with the time embedding added to both node types."""
+    """Their hetero GNN: per layer a cell->net and a net->cell GATv2 (mean over relation
+    types), residual, LayerNorm, ELU, with the time embedding added to both node
+    types."""
 
     def __init__(
         self,
@@ -125,7 +129,8 @@ class GraphConv(nn.Module):
 
 
 class CrossAttention(nn.Module):
-    """Their multi-head attention ``(B, T, Dq) x (B, S, Dc) -> (B, T, Dq)`` with a key mask."""
+    """Their multi-head attention ``(B, T, Dq) x
+    (B, S, Dc) -> (B, T, Dq)`` with a key mask."""
 
     def __init__(self, query_dim, context_dim, heads, dim_head, dropout) -> None:
         super().__init__()
@@ -196,8 +201,9 @@ class ResidualBlock(nn.Module):
 
 
 class TransConv(nn.Module):
-    """Their token U-Net: Linear down / up over channels with skip concatenation, self- and
-    cross-attention at the chosen levels and in the middle, conditioned on per-token context.
+    """Their token U-Net: Linear down / up over channels with skip concatenation, self-
+    and cross-attention at the chosen levels and in the middle, conditioned on per-token
+    context.
     """
 
     def __init__(
@@ -314,7 +320,8 @@ class TransConv(nn.Module):
 
 @BASELINE_BACKBONE.register("macrodiff_hetero")
 class MacroDiffHetero(nn.Module):
-    """``MacroPlacer`` (hetero GNN -> token U-Net) with the HPWL-composed epsilon, over the conditioning."""
+    """``MacroPlacer`` (hetero GNN -> token U-Net) with
+    the HPWL-composed epsilon, over the conditioning."""
 
     def __init__(
         self,
@@ -361,7 +368,8 @@ class MacroDiffHetero(nn.Module):
     def forward(
         self, z_t: torch.Tensor, t: torch.Tensor, cond: DenoiserCond
     ) -> torch.Tensor:
-        """``z_t`` ``(B, N, latent)``, ``t`` ``(B,)`` in ``[0, 1]``; returns ``(B, N, latent)``."""
+        """``z_t`` ``(B, N, latent)``, ``t`` ``(B,)``
+        in ``[0, 1]``; returns ``(B, N, latent)``."""
         b, n, _ = z_t.shape
         real = (
             cond.key_pad_mask

@@ -1,4 +1,5 @@
-"""The batched spectral-drawing PE survives a batch element the batched eigensolver rejects."""
+"""The batched spectral-drawing PE survives a
+batch element the batched eigensolver rejects."""
 
 import torch
 

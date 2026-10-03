@@ -1,14 +1,15 @@
 """The per-step time of every correction loop.
 
-The closed-form refiner and the ported published refiners run ``STEPS`` steps on the first
-``rows`` dev cases (padded to their largest block count) for every ``rows`` of ``ROWS``; the
-start latent is the reference layout's latent plus Gaussian jitter ``JITTER``. Reported per
-loop and row count: the median of ``REPEATS`` timed runs after one warm-up, per step and per
-layout, and the peak GPU memory. Output: one JSON.
+The closed-form refiner and the ported published refiners run ``STEPS`` steps on the
+first ``rows`` dev cases (padded to their largest block count) for every ``rows`` of
+``ROWS``; the start latent is the reference layout's latent plus Gaussian jitter
+``JITTER``. Reported per loop and row count: the median of ``REPEATS`` timed runs after
+one warm-up, per step and per layout, and the peak GPU memory. Output: one JSON.
 
 Run::
 
-    kogine run scripts/profile/loop_step_time.py --config configs/profile/loop_step_time.py
+    kogine run scripts/profile/loop_step_time.py \\
+        --config configs/profile/loop_step_time.py
 """
 
 import json
@@ -80,7 +81,8 @@ def loop_runner(loop: str, z0: torch.Tensor, case):
 
 
 def timed(fn) -> float:
-    """Median wall time of ``fn()`` over ``REPEATS`` synchronized calls after one warm-up."""
+    """Median wall time of ``fn()`` over ``REPEATS``
+    synchronized calls after one warm-up."""
     fn()
     torch.cuda.synchronize()
     times = []

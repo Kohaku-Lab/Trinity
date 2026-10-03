@@ -1,11 +1,12 @@
-"""Time-conditioning strategies: how the timestep embedding ``c (B, dim)`` enters the backbone.
+"""Time-conditioning strategies: how the timestep
+embedding ``c (B, dim)`` enters the backbone.
 
 * ``adaln`` -- DiT adaLN-Zero: one ``SiLU + Linear(dim, 6 dim)`` projection per block.
 * ``adaln_shared`` -- one projection shared by every block; ``per_layer_affine`` adds a
   learned per-block ``(scale, shift)`` on the shared modulation.
 * ``additive`` -- ``c`` added to every token once at the input.
-* ``token`` -- ``c`` prepended as one extra token (removed before the head); the graph bias
-  is padded to match.
+* ``token`` -- ``c`` prepended as one extra token (removed
+  before the head); the graph bias is padded to match.
 
 Each strategy exposes ``enter(x, c, bias) -> (x, bias)``, ``modulation(c) -> list`` (one
 entry per block, ``None`` for the unmodulated strategies) and ``exit(x) -> x``;
@@ -21,7 +22,8 @@ from trinity.registry import TIME_COND
 
 @TIME_COND.register("adaln")
 class AdaLNCond(nn.Module):
-    """DiT adaLN-Zero: one ``Linear(dim, 6*dim)`` projection per block, gated residuals."""
+    """DiT adaLN-Zero: one ``Linear(dim, 6*dim)``
+    projection per block, gated residuals."""
 
     owns_block_modulation = True
 

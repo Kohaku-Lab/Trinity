@@ -1,9 +1,10 @@
 """Random-access reader over the transcoded FloorSet-Lite Lance dataset.
 
-The 1M training layouts are transcoded once (``scripts/data/transcode_floorset.py``) into
-one Lance dataset of fixed and flat ``List`` columns. ``ds.take(row_ids)`` reads only those
-rows (memory-mapped), and :meth:`LanceFloorplanStore.instance` reshapes the flat columns
-back into a :class:`FloorplanInstance`. The stored ``fp_sol`` is ``(n, 4) = (w, h, x, y)``.
+The 1M training layouts are transcoded once (``scripts/data/transcode_floorset.py``)
+into one Lance dataset of fixed and flat ``List`` columns. ``ds.take(row_ids)`` reads
+only those rows (memory-mapped), and :meth:`LanceFloorplanStore.instance` reshapes the
+flat columns back into a :class:`FloorplanInstance`. The stored ``fp_sol`` is ``(n, 4) =
+(w, h, x, y)``.
 """
 
 from pathlib import Path

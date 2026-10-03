@@ -1,9 +1,9 @@
 """Hard-constraint feasibility checks.
 
 A layout is *feasible* iff it has no overlap, every soft block meets its area within 1%,
-every soft block's ``w/h`` lies within its aspect bounds (when the instance has them), and
--- when immutability is enforced -- every fixed-shape and preplaced block keeps its target.
-Each check returns the violating blocks or pairs.
+every soft block's ``w/h`` lies within its aspect bounds (when the instance has them),
+and -- when immutability is enforced -- every fixed-shape and preplaced block keeps its
+target. Each check returns the violating blocks or pairs.
 """
 
 from dataclasses import dataclass, field
@@ -45,7 +45,8 @@ class FeasibilityReport:
 
 
 def check_area(placement: Placement, tolerance: float = AREA_TOLERANCE) -> list[int]:
-    """Indices of soft blocks whose ``w*h`` deviates from target area by ``> tolerance``."""
+    """Indices of soft blocks whose ``w*h`` deviates
+    from target area by ``> tolerance``."""
     inst = placement.instance
     actual = placement.w * placement.h
     target = inst.area_targets
@@ -75,7 +76,8 @@ def check_fixed_shape(
 def check_aspect(
     placement: Placement, tolerance: float = ASPECT_TOLERANCE
 ) -> list[int]:
-    """Indices of soft blocks whose ``w/h`` leaves their ``aspect_bounds`` (relative ``tolerance``)."""
+    """Indices of soft blocks whose ``w/h`` leaves their
+    ``aspect_bounds`` (relative ``tolerance``)."""
     inst = placement.instance
     if inst.aspect_bounds is None:
         return []

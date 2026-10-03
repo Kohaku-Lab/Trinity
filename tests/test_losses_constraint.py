@@ -1,4 +1,5 @@
-"""Per-constraint aux terms: exact values on hand-built layouts, zero-iff, gradients, t-weighting."""
+"""Per-constraint aux terms: exact values on hand-built
+layouts, zero-iff, gradients, t-weighting."""
 
 import pytest
 import torch
@@ -73,7 +74,8 @@ def test_overlap_exact_area_and_zero_when_apart():
 def test_overlap_gradient_pushes_apart():
     g = _boxes([[0, 0, 2, 2], [1, 0, 2, 2]]).requires_grad_(True)
     overlap_area(g, torch.ones(1, 2)).sum().backward()
-    # gradient = y-penetration; descent (-grad) moves the left block left and the right block right
+    # gradient = y-penetration; descent (-grad) moves
+    # the left block left and the right block right
     assert g.grad[0, 0, 0] == pytest.approx(2.0) and g.grad[0, 1, 0] == pytest.approx(
         -2.0
     )
@@ -107,7 +109,8 @@ def test_group_mst_gap_is_min_total_gap_to_connect():
 def test_group_gradient_pulls_mst_edges_only():
     g = _boxes([[0, 0, 1, 1], [2, 0, 1, 1], [5, 0, 1, 1]]).requires_grad_(True)
     cluster_mst_gap(g, torch.tensor([[1, 1, 1]]), torch.ones(1, 3)).sum().backward()
-    # descent moves a right (toward b) and c left (toward b); b is pulled both ways equally
+    # descent moves a right (toward b) and c left
+    # (toward b); b is pulled both ways equally
     assert g.grad[0, 0, 0] == pytest.approx(-1.0)
     assert g.grad[0, 2, 0] == pytest.approx(1.0)
     assert g.grad[0, 1, 0] == pytest.approx(0.0)
@@ -190,7 +193,8 @@ def test_frozen_channels_receive_no_gradient_through_the_decode():
     ctx.mob_shape[:, 1] = 0
     total = sum(build({"name": nm, "weight": 1.0}, LOSS)(ctx)[0] for nm in TERMS)
     total.backward()
-    # the fixed-shape block's rho sees only the round-off of the cancelled -w/2 + w/2 decode path
+    # the fixed-shape block's rho sees only the
+    # round-off of the cancelled -w/2 + w/2 decode path
     assert z.grad[:, 0, 2].abs().max() < 1e-6
     assert z.grad[:, 0, :2].abs().max() > 1e-2  # its centre still moves
     assert torch.all(z.grad[:, 1] == 0)  # the preplaced block receives nothing

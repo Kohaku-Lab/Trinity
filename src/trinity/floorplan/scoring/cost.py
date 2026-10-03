@@ -1,15 +1,15 @@
 """The per-case cost of FloorSet and the scorer backends.
 
 HPWL is the weighted center-to-center Manhattan length summed over the b2b and p2b nets
-(the FloorSet convention). A case is feasible iff its hard constraints hold; an infeasible
-case costs ``M_PENALTY``. The cost of a feasible case is
-``(1 + ALPHA (hpwl_gap + area_gap)) exp(BETA V_rel)``.
+(the FloorSet convention). A case is feasible iff its hard constraints hold; an
+infeasible case costs ``M_PENALTY``. The cost of a feasible case is ``(1 + ALPHA
+(hpwl_gap + area_gap)) exp(BETA V_rel)``.
 
 Scorers:
 
 * ``full`` -- hard feasibility (including immutability) and the soft term ``V_rel``;
-* ``full_fast`` -- the same result, with the HPWL edge data cached per instance and the sum
-  vectorized in the same order (bitwise-identical);
+* ``full_fast`` -- the same result, with the HPWL edge data cached per
+  instance and the sum vectorized in the same order (bitwise-identical);
 * ``stub`` -- overlap and area feasibility only, ``V_rel = 0``.
 """
 
@@ -99,7 +99,8 @@ _FAST_HPWL_CONTEXT: ContextVar[bool] = ContextVar("fast_hpwl_context", default=F
 
 @contextmanager
 def use_fast_hpwl(enabled: bool = True):
-    """Make every ``full`` scoring inside the block use :func:`hpwl_fast` (context-local)."""
+    """Make every ``full`` scoring inside the block
+    use :func:`hpwl_fast` (context-local)."""
     token = _FAST_HPWL_CONTEXT.set(bool(enabled))
     try:
         yield
@@ -142,7 +143,8 @@ def _build_hpwl_plan(inst: FloorplanInstance) -> _HPWLPlan:
 
 
 def _hpwl_plan(inst: FloorplanInstance) -> _HPWLPlan:
-    """The cached :class:`_HPWLPlan` of ``inst`` (keyed by ``id`` with a weak reference)."""
+    """The cached :class:`_HPWLPlan` of ``inst``
+    (keyed by ``id`` with a weak reference)."""
     key = id(inst)
     cached = _HPWL_PLAN_CACHE.get(key)
     if cached is not None and cached[0]() is inst:
@@ -202,8 +204,8 @@ def hpwl_fast(placement: Placement) -> float:
 def gap_baselines(placement: Placement, fast_hpwl: bool = False) -> tuple[float, float]:
     """``(hpwl_baseline, area_baseline)`` from the dataset metrics.
 
-    Without metrics, the baselines are recomputed on the ground truth (or on ``placement``
-    itself when there is none).
+    Without metrics, the baselines are recomputed on the ground
+    truth (or on ``placement`` itself when there is none).
     """
     inst = placement.instance
     hpwl_fn = hpwl_fast if fast_hpwl else hpwl
@@ -232,7 +234,8 @@ def compute_cost(
 ) -> float:
     """The per-case cost ``(1 + ALPHA (hpwl_gap + area_gap)) exp(BETA V_rel)``.
 
-    Gaps are clamped at 0; an infeasible case costs ``M_PENALTY``; the runtime factor is 1.
+    Gaps are clamped at 0; an infeasible case
+    costs ``M_PENALTY``; the runtime factor is 1.
     """
     if not feasible:
         return M_PENALTY

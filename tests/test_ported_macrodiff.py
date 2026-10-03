@@ -1,4 +1,5 @@
-"""The MacroDiff+ port: shape, pad independence, permutation equivariance, parameter count."""
+"""The MacroDiff+ port: shape, pad independence,
+permutation equivariance, parameter count."""
 
 import pytest
 import torch

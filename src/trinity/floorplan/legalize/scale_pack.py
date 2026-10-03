@@ -2,15 +2,16 @@
 
 Stages:
 
-* (A) restore -- preplaced blocks to their target box, fixed-shape blocks to their target
-  shape, soft blocks to their target area, all-soft MIB groups to one shared shape;
+* (A) restore -- preplaced blocks to their target box, fixed-shape blocks to their
+  target shape, soft blocks to their target area, all-soft MIB groups to one shared
+  shape;
 * (B) expand -- free centers moved outward from the layout center by the smallest factor
   (capped) at which no pair overlaps;
-* (C) relations -- per pair, the axis with the larger gap and the order along it, rewritten
-  so no block sits between an abutting pair or outside a boundary-coded block;
-* (D) one packing LP over positions (shapes fixed): the relations, preplaced blocks pinned,
-  cluster members abutting along a spanning tree, boundary-coded edges on the outline,
-  minimizing the bounding box plus a displacement term;
+* (C) relations -- per pair, the axis with the larger gap and the order along it,
+  rewritten so no block sits between an abutting pair or outside a boundary-coded block;
+* (D) one packing LP over positions (shapes fixed): the relations, preplaced blocks
+  pinned, cluster members abutting along a spanning tree, boundary-coded edges on the
+  outline, minimizing the bounding box plus a displacement term;
 * (E) a fixed ladder when the LP is infeasible: abutment and boundary as penalties; then
   the pinned pairs the LP cannot hold flipped to the other axis (up to ``FLIP_ROUNDS``);
   then free blocks above the preplaced blocks of those pairs; finally above every
@@ -21,8 +22,8 @@ Stages:
   up to ``RESHAPE_ROUNDS`` times while it gains a fit or a smaller bounding box).
 
 The stages live in :mod:`.pack_relations` and :mod:`.pack_lp`; this module runs the
-ladder. ``last_info()`` reports the latest call's expansion factor, rung, solves, time and
-whether the aspect pass was kept.
+ladder. ``last_info()`` reports the latest call's expansion factor, rung, solves, time
+and whether the aspect pass was kept.
 """
 
 import time
@@ -91,7 +92,8 @@ _LAST = {"lam": 1.0, "rung": 0, "solves": 0, "ms": 0.0, "reshaped": 0}
 
 
 def last_info() -> dict:
-    """``{"lam", "rung", "solves", "ms", "reshaped"}`` of the latest ``scale_pack`` call.
+    """``{"lam", "rung", "solves", "ms",
+    "reshaped"}`` of the latest ``scale_pack`` call.
 
     ``rung`` 0 = no LP was needed; ``reshaped`` counts the kept aspect passes.
     """
@@ -101,7 +103,8 @@ def last_info() -> dict:
 def _outline_better(inst, cand: np.ndarray, out: np.ndarray, box) -> bool:
     """Whether feasible ``cand`` fits the outline ``box`` better than ``out``.
 
-    Better = it fits where ``out`` does not, or both fit equally and its bbox is smaller.
+    Better = it fits where ``out`` does not, or
+    both fit equally and its bbox is smaller.
     """
     if not check_feasibility(Placement(cand, inst)).is_feasible():
         return False
@@ -194,9 +197,10 @@ def scale_pack_legalize(
     ``mu`` weights the displacement term, ``penalty`` the relaxed abutment / boundary
     terms, ``contact`` is the perpendicular overlap kept on every abutting pair, ``cap``
     bounds the expansion factor. ``relation`` reads the pair relations from the
-    ``restored`` or the ``expanded`` layout. ``reshape`` enables stage H (``trust`` bounds
-    the change per side). ``outline`` caps the LP at the instance's fixed outline (when it
-    has one) on every rung but the last. Returns the restored layout when no rung solves.
+    ``restored`` or the ``expanded`` layout. ``reshape`` enables stage H (``trust``
+    bounds the change per side). ``outline`` caps the LP at the instance's fixed outline
+    (when it has one) on every rung but the last. Returns the restored layout when no
+    rung solves.
     """
     t0 = time.perf_counter()
     inst = placement.instance
@@ -223,7 +227,8 @@ def scale_pack_legalize(
         )
 
     def flip_ladder():
-        """Flip the pinned pairs a slack solve violates to the other axis, then re-solve."""
+        """Flip the pinned pairs a slack solve
+        violates to the other axis, then re-solve."""
         nonlocal solves
         current = rel
         for _ in range(FLIP_ROUNDS):

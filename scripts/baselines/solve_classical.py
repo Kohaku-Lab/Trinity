@@ -1,11 +1,13 @@
 """Run a classical ``SOLVER`` over the dev split and write a generation-style cache.
 
-Writes ``OUT_DIR/<NAME>/free_nfe1.npz`` in the latent layout of ``scripts/eval/generate.py``
-(``lat`` = ``(cx/s, cy/s, rho)``, ``bcount``, ``k``), so ``scripts/eval/score.py`` scores a
-classical placer with the metric vector of the learned placers. ``K`` solves per case, each with
-its own seed, fill the ``k`` draws. Run::
+Writes ``OUT_DIR/<NAME>/free_nfe1.npz`` in the latent layout of
+``scripts/eval/generate.py`` (``lat`` = ``(cx/s, cy/s, rho)``, ``bcount``, ``k``), so
+``scripts/eval/score.py`` scores a classical placer with the metric vector of the
+learned placers. ``K`` solves per case, each with its own seed, fill the ``k`` draws.
+Run::
 
-    kogine run scripts/baselines/solve_classical.py --config configs/baselines/solve_sp_sa.py
+    kogine run scripts/baselines/solve_classical.py \\
+        --config configs/baselines/solve_sp_sa.py
 """
 
 import json

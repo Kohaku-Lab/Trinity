@@ -1,14 +1,16 @@
-"""ChipDiffusion: the ported ``AttGNN`` denoiser with its DDPM objective on the Trinity recipe.
+"""ChipDiffusion: the ported ``AttGNN`` denoiser
+with its DDPM objective on the Trinity recipe.
 
-Backbone: ``flowplace_attgnn`` (the same network as FlowPlace). Objective: epsilon prediction
-on the cosine variance-preserving schedule (``ddpm_cosine_eps``) with a target-emitting head,
-uniform t. Data, split, augmentation (the base recipe plus the wire-dropout mixture), batch,
-steps, optimizer and evaluation are the base recipe's. ``BACKBONE`` needs the ``baselines``
-extra (``torch_geometric``).
+Backbone: ``flowplace_attgnn`` (the same network as FlowPlace). Objective: epsilon
+prediction on the cosine variance-preserving schedule (``ddpm_cosine_eps``) with a
+target-emitting head, uniform t. Data, split, augmentation (the base recipe plus the
+wire-dropout mixture), batch, steps, optimizer and evaluation are the base recipe's.
+``BACKBONE`` needs the ``baselines`` extra (``torch_geometric``).
 
 Run::
 
-    kogine run scripts/train/diffusion.py --config configs/baselines/train_chipdiffusion.py
+    kogine run scripts/train/diffusion.py \\
+        --config configs/baselines/train_chipdiffusion.py
 """
 
 from kohakuengine import use_config

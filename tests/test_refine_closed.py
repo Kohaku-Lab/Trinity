@@ -1,6 +1,6 @@
-"""Closed-form refiner gates: gradient equals autograd, padding invariance, frozen channels,
-the loop equals ``torch.optim.Adam``, compiled equals eager, schedules, batched scorer equals
-the numpy metric vector."""
+"""Closed-form refiner gates: gradient equals autograd, padding invariance, frozen
+channels, the loop equals ``torch.optim.Adam``, compiled equals eager, schedules,
+batched scorer equals the numpy metric vector."""
 
 import numpy as np
 import torch
@@ -114,7 +114,8 @@ def test_outline_term_matches_autograd_and_is_silent_without_an_outline():
 
 
 def _variant_energy(z, case, margin, squared):
-    """Overlap on boxes inflated by ``margin`` plus the squared MST gap, both at weight 1."""
+    """Overlap on boxes inflated by ``margin``
+    plus the squared MST gap, both at weight 1."""
     g = z_to_xywh(z, case.area_norm, z.new_ones(z.shape[0]))
     g = C._freeze(g, case.mob_pos, case.mob_shape)
     infl = torch.cat([g[..., :2] - margin / 2, g[..., 2:] + margin], dim=-1)

@@ -1,16 +1,18 @@
-"""In-training validation on the held-out dev split (and optionally the official 100 cases).
+"""In-training validation on the held-out dev
+split (and optionally the official 100 cases).
 
 Every ``every_n_steps`` the callback scores the live (EMA) model in one of two modes:
 
-* ``mode="soft"`` -- the raw sample of every dev case (no refiner, no legalizer), scored with
-  the continuous soft metrics; logged as ``val/<metric>``.
-* ``mode="full"`` -- sample -> refine -> legalize -> score over the dev cases and, when an
-  ``official_shard_fn`` is given, the official 100-case set. The dev cases log the full
-  breakdown under ``val/`` (hard cost, feasibility, V_rel, gaps, and the soft metrics of the
-  raw sample); the official cases log only ``official_val/cost``.
+* ``mode="soft"`` -- the raw sample of every dev case (no refiner, no legalizer),
+  scored with the continuous soft metrics; logged as ``val/<metric>``.
+* ``mode="full"`` -- sample -> refine -> legalize -> score over the dev cases and, when
+  an ``official_shard_fn`` is given, the official 100-case set. The dev cases log the
+  full breakdown under ``val/`` (hard cost, feasibility, V_rel, gaps, and the soft
+  metrics of the raw sample); the official cases log only ``official_val/cost``.
 
-The sets arrive as ``shard_fn(rank, world)`` callables returning this rank's disjoint slice;
-rank zero gathers the per-case rows and writes them straight to the logger experiment.
+The sets arrive as ``shard_fn(rank, world)`` callables returning this rank's disjoint
+slice; rank zero gathers the per-case rows and writes them straight to the logger
+experiment.
 """
 
 import os
@@ -151,7 +153,8 @@ class ValidationCallback(pl.Callback):
 
     @staticmethod
     def _all_gather(trainer, local: list[tuple]) -> list[tuple]:
-        """Gather every rank's per-case scores into one full-set list (or local if 1 rank)."""
+        """Gather every rank's per-case scores into
+        one full-set list (or local if 1 rank)."""
         if trainer.world_size <= 1:
             return local
         buckets: list[list[tuple]] = [None] * trainer.world_size  # type: ignore[list-item]
@@ -162,7 +165,8 @@ class ValidationCallback(pl.Callback):
         self, pl_module, scores: list[tuple], prefix: str, cost_only: bool
     ) -> None:
         """Log the aggregate of the full-mode rows ``(tag, n, cost, feasible, v_rel,
-        hpwl_gap, area_gap, *soft)``: the exp-weighted total, and the means unless ``cost_only``.
+        hpwl_gap, area_gap, *soft)``: the exp-weighted total, and the means unless
+        ``cost_only``.
         """
         if not scores:
             return

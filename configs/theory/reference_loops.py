@@ -1,10 +1,11 @@
 """Every dev case's reference layout through the three ported refiners at their
-published step counts and through the closed-form refiner at the paper weights and at the
-training weights (every loop's defaults in the script).
+published step counts and through the closed-form refiner at the paper weights and at
+the training weights (every loop's defaults in the script).
 
 Run::
 
-    kogine run scripts/theory/reference_loops.py --config configs/theory/reference_loops.py
+    kogine run scripts/theory/reference_loops.py \\
+        --config configs/theory/reference_loops.py
 """
 
 DEV_LIMIT = 0

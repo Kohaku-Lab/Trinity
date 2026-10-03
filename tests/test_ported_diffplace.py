@@ -1,4 +1,5 @@
-"""The DiffPlace port: shape, pad independence, permutation equivariance, parameter count."""
+"""The DiffPlace port: shape, pad independence,
+permutation equivariance, parameter count."""
 
 import torch
 

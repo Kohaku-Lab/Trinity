@@ -2,8 +2,8 @@
 
 The dev split has two disjoint parts, both disjoint from train:
 
-* ``dev_per_n`` -- ``per_n_k`` layouts per block count (21..120), uniform over N like the
-  official 100-case set.
+* ``dev_per_n`` -- ``per_n_k`` layouts per block count
+  (21..120), uniform over N like the official 100-case set.
 * ``dev_random`` -- ``random_size`` layouts drawn uniformly from the remaining rows,
   following the train distribution of block counts.
 
@@ -22,7 +22,8 @@ from trinity.floorplan.data import LanceFloorplanStore, find_train_lance
 
 @dataclass
 class DataSplits:
-    """Row-id lists over the Lance store (disjoint), tagged with the params that built them."""
+    """Row-id lists over the Lance store (disjoint),
+    tagged with the params that built them."""
 
     train: list[int]
     dev_per_n: list[int]
@@ -58,10 +59,12 @@ def make_splits(
     random_size: int = 1000,
     seed: int = 20090220,
 ) -> DataSplits:
-    """Split the rows of ``block_counts`` (the per-row ``n``) into train and the two dev parts.
+    """Split the rows of ``block_counts`` (the
+    per-row ``n``) into train and the two dev parts.
 
-    ``per_n_k`` rows per distinct block count form ``dev_per_n``, ``random_size`` rows of
-    the rest form ``dev_random``, everything else is train. Deterministic in ``seed``.
+    ``per_n_k`` rows per distinct block count form ``dev_per_n``, ``random_size`` rows
+    of the rest form ``dev_random``, everything else is train. Deterministic in
+    ``seed``.
     """
     rng = np.random.default_rng(seed)
     n_rows = len(block_counts)
@@ -102,8 +105,8 @@ def load_or_make_splits(
     random_size: int = 1000,
     seed: int = 20090220,
 ) -> DataSplits:
-    """The cached split at ``cache_path`` when its ``{n_rows, per_n_k, random_size, seed}``
-    match, else a freshly built split (written to ``cache_path``)."""
+    """The cached split at ``cache_path`` when its ``{n_rows, per_n_k, random_size,
+    seed}`` match, else a freshly built split (written to ``cache_path``)."""
     cache_path = Path(cache_path)
     want = {
         "n_rows": len(block_counts),
@@ -132,8 +135,8 @@ def dev_split_ids(
 ) -> tuple[LanceFloorplanStore, list[int], dict]:
     """The Lance store, the dev row ids and the split parameters.
 
-    The ids are ``dev_per_n`` then ``dev_random``; ``limit > 0`` keeps the first ``limit``.
-    The split is cached as ``splits.json`` next to the Lance set.
+    The ids are ``dev_per_n`` then ``dev_random``; ``limit > 0`` keeps the first
+    ``limit``. The split is cached as ``splits.json`` next to the Lance set.
     """
     path = find_train_lance(train_lance)
     store = LanceFloorplanStore(str(path))
@@ -157,6 +160,7 @@ def dev_split_cases(
     seed: int = 20090220,
     limit: int = 0,
 ) -> tuple[list, list[int], dict]:
-    """The dev-split instances, their row ids and the split parameters (see ``dev_split_ids``)."""
+    """The dev-split instances, their row ids and
+    the split parameters (see ``dev_split_ids``)."""
     store, ids, params = dev_split_ids(train_lance, per_n_k, random_size, seed, limit)
     return store.instances(ids), ids, params

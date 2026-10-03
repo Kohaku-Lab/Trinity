@@ -1,10 +1,11 @@
-"""Training data: the ground-truth latent ``z0`` plus conditioning, and two batching modes.
+"""Training data: the ground-truth latent ``z0``
+plus conditioning, and two batching modes.
 
 The denoiser trains on the ground-truth layout encoded to the area-preserving latent
 ``z = (cx/s, cy/s, rho)``. Two batching strategies, selected by config:
 
-* ``same_n`` -- batches of equal block count (:class:`SameNBatchSampler`), stacked with no
-  padding; the sampler shards batches across DDP ranks itself.
+* ``same_n`` -- batches of equal block count (:class:`SameNBatchSampler`),
+  stacked with no padding; the sampler shards batches across DDP ranks itself.
 * ``pad_to_max`` -- every case padded to ``max_n`` (:class:`PadCollate`) with a
   ``token_mask``; padded tokens are masked out of attention, the loss and the geometry.
   DDP uses Lightning's ``DistributedSampler``.
@@ -41,12 +42,14 @@ MAX_PINS = 8192
 
 
 def _check_group_sizes(inst) -> None:
-    """Raise if a cluster or MIB group exceeds the loss terms' ``MAX_GROUP_SIZE`` bound."""
+    """Raise if a cluster or MIB group exceeds
+    the loss terms' ``MAX_GROUP_SIZE`` bound."""
     for ids in (inst.cluster_id, inst.mib_id):
         ids = ids[ids > 0]
         if ids.size and int(np.bincount(ids).max()) > MAX_GROUP_SIZE:
             raise ValueError(
-                f"group of {int(np.bincount(ids).max())} blocks exceeds MAX_GROUP_SIZE={MAX_GROUP_SIZE}"
+                f"group of {int(np.bincount(ids).max())} blocks exceeds "
+                f"MAX_GROUP_SIZE={MAX_GROUP_SIZE}"
             )
 
 
@@ -55,11 +58,12 @@ def encode_instance(
 ) -> dict[str, torch.Tensor]:
     """Encode one ``FloorplanInstance`` to the tensor dict the collates consume.
 
-    The augment ``pipeline`` transforms the instance first; the ground truth and the anchors
-    are mapped through ``param.to_latent``. The dict holds the conditioning of
-    ``build_conditioning`` (including the raw b2b adjacency ``adj_raw`` for the batched graph
-    PE), ``z0``, the group ids and mobility masks the aux terms read, the pin targets in
-    ``/s`` units, and the ground-truth area / HPWL baselines in normalized units.
+    The augment ``pipeline`` transforms the instance first; the ground truth and the
+    anchors are mapped through ``param.to_latent``. The dict holds the conditioning of
+    ``build_conditioning`` (including the raw b2b adjacency ``adj_raw`` for the batched
+    graph PE), ``z0``, the group ids and mobility masks the aux terms read, the pin
+    targets in ``/s`` units, and the ground-truth area / HPWL baselines in normalized
+    units.
     """
     inst = pipeline.apply(inst, rng)
     _check_group_sizes(inst)
@@ -77,7 +81,8 @@ def encode_instance(
     cond["mob_shape"] = torch.from_numpy(
         (~(inst.is_fixed | inst.is_preplaced)).astype(np.float32)
     )
-    # Ground-truth bbox area (metrics[0]) and HPWL (metrics[6] + metrics[7]), normalized.
+    # Ground-truth bbox area (metrics[0]) and
+    # HPWL (metrics[6] + metrics[7]), normalized.
     m = inst.metrics
     scale = float(inst.s)
     has_metrics = m is not None and len(m) >= 8
@@ -93,7 +98,8 @@ def encode_instance(
 
 
 class FloorplanLatentDataset(Dataset):
-    """A list of instances encoded once and held in memory (the small validation set)."""
+    """A list of instances encoded once and held
+    in memory (the small validation set)."""
 
     def __init__(
         self, instances, param, pipeline, cond_options=DEFAULT_COND_OPTIONS
@@ -152,8 +158,9 @@ class LanceLayoutDataset(Dataset):
 class SameNBatchSampler(Sampler):
     """Yield batches of indices that share a block count, sharded across DDP ranks.
 
-    ``rank`` / ``world_size`` default to the live ``torch.distributed`` group (or a single
-    process); each rank takes every ``world_size``-th batch of the epoch's shuffled list.
+    ``rank`` / ``world_size`` default to the live ``torch.distributed`` group (or a
+    single process); each rank takes every ``world_size``-th batch of the epoch's
+    shuffled list.
     """
 
     def __init__(
@@ -210,7 +217,8 @@ class SameNBatchSampler(Sampler):
 def _pad_pin_edges(
     batch: list[dict], p_max: int | None = None
 ) -> dict[str, torch.Tensor]:
-    """Pad every sample's pin-edge list to ``p_max`` (default: the batch's longest; weight 0, block 0)."""
+    """Pad every sample's pin-edge list to ``p_max``
+    (default: the batch's longest; weight 0, block 0)."""
     longest = max(int(b["pin_edge_w"].shape[0]) for b in batch)
     if p_max is None:
         p_max = longest
@@ -257,8 +265,8 @@ def collate_same_n(batch: list[dict]) -> dict[str, torch.Tensor]:
 
 
 class PadCollate:
-    """Pad every case to ``max_n`` tokens (zeros) and stack, with ``token_mask`` 1 on real
-    blocks and 0 on padding; pin edges are padded to ``MAX_PINS``."""
+    """Pad every case to ``max_n`` tokens (zeros) and stack, with ``token_mask``
+    1 on real blocks and 0 on padding; pin edges are padded to ``MAX_PINS``."""
 
     def __init__(self, max_n: int) -> None:
         self.max_n = max_n
@@ -369,9 +377,9 @@ def build_loader(
 ) -> tuple[DataLoader, bool]:
     """The train ``DataLoader`` of ``batching`` (``"same_n"`` | ``"pad_to_max"``).
 
-    Returns ``(loader, use_distributed_sampler)``: ``False`` for ``same_n`` (it shards in
-    its own sampler), ``True`` for ``pad_to_max``. Workers use the ``forkserver`` start
-    method; ``pin_memory`` returns page-locked batches.
+    Returns ``(loader, use_distributed_sampler)``: ``False`` for ``same_n`` (it shards
+    in its own sampler), ``True`` for ``pad_to_max``. Workers use the ``forkserver``
+    start method; ``pin_memory`` returns page-locked batches.
     """
     worker_kw = (
         {"multiprocessing_context": "forkserver", "persistent_workers": True}

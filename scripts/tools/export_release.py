@@ -1,7 +1,7 @@
 """Export training checkpoints as releases (``config.json`` + ``model.safetensors``).
 
-Each entry of ``RELEASES`` maps a release name to a checkpoint; the release is written to
-``OUT_DIR/<name>/`` and can be loaded with ``trinity.hub.load_model``::
+Each entry of ``RELEASES`` maps a release name to a checkpoint; the release is
+written to ``OUT_DIR/<name>/`` and can be loaded with ``trinity.hub.load_model``::
 
     kogine run scripts/tools/export_release.py \\
         --set 'RELEASES={"flagship": "outputs/train/flagship/checkpoints/last.ckpt"}'
@@ -26,7 +26,8 @@ def main() -> None:
             model = load_model(out)
             n_params = sum(p.numel() for p in model.backbone.parameters())
             print(
-                f"  reloaded: {n_params / 1e6:.1f} M parameters, arch {model.config['arch']}"
+                f"  reloaded: {n_params / 1e6:.1f} M parameters, "
+                f"arch {model.config['arch']}"
             )
 
 

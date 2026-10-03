@@ -4,8 +4,8 @@ Importing this package registers, in :data:`trinity.registry.LOSS`:
 
 * the regression losses ``denoise`` / ``l2``, ``l1``, ``huber``, ``charbonnier``,
   ``pseudo_huber`` (:mod:`.diffusion`);
-* the per-constraint aux terms ``overlap``, ``group``, ``mib``, ``boundary``, ``wl``, ``area``
-  (:mod:`.constraint`, ``docs/physics.md``);
+* the per-constraint aux terms ``overlap``, ``group``, ``mib``,
+  ``boundary``, ``wl``, ``area`` (:mod:`.constraint`, ``docs/physics.md``);
 * the ``ref_*`` aux terms of the FloorSet reference recipe (:mod:`.aux`).
 """
 

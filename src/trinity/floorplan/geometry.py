@@ -1,8 +1,8 @@
 """Geometry primitives over ``(x, y, w, h)`` rectangles.
 
-``(x, y)`` is the lower-left corner and a block spans ``[x, x+w] x [y, y+h]``. Overlap is
-tested per axis with a ``1e-6`` epsilon, so edge contact is not an overlap. A polygon is
-reduced to its axis-aligned bounding box.
+``(x, y)`` is the lower-left corner and a block spans ``[x, x+w] x [y, y+h]``. Overlap
+is tested per axis with a ``1e-6`` epsilon, so edge contact is not an overlap. A polygon
+is reduced to its axis-aligned bounding box.
 """
 
 import functools
@@ -52,7 +52,8 @@ def overlapping_pairs(
 
 
 def rects_overlap(a: np.ndarray, b: np.ndarray, eps: float = OVERLAP_EPS) -> bool:
-    """Whether two ``(x, y, w, h)`` rectangles penetrate by more than ``eps`` on both axes."""
+    """Whether two ``(x, y, w, h)`` rectangles
+    penetrate by more than ``eps`` on both axes."""
     ox = min(a[0] + a[2], b[0] + b[2]) - max(a[0], b[0])
     oy = min(a[1] + a[3], b[1] + b[3]) - max(a[1], b[1])
     return ox > eps and oy > eps
@@ -97,7 +98,8 @@ def rect_polygon(x: float, y: float, w: float, h: float) -> Polygon:
 def polygon_to_bbox(vertices: np.ndarray) -> tuple[float, float, float, float]:
     """The axis-aligned bounding box ``(x, y, w, h)`` of polygon ``vertices``.
 
-    Rows whose x is ``-1`` are padding; an empty polygon gives the unit box at the origin.
+    Rows whose x is ``-1`` are padding; an empty
+    polygon gives the unit box at the origin.
     """
     valid = vertices[vertices[:, 0] != -1]
     if valid.shape[0] == 0:
@@ -110,8 +112,8 @@ def polygon_to_bbox(vertices: np.ndarray) -> tuple[float, float, float, float]:
 def connected_components(xywh: np.ndarray, indices: np.ndarray) -> int:
     """The number of connected components among the blocks ``indices``.
 
-    Computed by a shapely ``unary_union``: blocks sharing an edge or overlapping merge, a
-    corner-only contact does not.
+    Computed by a shapely ``unary_union``: blocks sharing an
+    edge or overlapping merge, a corner-only contact does not.
     """
     if len(indices) <= 1:
         return len(indices)

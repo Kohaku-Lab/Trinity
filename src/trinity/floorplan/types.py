@@ -4,10 +4,10 @@
 layout for it. Both hold plain numpy arrays, so geometry, scoring and legalization are
 torch-free.
 
-A block's kind comes from the 5-column constraint array
-``[fixed, preplaced, mib_id, cluster_id, boundary_code]`` (the FloorSet column order): a
-block is *preplaced* if ``preplaced != 0`` (position and shape locked), else *fixed-shape*
-if ``fixed != 0`` (shape locked, free to move), else *soft* (only its area is constrained).
+A block's kind comes from the 5-column constraint array ``[fixed, preplaced, mib_id,
+cluster_id, boundary_code]`` (the FloorSet column order): a block is *preplaced* if
+``preplaced != 0`` (position and shape locked), else *fixed-shape* if ``fixed != 0``
+(shape locked, free to move), else *soft* (only its area is constrained).
 """
 
 from dataclasses import dataclass
@@ -21,7 +21,8 @@ COL_MIB = 2
 COL_CLUSTER = 3
 COL_BOUNDARY = 4
 
-# Boundary bitmask -> required bbox edges (1=left, 2=right, 4=top, 8=bottom; corners sum).
+# Boundary bitmask -> required bbox edges (1=left,
+# 2=right, 4=top, 8=bottom; corners sum).
 BOUNDARY_EDGES: dict[int, tuple[str, ...]] = {
     1: ("left",),
     2: ("right",),
@@ -38,9 +39,9 @@ BOUNDARY_EDGES: dict[int, tuple[str, ...]] = {
 class FloorplanInstance:
     """One floorplanning case, unpadded to ``n = block_count`` blocks.
 
-    ``target_positions`` is ``(n, 4)`` ``(x, y, w, h)`` with ``-1`` where a coordinate is
-    free (all ``-1`` = soft block). ``nets``, ``outline`` and ``aspect_bounds`` are set only
-    by the bookshelf loaders.
+    ``target_positions`` is ``(n, 4)`` ``(x, y, w, h)`` with ``-1`` where a coordinate
+    is free (all ``-1`` = soft block). ``nets``, ``outline`` and ``aspect_bounds`` are
+    set only by the bookshelf loaders.
     """
 
     block_count: int

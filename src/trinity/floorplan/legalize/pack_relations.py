@@ -1,4 +1,5 @@
-"""The geometric stages of ``scale_pack``: restore, expand, pair relations, abutment, snap.
+"""The geometric stages of ``scale_pack``:
+restore, expand, pair relations, abutment, snap.
 
 A *relation* ``(axis, lo, hi)`` of a block pair says that ``lo`` lies before ``hi`` on
 ``axis`` (0 = x, 1 = y): ``pos[lo] + size[lo] <= pos[hi]``. The relations of every pair
@@ -23,9 +24,9 @@ def restore(inst, xywh: np.ndarray) -> np.ndarray:
     """Stage A: the known shapes and positions written back into ``xywh``.
 
     Fixed-shape blocks get their target shape about their center, preplaced blocks their
-    target box, soft blocks their target area about their center (aspect clipped into the
-    instance's aspect bounds when it has them), and every all-soft MIB group of equal areas
-    one shared shape (the median log-aspect of its members).
+    target box, soft blocks their target area about their center (aspect clipped into
+    the instance's aspect bounds when it has them), and every all-soft MIB group of
+    equal areas one shared shape (the median log-aspect of its members).
     """
     out = np.asarray(xywh, np.float64).copy()
     targets = inst.target_positions
@@ -114,14 +115,16 @@ def expand(
 
 
 def ordered(ref: np.ndarray, axis: int, i: int, j: int) -> tuple[int, int, int]:
-    """The relation of ``i`` and ``j`` on ``axis``, ordered by their centers in ``ref``."""
+    """The relation of ``i`` and ``j`` on ``axis``,
+    ordered by their centers in ``ref``."""
     if _center(ref, i, axis) <= _center(ref, j, axis):
         return (axis, i, j)
     return (axis, j, i)
 
 
 def pair_relation(ref: np.ndarray, i: int, j: int) -> tuple[int, int, int]:
-    """The relation of one pair: the axis with the larger gap in ``ref``, ordered by center."""
+    """The relation of one pair: the axis with the
+    larger gap in ``ref``, ordered by center."""
     gx = max(ref[i, 0] - ref[j, 0] - ref[j, 2], ref[j, 0] - ref[i, 0] - ref[i, 2])
     gy = max(ref[i, 1] - ref[j, 1] - ref[j, 3], ref[j, 1] - ref[i, 1] - ref[i, 3])
     return ordered(ref, 0 if gx >= gy else 1, i, j)
@@ -215,7 +218,8 @@ def count_between(rel: dict, axis: int, lo: int, hi: int, n: int) -> int:
 
 
 def _abut_cost(inst, restored, rel, contact, axis, lo, hi, i, j) -> float:
-    """The ranking cost of abutting ``i`` and ``j`` along their relation ``(axis, lo, hi)``.
+    """The ranking cost of abutting ``i`` and
+    ``j`` along their relation ``(axis, lo, hi)``.
 
     Gap on the axis + perpendicular overlap missing to ``contact`` + ``s`` per block in
     between + ``s`` when sliding the free member onto the preplaced one hits another
@@ -287,7 +291,8 @@ def abut_tree(
 
 
 def flip_pairs(rel: dict, pairs, ref: np.ndarray) -> dict:
-    """``rel`` with the listed pairs moved to the other axis, ordered by center in ``ref``."""
+    """``rel`` with the listed pairs moved to the
+    other axis, ordered by center in ``ref``."""
     out = dict(rel)
     for key in pairs:
         axis, lo, hi = out[key]

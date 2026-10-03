@@ -1,11 +1,12 @@
-"""The ported sequence-pair annealer, from a random pair, on the 100 FloorSet validation cases:
-four seeds, one 100k-evaluation run per case and seed, the best-so-far layout snapshotted at
-100 / 200 / 500 / 1k / 2k / 5k / 10k / 20k / 50k evaluations and at the end, scored after the
-``scale_pack`` legalizer.
+"""The ported sequence-pair annealer, from a random pair, on the 100 FloorSet validation
+cases: four seeds, one 100k-evaluation run per case and seed, the best-so-far layout
+snapshotted at 100 / 200 / 500 / 1k / 2k / 5k / 10k / 20k / 50k evaluations and at the
+end, scored after the ``scale_pack`` legalizer.
 
 Run::
 
-    kogine run scripts/baselines/anneal_curve.py --config configs/baselines/anneal_sp_sa_official.py
+    kogine run scripts/baselines/anneal_curve.py \\
+        --config configs/baselines/anneal_sp_sa_official.py
 """
 
 TRAIN_LANCE = "data/floorset_lite_mibfix.lance"

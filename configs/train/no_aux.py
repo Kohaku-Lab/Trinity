@@ -1,5 +1,5 @@
-"""The flagship without aux terms: spectral-drawing PE + info mover + wire dropout, trained on
-the denoise loss alone.
+"""The flagship without aux terms: spectral-drawing PE + info
+mover + wire dropout, trained on the denoise loss alone.
 
 Run::
 

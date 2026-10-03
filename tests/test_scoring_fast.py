@@ -1,4 +1,5 @@
-"""The fast HPWL path and the ``full_fast`` scorer equal the reference scorer exactly."""
+"""The fast HPWL path and the ``full_fast``
+scorer equal the reference scorer exactly."""
 
 import numpy as np
 

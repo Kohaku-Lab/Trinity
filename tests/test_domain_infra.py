@@ -1,8 +1,9 @@
-"""Problem-side correctness gates: data, parameterization, scoring, jitter, legalization, augment.
+"""Problem-side correctness gates: data,
+parameterization, scoring, jitter, legalization, augment.
 
-The data-dependent tests run against the FloorSet validation set and GSRC (resolved through
-the project ``data/`` directory or ``TRINITY_FLOORSET`` / ``TRINITY_GSRC``) and are skipped
-when the data is absent.
+The data-dependent tests run against the FloorSet validation set and GSRC (resolved
+through the project ``data/`` directory or ``TRINITY_FLOORSET`` / ``TRINITY_GSRC``) and
+are skipped when the data is absent.
 """
 
 import numpy as np
@@ -282,7 +283,8 @@ def test_augment_shift_keeps_signals_consistent():
 
 @needs_gsrc
 def test_gsrc_hard_loads_as_feasible_instance():
-    """A GSRC HARD case parses with fixed shapes and an overlap-free reference layout."""
+    """A GSRC HARD case parses with fixed shapes
+    and an overlap-free reference layout."""
     inst = load_gsrc_case(100, "HARD", allow_download=False)
     assert inst.block_count == 100
     assert inst.area_targets.shape == (100,)

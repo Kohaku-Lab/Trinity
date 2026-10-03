@@ -1,14 +1,16 @@
-"""Per-unit runtime costs on the official 100 cases, one case at a time on an idle machine.
+"""Per-unit runtime costs on the official 100
+cases, one case at a time on an idle machine.
 
 Per case and against its block count:
 
-* the legalizer's milliseconds per call (``LEGALIZE_ROUTE`` on the flagship's refined draws,
-  one call at a time in this process), with its LP solves and ladder rung;
-* PARSAC's milliseconds per annealing step and SP-SA's milliseconds per evaluation (one short
-  single-core run each).
+* the legalizer's milliseconds per call (``LEGALIZE_ROUTE`` on the flagship's refined
+  draws, one call at a time in this process), with its LP solves and ladder rung;
+* PARSAC's milliseconds per annealing step and SP-SA's
+  milliseconds per evaluation (one short single-core run each).
 
-The sampler's per-NFE cost and the refiners' per-step costs come from ``time_scaling.py``.
-Output: one JSON with a row per case and the means per block-count bucket.
+The sampler's per-NFE cost and the refiners' per-step costs come from
+``time_scaling.py``. Output: one JSON with a row per case and the means per block-count
+bucket.
 
 Run::
 
@@ -36,7 +38,8 @@ from trinity.sampling.refine_closed import refine_closed
 
 torch.set_float32_matmul_precision("high")
 
-# The model: a .ckpt, a release directory or a Hugging Face repo id (+ release subfolder).
+# The model: a .ckpt, a release directory or a
+# Hugging Face repo id (+ release subfolder).
 CHECKPOINT: str = "outputs/train/flagship/checkpoints/last.ckpt"
 SCALE: str | None = None
 SAMPLE_SOLVER: str = "euler"

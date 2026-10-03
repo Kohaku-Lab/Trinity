@@ -2,16 +2,17 @@
 
 Measured per N of ``N_LADDER``:
 
-* for every model of ``CHECKPOINTS``: the conditioning build per batch and the sampler's cost
-  per NFE (the slope of the sampling time between the two ``NFE_PROBES``);
+* for every model of ``CHECKPOINTS``: the conditioning build per batch and the sampler's
+  cost per NFE (the slope of the sampling time between the two ``NFE_PROBES``);
 * the cost per step of the closed-form refiner and of the ported published refiners.
 
-Cases: within the dev range, dev cases with exactly N blocks. Above it, synthetic cases that
-tile ``N / SUB_N`` dev cases of ``SUB_N`` blocks in a grid (boxes and preplaced targets
-shifted, cluster / MIB ids re-indexed, boundary codes kept), with every pin dropped and as
-many cross-tile block-to-block nets added, sampled with probability proportional to the dev
-set's net-length histogram and with weights drawn from the dev set's net weights. On a CUDA
-out-of-memory the batch is halved and the rows used are recorded. Output: one JSON.
+Cases: within the dev range, dev cases with exactly N blocks. Above it, synthetic cases
+that tile ``N / SUB_N`` dev cases of ``SUB_N`` blocks in a grid (boxes and preplaced
+targets shifted, cluster / MIB ids re-indexed, boundary codes kept), with every pin
+dropped and as many cross-tile block-to-block nets added, sampled with probability
+proportional to the dev set's net-length histogram and with weights drawn from the dev
+set's net weights. On a CUDA out-of-memory the batch is halved and the rows used are
+recorded. Output: one JSON.
 
 Run::
 
@@ -88,7 +89,8 @@ def sync() -> None:
 
 
 def timed(fn) -> float:
-    """Median wall time of ``fn()`` over ``REPEATS`` synchronized calls after one warm-up."""
+    """Median wall time of ``fn()`` over ``REPEATS``
+    synchronized calls after one warm-up."""
     fn()
     sync()
     times = []
@@ -103,7 +105,8 @@ def timed(fn) -> float:
 def with_oom_fallback(measure, rows: int):
     """``measure(rows)`` retried at half the rows on CUDA out-of-memory.
 
-    Returns ``(rows used, result, peak MiB)``; ``(0, None, None)`` when even one row fails.
+    Returns ``(rows used, result, peak MiB)``;
+    ``(0, None, None)`` when even one row fails.
     """
     while rows >= 1:
         try:
@@ -117,7 +120,8 @@ def with_oom_fallback(measure, rows: int):
 
 
 def net_stats(cases):
-    """The dev set's net-length histogram (Manhattan centre distance / s) and net weights."""
+    """The dev set's net-length histogram (Manhattan
+    centre distance / s) and net weights."""
     lengths, weights, nets_per_block = [], [], []
     for case in cases:
         nets_per_block.append(case.b2b.shape[0] / case.block_count)
@@ -135,7 +139,8 @@ def net_stats(cases):
 
 
 def tile_case(tiles, hist, edges, weight_pool, rng) -> FloorplanInstance:
-    """One synthetic case from the dev cases ``tiles``: pins dropped, cross-tile nets added."""
+    """One synthetic case from the dev cases
+    ``tiles``: pins dropped, cross-tile nets added."""
     grid = int(np.ceil(np.sqrt(len(tiles))))
     tile_w = max(
         float((t.gt_positions[:, 0] + t.gt_positions[:, 2]).max()) for t in tiles
@@ -204,7 +209,8 @@ def cross_tile_nets(
 
 
 def ladder_cases(dev, rng, hist, edges, weight_pool) -> dict[int, list]:
-    """``{N: ROWS cases}``: dev cases inside the dev range, tiled synthetic cases above."""
+    """``{N: ROWS cases}``: dev cases inside the
+    dev range, tiled synthetic cases above."""
     by_n = {}
     for case in dev:
         by_n.setdefault(case.block_count, []).append(case)
@@ -287,7 +293,8 @@ def time_model(name: str, source: str, ladder) -> dict:
 
 
 def time_refiner(refiner: str, group) -> float:
-    """Seconds of ``REFINER_STEPS`` steps of one refiner on a random latent of ``group``."""
+    """Seconds of ``REFINER_STEPS`` steps of one
+    refiner on a random latent of ``group``."""
     case = build_refine_case(group, DRAWS, DEVICE)
     z0 = torch.randn(len(group) * DRAWS, case.token_mask.shape[1], 3, device=DEVICE)
     if refiner in PORTS:

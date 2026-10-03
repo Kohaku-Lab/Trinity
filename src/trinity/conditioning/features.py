@@ -23,7 +23,8 @@ from trinity.floorplan.types import BOUNDARY_EDGES, FloorplanInstance
 
 FEATURE_DIM = 19
 
-# Boundary code -> (left, right, top, bottom) bits; codes not in BOUNDARY_EDGES stay zero.
+# Boundary code -> (left, right, top, bottom)
+# bits; codes not in BOUNDARY_EDGES stay zero.
 _MAX_BOUNDARY_CODE = max(BOUNDARY_EDGES)
 _EDGE_INDEX = {"left": 0, "right": 1, "top": 2, "bottom": 3}
 _BOUNDARY_BITS = np.zeros((_MAX_BOUNDARY_CODE + 1, 4), dtype=np.float32)
@@ -36,10 +37,12 @@ for _code, _names in BOUNDARY_EDGES.items():
 class CondOptions:
     """How the per-block conditioning is normalized.
 
-    * ``pin_pull_normalize`` -- max-normalize the pin-pull strength to ``[0, 1]`` per case.
-    * ``graph_bias_normalize`` -- divide the ``log1p`` b2b adjacency by its per-case max.
-    * ``mib_anchor`` -- the anchor of an all-soft MIB group: ``group_mean`` | ``square`` |
-      ``none`` (see :mod:`trinity.conditioning.anchors`).
+    * ``pin_pull_normalize`` -- max-normalize the
+      pin-pull strength to ``[0, 1]`` per case.
+    * ``graph_bias_normalize`` -- divide the
+      ``log1p`` b2b adjacency by its per-case max.
+    * ``mib_anchor`` -- the anchor of an all-soft MIB group: ``group_mean``
+      | ``square`` | ``none`` (see :mod:`trinity.conditioning.anchors`).
     """
 
     pin_pull_normalize: bool = False
@@ -51,7 +54,8 @@ DEFAULT_COND_OPTIONS = CondOptions()
 
 
 def build_b2b_dense(inst: FloorplanInstance) -> np.ndarray:
-    """The dense symmetric b2b weight matrix ``(n, n)``, repeated pairs summed in edge order."""
+    """The dense symmetric b2b weight matrix ``(n,
+    n)``, repeated pairs summed in edge order."""
     n = inst.block_count
     adj = np.zeros((n, n), dtype=np.float32)
     edges = np.asarray(inst.b2b, dtype=np.float64).reshape(-1, 3)
@@ -86,8 +90,8 @@ def build_adjacency(
 def pin_targets(inst: FloorplanInstance) -> tuple[np.ndarray, np.ndarray]:
     """The per-block pin pull ``(pin_xy (n, 2), pin_w (n,))``.
 
-    ``pin_xy`` is the weighted-mean position of a block's pins (absolute coordinates, 0 for
-    a block without pins) and ``pin_w`` its total p2b weight.
+    ``pin_xy`` is the weighted-mean position of a block's pins (absolute
+    coordinates, 0 for a block without pins) and ``pin_w`` its total p2b weight.
     """
     n = inst.block_count
     # Columns: sum(w * x), sum(w * y), sum(w).
@@ -112,7 +116,8 @@ def pin_targets(inst: FloorplanInstance) -> tuple[np.ndarray, np.ndarray]:
 
 
 def pin_edges(inst: FloorplanInstance) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """The valid p2b edges: ``(pin_xy (P, 2) absolute, weight (P,), block index (P,))``."""
+    """The valid p2b edges: ``(pin_xy (P, 2)
+    absolute, weight (P,), block index (P,))``."""
     n = inst.block_count
     edges = np.asarray(inst.p2b, dtype=np.float64).reshape(-1, 3)
     if edges.size == 0:
@@ -188,9 +193,10 @@ def build_conditioning(
 ) -> dict[str, torch.Tensor]:
     """Every conditioning tensor of one case, as CPU torch tensors.
 
-    Keys: ``features``, ``adjacency`` (graph bias), ``adj_raw`` (dense b2b weights, input of
-    the graph PE), ``anchor_z`` / ``anchor_mask`` (``/ s`` latent space), ``pin_xy`` /
-    ``pin_w``, ``pin_edge_xy`` / ``pin_edge_w`` / ``pin_edge_block``, ``mib_soft_group``.
+    Keys: ``features``, ``adjacency`` (graph bias), ``adj_raw`` (dense b2b weights,
+    input of the graph PE), ``anchor_z`` / ``anchor_mask`` (``/ s`` latent space),
+    ``pin_xy`` / ``pin_w``, ``pin_edge_xy`` / ``pin_edge_w`` / ``pin_edge_block``,
+    ``mib_soft_group``.
     """
     anchor_z, anchor_mask, mib_soft_group = build_anchors(inst, options.mib_anchor)
     b2b_dense = build_b2b_dense(inst)

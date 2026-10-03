@@ -5,13 +5,14 @@ Every objective is one per-``t`` linear transform over ``(x0 = data, x1 = noise)
     x_t    = a(t) * x0 + b(t) * x1
     target = c(t) * x0 + d(t) * x1
 
-A concrete framing implements only :meth:`Framing.coeffs`; ``x_t``, the regression target,
-the recovery of ``(x0, x1)`` from a prediction and the sampling velocity are derived here.
+A concrete framing implements only :meth:`Framing.coeffs`; ``x_t``, the regression
+target, the recovery of ``(x0, x1)`` from a prediction and the sampling velocity are
+derived here.
 
-The denoiser emits ``x0`` (or, with ``output_kind="target"``, the framing target converted
-back by :meth:`Framing.x0_from_target`). :meth:`Framing.pred_to_target` maps a predicted
-``x0`` into the framing's target space for the loss; :meth:`Framing.x0_to_velocity` gives
-the ODE drift from a predicted ``x0``.
+The denoiser emits ``x0`` (or, with ``output_kind="target"``, the framing target
+converted back by :meth:`Framing.x0_from_target`). :meth:`Framing.pred_to_target` maps a
+predicted ``x0`` into the framing's target space for the loss;
+:meth:`Framing.x0_to_velocity` gives the ODE drift from a predicted ``x0``.
 """
 
 from dataclasses import dataclass
@@ -100,7 +101,8 @@ class Framing:
         t: torch.Tensor,
         eps: float = 1e-4,
     ) -> torch.Tensor:
-        """The ``x0`` implied by a target-space prediction (inverse of :meth:`pred_to_target`).
+        """The ``x0`` implied by a target-space
+        prediction (inverse of :meth:`pred_to_target`).
 
         The 2x2 solve of :meth:`recover` with ``|det|`` floored at ``eps``.
         """
@@ -112,7 +114,8 @@ class Framing:
     def target_from_x0(
         self, x_t: torch.Tensor, x0: torch.Tensor, t: torch.Tensor, eps: float = 1e-4
     ) -> torch.Tensor:
-        """The target-space value implied by ``x0``: :meth:`pred_to_target` with ``|b|`` floored."""
+        """The target-space value implied by ``x0``:
+        :meth:`pred_to_target` with ``|b|`` floored."""
         co = self.coeffs(t)
         a, b = _bcast(co.a, x_t), _bcast(co.b, x_t)
         c, d = _bcast(co.c, x_t), _bcast(co.d, x_t)
@@ -135,7 +138,8 @@ class Framing:
     def to_velocity(
         self, x_t: torch.Tensor, pred: torch.Tensor, t: torch.Tensor
     ) -> torch.Tensor:
-        """Probability-flow ODE drift ``dx_t/dt = a' x0 + b' x1`` from a *target* pred."""
+        """Probability-flow ODE drift ``dx_t/dt =
+        a' x0 + b' x1`` from a *target* pred."""
         co = self.coeffs(t)
         if co.a_dot is None or co.b_dot is None:
             raise ValueError("framing has no a_dot/b_dot; cannot form an ODE velocity")

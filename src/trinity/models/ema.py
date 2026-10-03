@@ -1,8 +1,9 @@
 """Exponential moving average of a module's parameters.
 
-An ``nn.Module`` holding the shadow weights (saved in checkpoints). :meth:`EMAModule.update`
-runs once per optimizer step; :meth:`EMAModule.use_ema` swaps the shadow weights into the
-live module for a block and restores the training weights on exit.
+An ``nn.Module`` holding the shadow weights (saved in checkpoints).
+:meth:`EMAModule.update` runs once per optimizer step; :meth:`EMAModule.use_ema` swaps
+the shadow weights into the live module for a block and restores the training weights on
+exit.
 """
 
 import contextlib

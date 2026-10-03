@@ -1,10 +1,12 @@
-"""ChipDiffusion samples through its own ported scheduled gradient legalizer (5000 iterations)
-at NFE 32, then ``scale_pack``: the published generator with its own refiner, scored by the
-hard cost (single sample and best of 4). The layouts it stores feed the motivation figure.
+"""ChipDiffusion samples through its own ported scheduled gradient legalizer (5000
+iterations) at NFE 32, then ``scale_pack``: the published generator with its own
+refiner, scored by the hard cost (single sample and best of 4). The layouts it stores
+feed the motivation figure.
 
 Run::
 
-    kogine run scripts/eval/legalize.py --config configs/eval/ports/chipdiffusion_own_refiner.py
+    kogine run scripts/eval/legalize.py \\
+        --config configs/eval/ports/chipdiffusion_own_refiner.py
 """
 
 RUN = "baseline-chipdiffusion"

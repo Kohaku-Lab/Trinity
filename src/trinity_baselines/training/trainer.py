@@ -1,14 +1,15 @@
 """The direct-regressor trainer (PyTorch Lightning, manual optimization).
 
-Mirrors :class:`trinity.training.DiffusionTrainer` -- same backbone, conditioning, loss terms,
-optimizer, scheduler, EMA, refiner, legalizer and ``solve_cases`` interface -- with three
-differences that define the baseline:
+Mirrors :class:`trinity.training.DiffusionTrainer` -- same backbone, conditioning, loss
+terms, optimizer, scheduler, EMA, refiner, legalizer and ``solve_cases`` interface --
+with three differences that define the baseline:
 
-* no framing, time sampler or ODE sampler: one deterministic forward maps the conditioning to
-  a layout;
-* the regression target is the ground-truth layout in the head's space (``z`` or ``xywh``)
-  with a uniform per-sample loss weight;
-* evaluation runs the :class:`~trinity_baselines.solver.RegressionPlacer` (one candidate per case).
+* no framing, time sampler or ODE sampler: one
+  deterministic forward maps the conditioning to a layout;
+* the regression target is the ground-truth layout in the head's
+  space (``z`` or ``xywh``) with a uniform per-sample loss weight;
+* evaluation runs the :class:`~trinity_baselines.solver.RegressionPlacer`
+  (one candidate per case).
 """
 
 import contextlib
@@ -47,8 +48,9 @@ class RegressorTrainer(pl.LightningModule):
 
     ``head`` selects the regression space (``"z"`` or ``"xywh"``); ``refiner`` is a
     ``REFINER`` spec run after the forward at evaluation (``None`` = no refiner);
-    ``sample_projections`` are ``PROJECTION`` specs applied to the prediction (none by default);
-    ``legalize_portfolio`` is a list of legalization routes (``None`` = ``scale_pack``).
+    ``sample_projections`` are ``PROJECTION`` specs applied to the prediction (none by
+    default); ``legalize_portfolio`` is a list of legalization routes (``None`` =
+    ``scale_pack``).
     """
 
     def __init__(
@@ -275,7 +277,8 @@ class RegressorTrainer(pl.LightningModule):
         return self._sample_instances
 
     def _resolved_scheduler_config(self) -> dict:
-        """The scheduler config with every ``end: -1`` replaced by the total step count."""
+        """The scheduler config with every ``end:
+        -1`` replaced by the total step count."""
         try:
             total = int(self.trainer.estimated_stepping_batches)
         except (RuntimeError, ValueError, OverflowError):
@@ -312,7 +315,8 @@ class RegressorTrainer(pl.LightningModule):
 
     @contextlib.contextmanager
     def _eval_mode(self):
-        """The backbone in eval mode under EMA weights for the duration of the context."""
+        """The backbone in eval mode under EMA
+        weights for the duration of the context."""
         was_training = self.backbone.training
         if self.ema is not None:
             ema_ctx = self.ema.use_ema(self.backbone)
@@ -345,9 +349,11 @@ class RegressorTrainer(pl.LightningModule):
 
     @torch.no_grad()
     def solve_cases(self, instances, desc: str = "eval: solving"):
-        """Place every instance; return ``[(instance, score, placement)]`` in input order.
+        """Place every instance; return ``[(instance,
+        score, placement)]`` in input order.
 
-        Sets ``last_candidate_costs`` to each case's legalized cost (one candidate per case).
+        Sets ``last_candidate_costs`` to each case's
+        legalized cost (one candidate per case).
         """
         order = sorted(range(len(instances)), key=lambda i: instances[i].block_count)
         ordered = [instances[i] for i in order]
@@ -377,7 +383,8 @@ class RegressorTrainer(pl.LightningModule):
 
     @torch.no_grad()
     def raw_sample_cases(self, instances):
-        """Per case, the raw regressor layout (no refiner, no legalizer) as a ``Placement``."""
+        """Per case, the raw regressor layout (no
+        refiner, no legalizer) as a ``Placement``."""
         order = sorted(range(len(instances)), key=lambda i: instances[i].block_count)
         ordered = [instances[i] for i in order]
         per_chunk = max(1, self.eval_max_batch)

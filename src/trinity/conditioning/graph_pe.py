@@ -5,18 +5,18 @@ concatenated onto the block features at the input projection. Each variant is a
 ``GRAPH_PE`` component with two entry points computing the same encoding:
 
 * ``__call__(A (n, n))`` -- numpy, one case -> ``(n, dim)`` float32;
-* ``batched(A (B, N, N), key_pad_mask (B, N))`` -- torch, a padded batch -> ``(B, N, dim)``;
-  padded nodes are isolated in the Laplacian and their rows zeroed.
+* ``batched(A (B, N, N), key_pad_mask (B, N))`` -- torch, a padded batch -> ``(B,
+  N, dim)``; padded nodes are isolated in the Laplacian and their rows zeroed.
 
 Variants:
 
 * ``none`` -- an empty ``(n, 0)`` feature.
 * ``rwpe`` -- random-walk return probabilities ``[(M^t)_ii]``, ``t = 1..k``, with the
   weighted transition ``M = A D^{-1}``.
-* ``spectral_draw`` -- the spectral graph drawing (Hall, 1970): the eigenvectors
-  ``u_2 .. u_{k+1}`` of the generalized Laplacian problem ``L u = lambda D u``, each scaled to
-  unit norm with its sign fixed by its skewness. ``normalize="log1p"`` transforms the edge
-  weights first.
+* ``spectral_draw`` -- the spectral graph drawing (Hall, 1970): the eigenvectors ``u_2
+  .. u_{k+1}`` of the generalized Laplacian problem ``L u = lambda D u``, each scaled to
+  unit norm with its sign fixed by its skewness. ``normalize="log1p"`` transforms the
+  edge weights first.
 """
 
 import numpy as np
@@ -95,8 +95,8 @@ class SpectralDrawPE:
     """Spectral drawing: the generalized-Laplacian eigenvectors ``u_2 .. u_{k+1}``.
 
     Computed as the eigenvectors of ``L_sym = I - D^{-1/2} A D^{-1/2}`` mapped back by
-    ``D^{-1/2}``; ``k = 2`` is the Fiedler pair. ``normalize`` = ``"log1p"`` transforms the
-    edge weights first (``None`` = raw weights).
+    ``D^{-1/2}``; ``k = 2`` is the Fiedler pair. ``normalize`` = ``"log1p"`` transforms
+    the edge weights first (``None`` = raw weights).
     """
 
     def __init__(self, k: int = 2, normalize: str | None = None) -> None:
@@ -123,7 +123,8 @@ class SpectralDrawPE:
 
     @staticmethod
     def _canonicalize(u: np.ndarray) -> np.ndarray:
-        """Each column scaled to unit norm and signed so its third moment is non-negative.
+        """Each column scaled to unit norm and
+        signed so its third moment is non-negative.
 
         A column with ~0 skew is signed by its largest-magnitude entry.
         """
@@ -145,8 +146,9 @@ class SpectralDrawPE:
     ) -> torch.Tensor:
         """The batched ``__call__``: ``(B, N, N)`` -> ``(B, N, k)``.
 
-        A padded node gets the Laplacian diagonal ``_PAD_EIGENVALUE``, so its eigenvector
-        sorts after the real ones; padded rows and cases with ``n <= k + 1`` are zeroed.
+        A padded node gets the Laplacian diagonal ``_PAD_EIGENVALUE``, so its
+        eigenvector sorts after the real ones; padded rows and cases with ``n <= k + 1``
+        are zeroed.
         """
         b, n, _ = adj_raw.shape
         m = key_pad_mask.to(torch.float64)
@@ -191,7 +193,8 @@ def _eigh_vectors(l_sym: torch.Tensor) -> torch.Tensor:
 
 
 def _eigh_single(m: torch.Tensor, eye: torch.Tensor) -> torch.Tensor:
-    """Eigenvectors of one symmetric matrix, retried with ``_JITTERS``, then on the CPU."""
+    """Eigenvectors of one symmetric matrix,
+    retried with ``_JITTERS``, then on the CPU."""
     for jitter in (0.0, *_JITTERS):
         try:
             return torch.linalg.eigh(m + jitter * eye)[1]
@@ -201,7 +204,8 @@ def _eigh_single(m: torch.Tensor, eye: torch.Tensor) -> torch.Tensor:
 
 
 def _masked_adj(adj_raw: torch.Tensor, mask: torch.Tensor) -> torch.Tensor:
-    """``adj_raw (B, N, N)`` in float64 with padded rows / columns zeroed (float ``mask``)."""
+    """``adj_raw (B, N, N)`` in float64 with padded
+    rows / columns zeroed (float ``mask``)."""
     a = adj_raw.to(torch.float64)
     return a * mask[:, :, None] * mask[:, None, :]
 

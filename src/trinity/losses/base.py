@@ -1,8 +1,8 @@
 """The loss-term interface.
 
 The trainer holds a flat list of terms and calls each once per micro-batch with a shared
-:class:`LossContext`. The regression terms read ``pred`` / ``target`` / ``weight``; the aux
-terms read the decoded geometry (``xywh``) and the per-block data. Each term returns
+:class:`LossContext`. The regression terms read ``pred`` / ``target`` / ``weight``; the
+aux terms read the decoded geometry (``xywh``) and the per-block data. Each term returns
 ``(loss_value, {log_name: value})``.
 """
 
@@ -15,10 +15,11 @@ import torch
 class LossContext:
     """Tensors a loss term may read for one training micro-batch.
 
-    The regression fields (``pred``, ``target``, ``weight``, ``t``, ``anchor_mask``) are always
-    set. The geometry fields are populated only when some configured term declares
-    ``needs_geometry``; ``xywh`` and ``xywh_gt`` are the normalized ``(B, N, 4)`` decodes of the
-    predicted and ground-truth ``x0``, in the space where total block area is 1.
+    The regression fields (``pred``, ``target``, ``weight``, ``t``, ``anchor_mask``) are
+    always set. The geometry fields are populated only when some configured term
+    declares ``needs_geometry``; ``xywh`` and ``xywh_gt`` are the normalized ``(B, N,
+    4)`` decodes of the predicted and ground-truth ``x0``, in the space where total
+    block area is 1.
     """
 
     pred: torch.Tensor
@@ -38,7 +39,8 @@ class LossContext:
     # (B, N, 2) per-block pin targets in / s units.
     pin_xy_n: torch.Tensor | None = None
     pin_w: torch.Tensor | None = None
-    # (B, P, 2) per-pin positions in / s units, (B, P) weights (0 = padding), (B, P) blocks.
+    # (B, P, 2) per-pin positions in / s units,
+    # (B, P) weights (0 = padding), (B, P) blocks.
     pin_edge_xy_n: torch.Tensor | None = None
     pin_edge_w: torch.Tensor | None = None
     pin_edge_block: torch.Tensor | None = None
@@ -58,7 +60,8 @@ class LossContext:
 class LossTerm:
     """Base loss term; subclasses implement :meth:`__call__`.
 
-    ``needs_geometry`` declares whether the term reads the decoded layout from the context.
+    ``needs_geometry`` declares whether the term
+    reads the decoded layout from the context.
     """
 
     name: str = "loss"

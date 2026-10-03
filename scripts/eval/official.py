@@ -1,15 +1,16 @@
-"""The full pipeline on the official FloorSet 100 validation cases, run and timed per case.
+"""The full pipeline on the official FloorSet
+100 validation cases, run and timed per case.
 
-For every setting ``(NFE, refiner steps, draws)`` of ``SETTINGS`` and every case on its own:
-sample the draws (one forward of that case alone), refine them with the closed-form refiner,
-legalize every draw in parallel on a pool of ``WORKERS`` processes (one job per draw), score
-with the hard cost and keep the cheapest draw (feasible first). Recorded per case: the
-wall time of every stage (sampling, refinement, decoding, legalization = the slowest draw),
-the legalizer's milliseconds per draw and the LP solver's seconds per draw. The
-``torch.compile`` and pool warm-up runs once first and is reported separately.
+For every setting ``(NFE, refiner steps, draws)`` of ``SETTINGS`` and every case on its
+own: sample the draws (one forward of that case alone), refine them with the closed-form
+refiner, legalize every draw in parallel on a pool of ``WORKERS`` processes (one job per
+draw), score with the hard cost and keep the cheapest draw (feasible first). Recorded
+per case: the wall time of every stage (sampling, refinement, decoding, legalization =
+the slowest draw), the legalizer's milliseconds per draw and the LP solver's seconds per
+draw. The ``torch.compile`` and pool warm-up runs once first and is reported separately.
 
-``SAVE_LAYOUTS`` stores the kept legalized layout of every case and setting in one ``.npz``
-(the start layouts of the pipeline -> classical-solver hand-over).
+``SAVE_LAYOUTS`` stores the kept legalized layout of every case and setting in
+one ``.npz`` (the start layouts of the pipeline -> classical-solver hand-over).
 
 Run::
 
@@ -37,7 +38,8 @@ from trinity.sampling.refine_closed import refine_closed
 
 torch.set_float32_matmul_precision("high")
 
-# The model: a .ckpt, a release directory or a Hugging Face repo id (+ release subfolder).
+# The model: a .ckpt, a release directory or a
+# Hugging Face repo id (+ release subfolder).
 CHECKPOINT: str = "outputs/train/flagship/checkpoints/last.ckpt"
 SCALE: str | None = None
 FLOORSET_ROOT: str | None = None
@@ -97,7 +99,8 @@ _worker: dict = {"solve_s": 0.0}
 
 
 def init_worker(cases, route, scorer) -> None:
-    """Keep the cases and route; wrap the LP ``Solve`` so its seconds are accumulated."""
+    """Keep the cases and route; wrap the LP
+    ``Solve`` so its seconds are accumulated."""
     _worker.update(cases=cases, route=route, scorer=scorer)
     original_solve = pywraplp.Solver.Solve
 
@@ -111,7 +114,8 @@ def init_worker(cases, route, scorer) -> None:
 
 
 def legalize_job(job):
-    """``(case, draw, boxes)`` -> ``(case, draw, score row, ms, LP seconds, info, boxes)``."""
+    """``(case, draw, boxes)`` -> ``(case, draw,
+    score row, ms, LP seconds, info, boxes)``."""
     i, j, boxes = job
     inst = _worker["cases"][i]
     _worker["solve_s"] = 0.0
@@ -191,7 +195,8 @@ def warm_up(placer, samplers, pool, cases) -> float:
 
 
 def run_setting(placer, sampler, pool, cases, steps, draws, layouts, key):
-    """Every case through one setting; return per-case rows, times, draw costs and info."""
+    """Every case through one setting; return
+    per-case rows, times, draw costs and info."""
     rows, times, candidates, info = [], [], [], []
     for i, inst in enumerate(cases):
         t_case = time.perf_counter()
@@ -254,8 +259,10 @@ def report(rows: np.ndarray, times: np.ndarray, draws: int) -> dict:
         f"  mean {out['cost_mean']:.4f}  median {out['cost_median']:.4f}\n"
         f"  hpwl_gap {out['hpwl_gap']:+.4f}  area_gap {out['area_gap']:+.4f}"
         f"  v_rel {out['v_rel']:.4f}  feasible {100 * out['feasible']:.1f}%\n"
-        f"  per case {out['case_s']['mean']:.3f}s (sampling {out['sample_s']['mean']:.3f},"
-        f" refine {out['refine_s']['mean']:.3f}, legalize {out['legalize_s']['mean']:.3f}"
+        f"  per case {out['case_s']['mean']:.3f}s"
+        f" (sampling {out['sample_s']['mean']:.3f},"
+        f" refine {out['refine_s']['mean']:.3f},"
+        f" legalize {out['legalize_s']['mean']:.3f}"
         f" over {draws} draws)",
         flush=True,
     )

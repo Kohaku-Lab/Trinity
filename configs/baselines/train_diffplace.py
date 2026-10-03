@@ -1,10 +1,12 @@
-"""DiffPlace: the ported ``VectorGNNV2Global`` denoiser with its DDPM objective on the Trinity recipe.
+"""DiffPlace: the ported ``VectorGNNV2Global`` denoiser
+with its DDPM objective on the Trinity recipe.
 
-Backbone: ``diffplace_vgnn`` at the deployed configuration (hidden 256, 8 blocks of 2 vector
-message-passing layers, 8 heads, a global supernode after every block). Objective: epsilon
-prediction on the variance-preserving schedule (``ddpm_eps``) with a target-emitting head,
-uniform t. Micro-batch 64 (``GRAD_ACC = 4``) keeps the effective batch at 256. Everything else is
-the base recipe plus the wire-dropout mixture. ``BACKBONE`` needs the ``baselines`` extra.
+Backbone: ``diffplace_vgnn`` at the deployed configuration (hidden 256, 8 blocks of 2
+vector message-passing layers, 8 heads, a global supernode after every block).
+Objective: epsilon prediction on the variance-preserving schedule (``ddpm_eps``) with a
+target-emitting head, uniform t. Micro-batch 64 (``GRAD_ACC = 4``) keeps the effective
+batch at 256. Everything else is the base recipe plus the wire-dropout mixture.
+``BACKBONE`` needs the ``baselines`` extra.
 
 Run::
 

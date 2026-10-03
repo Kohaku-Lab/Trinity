@@ -1,17 +1,18 @@
 """Refine a run's cached draws, legalize every draw, and report the hard cost.
 
-Per ``(NFE, steps)`` cell: the refiner (as in ``refine.py``) runs on the GPU over every cached
-draw; each refined draw goes through ``LEGALIZE_ROUTE`` (None = ``scale_pack`` with its
-defaults) and is scored with ``SCORER`` on a CPU pool, timed per draw. Per case the cell
-records, for every ``N`` in ``N_SELECT``:
+Per ``(NFE, steps)`` cell: the refiner (as in ``refine.py``) runs on the GPU over every
+cached draw; each refined draw goes through ``LEGALIZE_ROUTE`` (None = ``scale_pack``
+with its defaults) and is scored with ``SCORER`` on a CPU pool, timed per draw. Per case
+the cell records, for every ``N`` in ``N_SELECT``:
 
 * ``n1`` -- the legalized cost of draw 0,
 * ``best<N>`` -- the cheapest legalized cost over the first ``N`` draws,
-* ``soft<N>`` -- the legalized cost of the draw with the lowest pre-legalization ``soft_cost``.
+* ``soft<N>`` -- the legalized cost of the draw
+  with the lowest pre-legalization ``soft_cost``.
 
-Each reports the mean cost, feasible rate and the block-count-weighted hard-cost total. Writes
-``OUT`` (JSON) and an ``.npz`` with the per-draw hard columns and soft vectors (and, with
-``SAVE_LAYOUTS``, the refined latents and legalized boxes).
+Each reports the mean cost, feasible rate and the block-count-weighted hard-cost total.
+Writes ``OUT`` (JSON) and an ``.npz`` with the per-draw hard columns and soft vectors
+(and, with ``SAVE_LAYOUTS``, the refined latents and legalized boxes).
 
 Run::
 
@@ -197,7 +198,8 @@ def shard_path(nfe: int) -> Path:
 
 
 def stack_draws(lat, offsets, bcount, k_all, k, indices, n_max) -> torch.Tensor:
-    """The first ``k`` cached draws of every case in ``indices``, padded to ``n_max``."""
+    """The first ``k`` cached draws of every
+    case in ``indices``, padded to ``n_max``."""
     z0 = torch.zeros(len(indices) * k, n_max, 3, device=DEVICE)
     for gi, ci in enumerate(indices):
         n = int(bcount[ci])
@@ -207,7 +209,8 @@ def stack_draws(lat, offsets, bcount, k_all, k, indices, n_max) -> torch.Tensor:
 
 
 def summarize(cost, feasible, bcount) -> dict:
-    """Mean cost, feasible rate and the block-count-weighted hard-cost total of per-case costs."""
+    """Mean cost, feasible rate and the block-count-weighted
+    hard-cost total of per-case costs."""
     feasible_mask = feasible > 0.5
     return {
         "cost": float(cost.mean()),
@@ -222,7 +225,8 @@ def summarize(cost, feasible, bcount) -> dict:
 
 
 def cell_summary(hard, soft, k, refine_s, bcount, arrays, key) -> dict:
-    """The reported numbers of one ``(NFE, steps)`` cell; per-case arrays go to ``arrays``."""
+    """The reported numbers of one ``(NFE, steps)``
+    cell; per-case arrays go to ``arrays``."""
     col = HARD.index
     cell = {
         "soft": soft.mean((0, 1)).tolist(),
@@ -258,7 +262,8 @@ def cell_summary(hard, soft, k, refine_s, bcount, arrays, key) -> dict:
 
 def print_cell(nfe: int, steps: int, cell: dict) -> None:
     selections = " ".join(
-        f"{name}: cost={v['cost']:.4f} feas={v['feasible']:.3f} total={v['total_exp']:.4f}"
+        f"{name}: cost={v['cost']:.4f} feas={v['feasible']:.3f} "
+        f"total={v['total_exp']:.4f}"
         for name, v in cell.items()
         if isinstance(v, dict) and "cost" in v
     )

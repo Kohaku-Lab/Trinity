@@ -5,12 +5,12 @@ blocks anchor all three coordinates.
 
 MIB groups (members share one shape):
 
-* a group with a fixed / preplaced member anchors every soft member's ``rho`` to the first
-  known member's ``rho``;
+* a group with a fixed / preplaced member anchors every soft
+  member's ``rho`` to the first known member's ``rho``;
 * an all-soft group follows ``mib_anchor``:
 
-  - ``"group_mean"`` -- no anchor; the group id is recorded in ``mib_soft_group`` and the
-    ``mib_group_mean`` projection sets every member's ``rho`` to the group mean;
+  - ``"group_mean"`` -- no anchor; the group id is recorded in ``mib_soft_group`` and
+    the ``mib_group_mean`` projection sets every member's ``rho`` to the group mean;
   - ``"square"`` -- anchors every member's ``rho`` to 0;
   - ``"none"`` -- nothing.
 """
@@ -28,7 +28,8 @@ def _rho_of(w: float, h: float) -> float:
 def build_anchors(
     inst: FloorplanInstance, mib_anchor: str = "group_mean"
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """The anchors of ``inst``: ``(anchor_z (n, 3), anchor_mask (n, 3), mib_soft_group (n,))``.
+    """The anchors of ``inst``: ``(anchor_z (n, 3),
+    anchor_mask (n, 3), mib_soft_group (n,))``.
 
     ``anchor_z`` is in ``/ s`` units; ``mib_soft_group`` is 0 for blocks outside a
     ``group_mean`` group.
@@ -93,6 +94,7 @@ def _anchor_mib(
             soft_group[members] = int(g)
         elif mib_anchor != "none":
             raise ValueError(
-                f"unknown mib_anchor {mib_anchor!r}; expected group_mean | square | none"
+                f"unknown mib_anchor {mib_anchor!r}; "
+                "expected group_mean | square | none"
             )
     return soft_group

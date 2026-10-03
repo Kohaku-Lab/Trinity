@@ -1,27 +1,33 @@
-"""In-sampler guidance of three published diffusion placers, ported onto the batched latent, and
-the guided Euler sampler (``SAMPLER`` ``euler_guided``) that applies one of them at every step.
+"""In-sampler guidance of three published diffusion placers, ported onto the batched
+latent, and the guided Euler sampler (``SAMPLER`` ``euler_guided``) that applies one of
+them at every step.
 
-Every guidance sees the state ``z_t``, the network's predicted ``x0`` (both in the ``/s`` latent
-``(cx, cy, rho)``), the step's times and the batch's :class:`RefineCase`; it moves block positions
-only (``rho`` stays), never moves preplaced blocks, and works on each row's canvas as the post-hoc
-ports do (the predicted ``x0``'s bounding box with a 5 % margin mapped to ``[-1, 1]^2``, see
-``trinity_baselines.ports.refine._setup``). The final ``x0`` is guided as well.
+Every guidance sees the state ``z_t``, the network's predicted ``x0`` (both in the
+``/s`` latent ``(cx, cy, rho)``), the step's times and the batch's :class:`RefineCase`;
+it moves block positions only (``rho`` stays), never moves preplaced blocks, and works
+on each row's canvas as the post-hoc ports do (the predicted ``x0``'s bounding box with
+a 5 % margin mapped to ``[-1, 1]^2``, see ``trinity_baselines.ports.refine._setup``).
+The final ``x0`` is guided as well.
 
-* ``chipd_opt`` -- ChipDiffusion's default evaluation guidance (https://github.com/vint-1/chipdiffusion,
-  ``guidance/opt.yaml``, ``ContinuousDiffusionModel.reverse_guidance_opt_force``): per step, 10 Adam steps (lr 8e-3,
-  betas (0.8, 0.99)) on ``alpha * legality + 1e-4 * wirelength`` from the predicted ``x0``; the
-  per-row dual weight ``alpha`` starts at 0, persists across steps, and takes an Adam step (lr 5e-4,
-  betas (0.9, 0.99)) toward the potential target 1e-4 while ``t < 0.5`` (clipped at 15); legality
-  softmax factor 20 -> 10 over ``t in [0.1, 1]``. The shift ``g`` enters as ``a(t_next) * g`` on the
-  next state (the scheduler keeps its noise prediction).
-* ``diffplace`` -- DiffPlace's deploy overlap guidance (https://github.com/HySonLab/DiffPlace,
-  ``sample_ddim``, ``deploy_nangate45.py``):
-  from ``1 - t >= 0.85``, ``eps <- eps - lambda_t * g`` with ``lambda_t = 200 (1 - t)^2`` and ``g`` the
-  gradient of the pairwise overlap of the movable blocks at the noisy state, rescaled per block to
-  norm 0.03 and clipped at 0.08; the step continues from the ``x0`` implied by the guided ``eps``.
-* ``macrodiff`` -- MacroDiff+'s ``apply_guidance`` (https://github.com/jhy00n/MacroDiff-plus, MIT)
-  on the predicted ``x0`` at every step (``refine_macrodiff``: 500 Adam iterations, lr 0.01, the
-  HPWL / overlap phases, gradient-norm clip, die clamp); the step continues from the guided ``x0``.
+* ``chipd_opt`` -- ChipDiffusion's default evaluation guidance
+  (https://github.com/vint-1/chipdiffusion, ``guidance/opt.yaml``,
+  ``ContinuousDiffusionModel.reverse_guidance_opt_force``): per step, 10 Adam steps (lr
+  8e-3, betas (0.8, 0.99)) on ``alpha * legality + 1e-4 * wirelength`` from the
+  predicted ``x0``; the per-row dual weight ``alpha`` starts at 0, persists across
+  steps, and takes an Adam step (lr 5e-4, betas (0.9, 0.99)) toward the potential target
+  1e-4 while ``t < 0.5`` (clipped at 15); legality softmax factor 20 -> 10 over ``t in
+  [0.1, 1]``. The shift ``g`` enters as ``a(t_next) * g`` on the next state (the
+  scheduler keeps its noise prediction).
+* ``diffplace`` -- DiffPlace's deploy overlap guidance
+  (https://github.com/HySonLab/DiffPlace, ``sample_ddim``, ``deploy_nangate45.py``):
+  from ``1 - t >= 0.85``, ``eps <- eps - lambda_t * g`` with ``lambda_t = 200 (1 -
+  t)^2`` and ``g`` the gradient of the pairwise overlap of the movable blocks at the
+  noisy state, rescaled per block to norm 0.03 and clipped at 0.08; the step continues
+  from the ``x0`` implied by the guided ``eps``.
+* ``macrodiff`` -- MacroDiff+'s ``apply_guidance``
+  (https://github.com/jhy00n/MacroDiff-plus, MIT) on the predicted ``x0`` at every step
+  (``refine_macrodiff``: 500 Adam iterations, lr 0.01, the HPWL / overlap phases,
+  gradient-norm clip, die clamp); the step continues from the guided ``x0``.
 
 Licenses: NOTICE.
 """
@@ -42,17 +48,20 @@ from trinity_baselines.ports.refine import (
 
 
 def _euler(framing, z, x0, t0, t1):
-    """One Euler step of the probability-flow ODE from ``z`` at ``t0`` to ``t1`` with the given ``x0``."""
+    """One Euler step of the probability-flow ODE from
+    ``z`` at ``t0`` to ``t1`` with the given ``x0``."""
     return z + (t1 - t0) * framing.x0_to_velocity(z, x0, t0.expand(z.shape[0]))
 
 
 def _position_delta(dX, e):
-    """Latent shift ``(B, N, 3)`` from a canvas-space position shift ``dX`` (``rho`` unchanged)."""
+    """Latent shift ``(B, N, 3)`` from a canvas-space
+    position shift ``dX`` (``rho`` unchanged)."""
     return torch.cat([dX * e[:, None], torch.zeros_like(dX[..., :1])], dim=-1)
 
 
 class ChipdOptGuidance:
-    """ChipDiffusion's ``opt`` guidance with its per-row dual weight kept across the steps."""
+    """ChipDiffusion's ``opt`` guidance with its
+    per-row dual weight kept across the steps."""
 
     def __init__(
         self,
@@ -134,7 +143,8 @@ class ChipdOptGuidance:
 
 
 class DiffPlaceGuidance:
-    """DiffPlace's deploy overlap guidance on the noise prediction over the last part of sampling."""
+    """DiffPlace's deploy overlap guidance on the noise
+    prediction over the last part of sampling."""
 
     def __init__(
         self,
@@ -218,8 +228,8 @@ GUIDANCES = {
 class GuidedEulerSampler(EulerSampler):
     """Euler sampler with one published placer's in-sampler guidance.
 
-    ``guidance`` names a ``GUIDANCES`` entry and ``guidance_kwargs`` its settings; set ``case``
-    (the ``RefineCase`` of the batch's rows) before ``sample``.
+    ``guidance`` names a ``GUIDANCES`` entry and ``guidance_kwargs`` its settings;
+    set ``case`` (the ``RefineCase`` of the batch's rows) before ``sample``.
     """
 
     def __init__(

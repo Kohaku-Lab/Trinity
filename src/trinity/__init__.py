@@ -1,9 +1,9 @@
 """Trinity: graph-conditioned diffusion for constrained floorplanning.
 
-``trinity.floorplan`` is the problem (data, geometry, scoring, legalization); the rest of the
-package is the method (conditioning, models, framings, losses, training, sampling, the
-refiner and the placer). Importing this package populates every registry, so
-``build(spec, REGISTRY)`` works immediately.
+``trinity.floorplan`` is the problem (data, geometry, scoring, legalization); the rest
+of the package is the method (conditioning, models, framings, losses, training,
+sampling, the refiner and the placer). Importing this package populates every registry,
+so ``build(spec, REGISTRY)`` works immediately.
 """
 
 from trinity import (

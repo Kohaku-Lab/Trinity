@@ -1,12 +1,13 @@
 """Label-preserving rigid transforms of a floorplan case.
 
-The transforms are the dihedral group of the square (the four 90-degree rotations, with an
-optional x mirror) plus a global translation. Block boxes, target and ground-truth
+The transforms are the dihedral group of the square (the four 90-degree rotations, with
+an optional x mirror) plus a global translation. Block boxes, target and ground-truth
 positions, pins and boundary codes move together, so HPWL, bbox area and the constraint
 violations of the ground truth are unchanged.
 
 * translation -- shifts every coordinate; ``shift`` is in raw layout units.
-* rotation by ``k * 90`` degrees -- rotates centers about the origin and swaps ``w`` / ``h``.
+* rotation by ``k * 90`` degrees -- rotates centers
+  about the origin and swaps ``w`` / ``h``.
 * mirror -- negates x.
 
 The boundary bitmask is ``1=left 2=right 4=top 8=bottom``; each op permutes those bits.
@@ -62,8 +63,8 @@ def transform_instance(
     """Apply a rigid transform to a whole case; return a new :class:`FloorplanInstance`.
 
     ``rot`` CCW 90-degree turns are applied first, then the x mirror when ``flip``. The
-    ground-truth bbox minimum is then moved back to the origin and the case is translated
-    by ``shift = (dx, dy)`` (raw layout units). Free coordinates stay free.
+    ground-truth bbox minimum is then moved back to the origin and the case is
+    translated by ``shift = (dx, dy)`` (raw layout units). Free coordinates stay free.
     """
     rot %= 4
     dx, dy = shift

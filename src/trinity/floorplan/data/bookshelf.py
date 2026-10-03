@@ -3,21 +3,22 @@
 The block-level Bookshelf triple of GSRC and MCNC (``.blocks`` / ``.pl`` / ``.nets``):
 
 * ``.blocks`` -- ``NumSoftRectangularBlocks`` / ``NumHardRectilinearBlocks`` /
-  ``NumTerminals`` header, then one line per object: a hard block
-  (``name hardrectilinear 4 (x,y) (x,y) (x,y) (x,y)`` -> bbox ``(w,h)``), a soft block
-  (``name softrectangular AREA min_ar max_ar`` -> area and a ``w/h`` range; the GSRC SOFT
-  files give ``min_ar == max_ar``, then the protocol range ``SOFT_ASPECT_RANGE`` applies), or
+  ``NumTerminals`` header, then one line per object: a hard block (``name
+  hardrectilinear 4 (x,y) (x,y) (x,y) (x,y)`` -> bbox ``(w,h)``), a soft block (``name
+  softrectangular AREA min_ar max_ar`` -> area and a ``w/h`` range; the GSRC SOFT files
+  give ``min_ar == max_ar``, then the protocol range ``SOFT_ASPECT_RANGE`` applies), or
   a terminal (``name terminal``). Files may mix soft and hard blocks.
-* ``.pl`` -- ``name x y [: ORIENT]`` lower-left positions for blocks and terminals. A file
-  with every block at the origin (an *unsolved* instance, no reference layout) still gives
-  real terminal positions; the loader then leaves ``gt_positions`` empty and keeps the
-  terminals.
+* ``.pl`` -- ``name x y [: ORIENT]`` lower-left positions for blocks and terminals. A
+  file with every block at the origin (an *unsolved* instance, no reference layout)
+  still gives real terminal positions; the loader then leaves ``gt_positions`` empty and
+  keeps the terminals.
 * ``.nets`` -- ``NetDegree : k`` then ``k`` ``node dir`` lines; nodes are blocks or
-  terminals. Hyperedges are clique-expanded into pairwise ``b2b`` / ``p2b`` edges, each pair
-  weighted ``1/(degree-1)`` (2-pin nets weight 1), and also kept as index lists in ``nets``.
+  terminals. Hyperedges are clique-expanded into pairwise ``b2b`` / ``p2b`` edges, each
+  pair weighted ``1/(degree-1)`` (2-pin nets weight 1), and also kept as index lists in
+  ``nets``.
 
-These suites carry no preplaced / MIB / cluster / boundary annotations; hard blocks can be
-loaded as fixed-shape blocks (``hard_shapes``).
+These suites carry no preplaced / MIB / cluster / boundary annotations;
+hard blocks can be loaded as fixed-shape blocks (``hard_shapes``).
 """
 
 import re
@@ -49,8 +50,9 @@ def parse_blocks(
 ) -> tuple[list[str], dict[str, tuple[float, float, float, float, float]], list[str]]:
     """Parse a ``.blocks`` file.
 
-    Returns ``(block_names, {name: (w, h, area, min_ar, max_ar)}, terminal_names)``: soft
-    blocks report ``(-1, -1, area, min_ar, max_ar)``, hard blocks ``(w, h, w*h, -1, -1)``.
+    Returns ``(block_names, {name: (w, h, area, min_ar, max_ar)}, terminal_names)``:
+    soft blocks report ``(-1, -1, area, min_ar, max_ar)``, hard blocks ``(w, h, w*h, -1,
+    -1)``.
     """
     block_names: list[str] = []
     blocks: dict[str, tuple[float, float, float, float, float]] = {}
@@ -142,13 +144,15 @@ def parse_bookshelf_case(
     hard_shapes: bool = False,
     soft_aspect_range: tuple[float, float] = SOFT_ASPECT_RANGE,
 ) -> FloorplanInstance:
-    """Build a :class:`FloorplanInstance` from one Bookshelf ``(.blocks, .pl, .nets)`` triple.
+    """Build a :class:`FloorplanInstance` from one
+    Bookshelf ``(.blocks, .pl, .nets)`` triple.
 
     ``gt_positions`` is set only when the ``.pl`` gives a real block layout (every block
-    placed, every shape known, not all at the origin); terminal positions are always kept.
-    ``nets`` lists the hyperedges as node ids (blocks ``0..n-1``, then terminals). With
-    ``hard_shapes`` every block of known ``(w, h)`` is fixed-shape; every other block is
-    soft with ``aspect_bounds`` = the file's ``w/h`` range, else ``soft_aspect_range``.
+    placed, every shape known, not all at the origin); terminal positions are always
+    kept. ``nets`` lists the hyperedges as node ids (blocks ``0..n-1``, then terminals).
+    With ``hard_shapes`` every block of known ``(w, h)`` is fixed-shape; every other
+    block is soft with ``aspect_bounds`` = the file's ``w/h`` range, else
+    ``soft_aspect_range``.
     """
     block_names, blocks, terminals = parse_blocks(blocks_path)
     pos = parse_pl(pl_path)
@@ -211,7 +215,8 @@ def parse_bookshelf_case(
 def fixed_outline(
     inst: FloorplanInstance, gamma: float = 0.10, aspect: float = 1.0
 ) -> tuple[float, float]:
-    """The fixed outline ``(W, H)`` of area ``(1 + gamma) * sum(area)`` and ``H / W = aspect``."""
+    """The fixed outline ``(W, H)`` of area ``(1 +
+    gamma) * sum(area)`` and ``H / W = aspect``."""
     area = float(inst.area_targets.sum()) * (1.0 + gamma)
     return float(np.sqrt(area / aspect)), float(np.sqrt(area * aspect))
 
@@ -224,8 +229,8 @@ def with_fixed_outline(
 ) -> FloorplanInstance:
     """A copy of ``inst`` with the fixed outline set and the reference layout dropped.
 
-    Terminals stay at their file positions; with ``map_pins`` they are mapped affinely from
-    their bounding box (widened by the reference layout's, when there is one) onto
+    Terminals stay at their file positions; with ``map_pins`` they are mapped affinely
+    from their bounding box (widened by the reference layout's, when there is one) onto
     ``[0, W] x [0, H]``.
     """
     W, H = fixed_outline(inst, gamma, aspect)

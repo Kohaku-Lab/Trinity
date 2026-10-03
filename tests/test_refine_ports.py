@@ -1,5 +1,6 @@
-"""The ported refiners: sizes and aspects untouched, preplaced blocks fixed, padding untouched,
-overlap reduced on an overlapping batch; the positions-only closed-form refiner keeps ``rho``.
+"""The ported refiners: sizes and aspects untouched, preplaced blocks fixed, padding
+untouched, overlap reduced on an overlapping batch; the positions-only closed-form
+refiner keeps ``rho``.
 """
 
 import torch

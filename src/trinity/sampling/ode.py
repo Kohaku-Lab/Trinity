@@ -1,15 +1,15 @@
 """Deterministic probability-flow ODE samplers over block-token latents.
 
 The network emits ``x0`` at every step; the drift is formed from it via
-``framing.x0_to_velocity`` and integrated from ``t_start`` (noise) to ``t_end`` (data). Each
-numerical method is its own class; the shared loop, velocity and projection live in ``ODESampler``
-and subclasses implement only the per-step rule ``_step``.
+``framing.x0_to_velocity`` and integrated from ``t_start`` (noise) to ``t_end`` (data).
+Each numerical method is its own class; the shared loop, velocity and projection live in
+``ODESampler`` and subclasses implement only the per-step rule ``_step``.
 
-State projections (``trinity/sampling/projection.py``) are an ordered list applied to the
-initial noise, to the state after every step, and to the returned ``x0``. The default,
-``DEFAULT_PROJECTIONS``, writes in the known answers (preplaced positions and shapes, fixed
-shapes, the shape of an MIB group that has a known member) and gives every all-soft MIB group
-one shared shape. Pass ``projections=[]`` for free sampling.
+State projections (``trinity/sampling/projection.py``) are an ordered list applied to
+the initial noise, to the state after every step, and to the returned ``x0``. The
+default, ``DEFAULT_PROJECTIONS``, writes in the known answers (preplaced positions and
+shapes, fixed shapes, the shape of an MIB group that has a known member) and gives every
+all-soft MIB group one shared shape. Pass ``projections=[]`` for free sampling.
 """
 
 import torch
@@ -23,9 +23,9 @@ DEFAULT_PROJECTIONS = ("anchor_clamp", "mib_group_mean")
 class ODESampler:
     """Base probability-flow ODE integrator; subclass and define ``_step``.
 
-    ``framing`` supplies the drift, ``num_steps`` the integration steps from ``t_start`` to
-    ``t_end``, and ``projections`` a list of ``PROJECTION`` specs applied to the state each
-    step (``None`` means ``DEFAULT_PROJECTIONS``, ``[]`` means none).
+    ``framing`` supplies the drift, ``num_steps`` the integration steps from ``t_start``
+    to ``t_end``, and ``projections`` a list of ``PROJECTION`` specs applied to the
+    state each step (``None`` means ``DEFAULT_PROJECTIONS``, ``[]`` means none).
     """
 
     def __init__(
@@ -56,7 +56,8 @@ class ODESampler:
         return self.framing.x0_to_velocity(z, x0_pred, t)
 
     def _step(self, model, z, t0, t1, cond):
-        """Advance ``z`` from ``t0`` to ``t1`` by one step of the method (subclass implements)."""
+        """Advance ``z`` from ``t0`` to ``t1`` by one
+        step of the method (subclass implements)."""
         raise NotImplementedError
 
     @torch.no_grad()
@@ -83,7 +84,8 @@ class EulerSampler(ODESampler):
 
 @SAMPLER.register("heun")
 class HeunSampler(ODESampler):
-    """Second-order Heun (trapezoidal): average the drift at ``t0`` and the Euler-predicted ``t1``."""
+    """Second-order Heun (trapezoidal): average the
+    drift at ``t0`` and the Euler-predicted ``t1``."""
 
     def _step(self, model, z, t0, t1, cond):
         dt = t1 - t0

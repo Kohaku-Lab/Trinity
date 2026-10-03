@@ -1,12 +1,15 @@
-"""Cache samples of a published placer drawn with its own in-sampler guidance over the dev split.
+"""Cache samples of a published placer drawn with
+its own in-sampler guidance over the dev split.
 
 Uses the dev split, NFE ladder, ``K`` draws, chunking and per-chunk noise of
-``scripts/eval/generate.py``, so a guided shard is paired draw for draw with the unguided shard
-of the same checkpoint. Sampling runs the ``euler_guided`` sampler
-(``trinity_baselines.ports.guidance``). Writes ``<OUT_DIR>/<NAME>/<SHARD>_nfe<f>.npz`` in the
-``generate.py`` layout plus ``meta_nfe<list>.json`` with the guidance and its settings. Run::
+``scripts/eval/generate.py``, so a guided shard is paired draw for draw with the
+unguided shard of the same checkpoint. Sampling runs the ``euler_guided`` sampler
+(``trinity_baselines.ports.guidance``). Writes ``<OUT_DIR>/<NAME>/<SHARD>_nfe<f>.npz``
+in the ``generate.py`` layout plus ``meta_nfe<list>.json`` with the guidance and its
+settings. Run::
 
-    kogine run scripts/baselines/generate_guided.py --config configs/baselines/generate_guided_chipdiffusion.py
+    kogine run scripts/baselines/generate_guided.py \\
+        --config configs/baselines/generate_guided_chipdiffusion.py
 """
 
 import json

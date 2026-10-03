@@ -4,18 +4,21 @@ Every dev case's reference layout (its ground-truth latent) is the start of each
 ``LOOPS``: the ported published refiners at their published settings and the closed-form
 refiner at the paper weights and at the training weights. Every snapshot is measured:
 
-* ``disp_rms`` / ``disp_max`` -- RMS and largest centre displacement of the movable blocks
-  (units of ``s``); ``disp_preplaced`` -- the displacement of the preplaced blocks (a check);
-* ``U_train`` / ``U_refine`` -- the two constraint energies; the soft vector; the six term
-  values at weight 1.
+* ``disp_rms`` / ``disp_max`` -- RMS and largest centre displacement of the movable
+  blocks (units of ``s``); ``disp_preplaced`` -- the displacement of the preplaced
+  blocks (a check);
+* ``U_train`` / ``U_refine`` -- the two constraint energies;
+  the soft vector; the six term values at weight 1.
 
-Also the reference's own rule violations (cluster pairs with a gap, coded sides off their
-edge). Writes ``reference_loops.npz`` (per-case arrays) and ``reference_loops.json`` (per loop
-and step the means and medians, and the share of cases whose soft cost rose).
+Also the reference's own rule violations (cluster pairs with a gap, coded sides off
+their edge). Writes ``reference_loops.npz`` (per-case arrays) and
+``reference_loops.json`` (per loop and step the means and medians, and the share of
+cases whose soft cost rose).
 
 Run::
 
-    kogine run scripts/theory/reference_loops.py --config configs/theory/reference_loops.py
+    kogine run scripts/theory/reference_loops.py \\
+        --config configs/theory/reference_loops.py
 """
 
 import json
@@ -153,7 +156,8 @@ def run_loop(name: str, spec: dict, z0: torch.Tensor, case) -> dict[int, torch.T
 
 
 def violations(g, case):
-    """Per case: same-cluster pairs, those with a gap, coded sides, those off their edge."""
+    """Per case: same-cluster pairs, those with
+    a gap, coded sides, those off their edge."""
     gap = C.gap_matrix(g)
     cluster = case.cluster_id
     member = (case.token_mask > 0.5) & (cluster > 0)

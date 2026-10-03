@@ -2,8 +2,8 @@
 
 Blocks are colored by kind (soft / fixed / preplaced / cluster member / boundary-coded),
 overlapping blocks are hatched red, b2b nets are faint steelblue lines between block
-centers, pins are green dots with faint green lines to their blocks, and the bounding box
-is dashed. The title carries the score summary (feasibility, cost, gaps, ``V_rel``).
+centers, pins are green dots with faint green lines to their blocks, and the bounding
+box is dashed. The title carries the score summary (feasibility, cost, gaps, ``V_rel``).
 """
 
 import matplotlib
@@ -37,7 +37,8 @@ _COMPONENT_COLORS = ["magenta", "cyan", "yellow", "lime", "orange", "deeppink"]
 
 
 def _line_style(n_edges: int) -> tuple[float, float]:
-    """``(alpha, linewidth)`` of a net layer with ``n_edges`` lines (fading as ``1/sqrt(n)``)."""
+    """``(alpha, linewidth)`` of a net layer with
+    ``n_edges`` lines (fading as ``1/sqrt(n)``)."""
     if n_edges <= 1:
         return 0.7, 0.8
     alpha = float(np.clip(4.5 / np.sqrt(n_edges), 0.12, 0.7))
@@ -72,7 +73,8 @@ def _b2b_segments(inst, centers):
 
 
 def _p2b_segments(inst, centers):
-    """The in-range pin-to-block segments ``(M, 2, 2)`` and the valid pin positions ``(P, 2)``."""
+    """The in-range pin-to-block segments ``(M, 2,
+    2)`` and the valid pin positions ``(P, 2)``."""
     edges = inst.p2b
     keep = (
         (edges[:, 0] >= 0)
@@ -93,8 +95,8 @@ def _violation_marks(placement: Placement):
     """The soft-violation overlay of ``placement``.
 
     Returns ``(V_boundary, V_grouping, boundary-violating blocks, {block: (color,
-    fragment)} for the members of split clusters, [(centroid_a, centroid_b, color)] links
-    between consecutive fragments)``.
+    fragment)} for the members of split clusters, [(centroid_a, centroid_b, color)]
+    links between consecutive fragments)``.
     """
     v_boundary, bad = check_boundary(placement)
     v_grouping, split_groups = check_grouping(placement)
@@ -202,7 +204,8 @@ def _draw_block(
 
 
 def _draw_nets(ax, inst, centers, draw_nets: bool, draw_pins: bool) -> None:
-    """The b2b nets and the pins with their p2b lines, one ``LineCollection`` per layer."""
+    """The b2b nets and the pins with their p2b
+    lines, one ``LineCollection`` per layer."""
     if draw_nets:
         segments = _b2b_segments(inst, centers)
         if segments.shape[0]:
@@ -241,10 +244,10 @@ def draw_placement(
 ) -> None:
     """Draw ``placement`` onto the matplotlib axes ``ax``.
 
-    Blocks by kind, nets, pins, bounding box, legend and a score title. ``labels`` writes
-    the block indices; ``mark_violations`` overlays an orange "B" on boundary-violating
-    blocks and outlines every member of a split cluster in its group color with its
-    fragment number, a dashed arrow linking consecutive fragments.
+    Blocks by kind, nets, pins, bounding box, legend and a score title. ``labels``
+    writes the block indices; ``mark_violations`` overlays an orange "B" on
+    boundary-violating blocks and outlines every member of a split cluster in its group
+    color with its fragment number, a dashed arrow linking consecutive fragments.
     """
     inst = placement.instance
     centers = placement.centers

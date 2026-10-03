@@ -1,10 +1,11 @@
-"""The flagship pipeline (NFE 8, the 400-step refiner, ``scale_pack``, 16 draws) on the five
-MCNC cases with hard blocks, a square outline with 10% white space and terminals at their
-file positions.
+"""The flagship pipeline (NFE 8, the 400-step refiner, ``scale_pack``, 16 draws) on the
+five MCNC cases with hard blocks, a square outline with 10% white space and terminals at
+their file positions.
 
 Run::
 
-    kogine run scripts/eval/bookshelf.py --config configs/eval/bookshelf/flagship_mcnc_hard.py
+    kogine run scripts/eval/bookshelf.py \\
+        --config configs/eval/bookshelf/flagship_mcnc_hard.py
 """
 
 CHECKPOINT = "outputs/train/flagship/checkpoints/last.ckpt"

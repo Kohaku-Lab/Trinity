@@ -1,16 +1,15 @@
 """Locate (and, when missing, download) FloorSet and the bookshelf benchmarks.
 
-Every dataset resolves the same way: an explicit ``override`` argument, then its environment
-variable, then the project data directory ``<repo>/data`` (``TRINITY_DATA`` overrides it).
-When none holds the data and downloading is allowed, it is fetched into the project data
-directory.
+Every dataset resolves the same way: an explicit ``override`` argument, then its
+environment variable, then the project data directory ``<repo>/data`` (``TRINITY_DATA``
+overrides it). When none holds the data and downloading is allowed, it is fetched into
+the project data directory.
 
-| dataset              | environment variable  | layout under the root                         |
-|----------------------|-----------------------|-----------------------------------------------|
-| FloorSet validation  | ``TRINITY_FLOORSET``  | ``LiteTensorDataTest/config_<21..120>/``      |
-| FloorSet train       | ``TRINITY_TRAIN_LANCE`` | ``floorset_lite_mibfix.lance`` (a script builds it) |
-| GSRC                 | ``TRINITY_GSRC``      | ``gsrc/{HARD,SOFT}/n<size>.{blocks,nets,pl}`` |
-| MCNC                 | ``TRINITY_MCNC``      | ``mcnc/{HARD,SOFT}/<name>.{blocks,nets,pl}``  |
+* FloorSet validation -- ``TRINITY_FLOORSET``: ``LiteTensorDataTest/config_<21..120>/``
+* FloorSet train -- ``TRINITY_TRAIN_LANCE``: ``floorset_lite_mibfix.lance`` (built by
+  ``scripts/data/transcode_floorset.py``)
+* GSRC -- ``TRINITY_GSRC``: ``gsrc/{HARD,SOFT}/n<size>.{blocks,nets,pl}``
+* MCNC -- ``TRINITY_MCNC``: ``mcnc/{HARD,SOFT}/<name>.{blocks,nets,pl}``
 """
 
 import os
@@ -58,7 +57,7 @@ def project_data_root() -> Path:
 
 
 def _candidate_roots(override: str | None, env_var: str) -> list[Path]:
-    """The roots to probe, in order: ``override``, ``$env_var``, the project data dir."""
+    """The roots to probe: ``override``, ``$env_var``, the project data dir."""
     roots = [Path(override)] if override else []
     if os.environ.get(env_var):
         roots.append(Path(os.environ[env_var]))
@@ -74,7 +73,7 @@ def _find_root(
     allow_download: bool,
     name: str,
 ) -> Path:
-    """The first candidate root holding the data, downloading into the project dir if allowed."""
+    """The first root holding the data, downloading into the project dir if allowed."""
     candidates = _candidate_roots(override, env_var)
     for root in candidates:
         if has_data(root):
@@ -92,7 +91,8 @@ def _find_root(
 
 
 def _download_tar(url: str, root: Path, archive_name: str, desc: str) -> None:
-    """Stream ``url`` to ``root/archive_name``, extract it into ``root``, then delete it."""
+    """Download ``url`` to ``root/archive_name``, extract it into ``root``, delete
+    the archive."""
     root.mkdir(parents=True, exist_ok=True)
     archive = root / archive_name
     if not archive.exists():
@@ -151,7 +151,7 @@ def find_floorset_root(
 def validation_case_path(
     root: Path, n_blocks: int, identifier: int = 1
 ) -> tuple[Path, Path]:
-    """The ``(litedata, litelabel)`` paths of one validation case (``config_<n_blocks>``)."""
+    """The ``(litedata, litelabel)`` paths of validation case ``config_<n_blocks>``."""
     config_dir = root / VALIDATION_DIRNAME / f"config_{n_blocks}"
     data = config_dir / f"litedata_{identifier}.pth"
     label = config_dir / f"litelabel_{identifier}.pth"
@@ -161,8 +161,8 @@ def validation_case_path(
 def find_train_lance(override: str | None = None) -> Path:
     """The transcoded 1M-layout train set ``floorset_lite_mibfix.lance``.
 
-    Raises ``FileNotFoundError`` with the build command when it is absent; the Lance set is
-    produced by ``scripts/data/transcode_floorset.py``, never downloaded.
+    Raises ``FileNotFoundError`` with the build command when it is absent; the Lance
+    set is produced by ``scripts/data/transcode_floorset.py``, never downloaded.
     """
     for candidate in (override, os.environ.get("TRINITY_TRAIN_LANCE")):
         if candidate and Path(candidate).is_dir():
@@ -179,7 +179,7 @@ def find_train_lance(override: str | None = None) -> Path:
 def download_train_raw(root: Path | None = None) -> Path:
     """Fetch and extract the raw 1M ``.th`` tree (``LiteTensorData_v2``, ~6.6 GB).
 
-    Returns the ``floorset_lite/`` directory under ``root`` (default: the project data dir).
+    Returns ``root/floorset_lite/`` (``root`` defaults to the project data dir).
     """
     root = project_data_root() if root is None else Path(root)
     tree = root / TRAIN_DIRNAME

@@ -1,7 +1,7 @@
 """The denoiser backbone, its block, its components and the architecture presets.
 
-Importing this package registers the components (norm, mlp, attention, time conditioning,
-graph mix).
+Importing this package registers the components
+(norm, mlp, attention, time conditioning, graph mix).
 """
 
 from trinity.models import components  # noqa: F401  (register: model components)

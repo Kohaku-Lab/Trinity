@@ -1,14 +1,16 @@
-"""Constraint refiner by autograd: gradient descent of the aux terms on a finished sample's latent.
+"""Constraint refiner by autograd: gradient descent
+of the aux terms on a finished sample's latent.
 
 The energy is the weighted sum of the constraint quantities of ``losses/constraint.py``
-(``overlap``, ``group``, ``mib``, ``boundary``, ``wl``, ``area``, plus ``outline`` for a case
-with a fixed outline), evaluated on the decoded geometry in normalized units (``scale = 1``,
-areas ``/ s^2``, pin edges ``/ s``). Frozen channels are detached by the terms' own masks
-(``mob_pos`` / ``mob_shape``); anchored coordinates are re-clamped after every step.
+(``overlap``, ``group``, ``mib``, ``boundary``, ``wl``, ``area``, plus ``outline`` for a
+case with a fixed outline), evaluated on the decoded geometry in normalized units
+(``scale = 1``, areas ``/ s^2``, pin edges ``/ s``). Frozen channels are detached by the
+terms' own masks (``mob_pos`` / ``mob_shape``); anchored coordinates are re-clamped
+after every step.
 
 ``refine_latent`` is the batched entry point over one :class:`RefineCase`;
-:class:`ConstraintRefiner` is the ``REFINER`` ``constraint_latent`` (``refine(z0, case)``),
-the autograd reference of the closed-form refiner.
+:class:`ConstraintRefiner` is the ``REFINER`` ``constraint_latent`` (``refine(z0,
+case)``), the autograd reference of the closed-form refiner.
 """
 
 import math
@@ -22,7 +24,8 @@ from trinity.registry import REFINER
 
 
 def _outline_fn(g, c):
-    """``(B,)`` bbox width and height beyond the fixed outline, ``/ s`` (0 without an outline)."""
+    """``(B,)`` bbox width and height beyond the
+    fixed outline, ``/ s`` (0 without an outline)."""
     if c.outline is None:
         return g.new_zeros(g.shape[0])
     x_min, y_min, x_max, y_max = C.bbox(
@@ -65,10 +68,11 @@ TERMS = {
 
 @dataclass
 class RefineCase:
-    """The static per-row tensors of a refine batch (all ``(B, ...)``, normalized units).
+    """The static per-row tensors of a refine
+    batch (all ``(B, ...)``, normalized units).
 
-    ``outline`` is the fixed outline ``(B, 2)`` of a bookshelf protocol (``None`` or ``inf``
-    without one); the fields from ``scale`` on are read by the batched scorer.
+    ``outline`` is the fixed outline ``(B, 2)`` of a bookshelf protocol (``None`` or
+    ``inf`` without one); the fields from ``scale`` on are read by the batched scorer.
     """
 
     area_norm: torch.Tensor
@@ -108,7 +112,8 @@ def constraint_energy(
 
 
 def lr_factor(schedule: str, step: int, steps: int) -> float:
-    """The lr multiplier of ``schedule`` (constant / cosine / linear decay to 0) at ``step``."""
+    """The lr multiplier of ``schedule`` (constant
+    / cosine / linear decay to 0) at ``step``."""
     t = step / max(steps - 1, 1)
     if schedule == "cosine":
         return 0.5 * (1.0 + math.cos(math.pi * t))
@@ -131,8 +136,8 @@ def refine_latent(
 ) -> dict[int, torch.Tensor]:
     """Descend the constraint energy from ``z0`` ``(B, N, 3)`` with autograd.
 
-    ``optimizer`` is ``adam`` or ``sgd``. Returns ``{step: z}`` (anchors clamped) at every
-    step in ``snapshots`` (0 = the input) and at ``steps``.
+    ``optimizer`` is ``adam`` or ``sgd``. Returns ``{step: z}`` (anchors
+    clamped) at every step in ``snapshots`` (0 = the input) and at ``steps``.
     """
     z = z0.detach().clone().requires_grad_(True)
     if optimizer == "adam":

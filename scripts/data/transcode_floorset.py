@@ -1,23 +1,27 @@
 """Transcode the raw FloorSet-Lite ``.th`` files into one Lance dataset.
 
 The 1M-layout train set ships as ``floorset_lite/worker_*/layouts_*.th`` files, each a
-7-column list of 112 layouts of one block count. This script writes them into a single Lance
-dataset (``data/floorset_lite.lance``): fixed fields as scalars or fixed-size lists, the
-ragged per-block / per-edge / per-pin arrays as flat ``list<float>`` columns plus their
-counts. The boxes ``fp_sol = [w, h, x, y]`` are stored as-is; the latent and the
-conditioning are derived at load time.
+7-column list of 112 layouts of one block count. This script writes them into a single
+Lance dataset (``data/floorset_lite.lance``): fixed fields as scalars or fixed-size
+lists, the ragged per-block / per-edge / per-pin arrays as flat ``list<float>`` columns
+plus their counts. The boxes ``fp_sol = [w, h, x, y]`` are stored as-is; the latent and
+the conditioning are derived at load time.
 
-With ``MIB_FIX`` (the default, and the set every paper model trained on) the MIB column is
-rebuilt from the ground-truth shapes: the MIB group becomes every block whose ground-truth
-``(w, h)`` equals the most frequent ``(w, h)`` of the layout (ties: the lexicographically
-smallest), so all members of the group share one shape. ``FIX_EXISTING`` applies the same
-rebuild to an already transcoded Lance set instead of the raw files.
+With ``MIB_FIX`` (the default, and the set every paper model trained on) the MIB column
+is rebuilt from the ground-truth shapes: the MIB group becomes every block whose
+ground-truth ``(w, h)`` equals the most frequent ``(w, h)`` of the layout (ties: the
+lexicographically smallest), so all members of the group share one shape.
+``FIX_EXISTING`` applies the same rebuild to an already transcoded Lance set instead of
+the raw files.
 
 Download the raw tree first (``trinity.floorplan.data.download_train_raw``), then::
 
     kogine run scripts/data/transcode_floorset.py
-    kogine run scripts/data/transcode_floorset.py --set MIB_FIX=False --set OUT=data/raw.lance
-    kogine run scripts/data/transcode_floorset.py --set FIX_EXISTING=data/floorset_lite.lance
+    kogine run scripts/data/transcode_floorset.py \\
+        --set MIB_FIX=False \\
+        --set OUT=data/raw.lance
+    kogine run scripts/data/transcode_floorset.py \\
+        --set FIX_EXISTING=data/floorset_lite.lance
 """
 
 import glob
@@ -74,8 +78,9 @@ def _flat(tensor) -> list[float]:
 def fix_mib(constraints: list[float], fp_sol: list[float], n: int) -> list[float]:
     """The flat ``(n, 5)`` constraints with the MIB column rebuilt from the shapes.
 
-    The new MIB group (id 1) is every block whose ``(w, h)`` in ``fp_sol`` equals the most
-    frequent shape (ties: the lexicographically smallest); no group when no shape repeats.
+    The new MIB group (id 1) is every block whose ``(w, h)`` in ``fp_sol`` equals the
+    most frequent shape (ties: the lexicographically smallest); no group when no shape
+    repeats.
     """
     table = np.asarray(constraints, dtype=np.float32).reshape(n, 5).copy()
     shapes = [
@@ -183,7 +188,8 @@ def main() -> None:
     if os.path.exists(OUT):
         raise SystemExit(f"{OUT} exists; remove it to transcode again")
     print(
-        f"transcoding {len(files)} files (~{len(files) * LAYOUTS_PER_FILE} layouts) -> {OUT}"
+        f"transcoding {len(files)} files "
+        f"(~{len(files) * LAYOUTS_PER_FILE} layouts) -> {OUT}"
     )
 
     start = time.perf_counter()

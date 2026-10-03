@@ -1,5 +1,5 @@
-"""Correctness gates of the method: framings, backbone, losses, trainer, placer, graph PE,
-and the release export / load round trip."""
+"""Correctness gates of the method: framings, backbone, losses,
+trainer, placer, graph PE, and the release export / load round trip."""
 
 from types import SimpleNamespace
 
@@ -212,7 +212,8 @@ def test_trainer_solve_cases_and_validation_totals():
 
 
 def _pad_batch(cases, device):
-    """Stack real instances' raw b2b adjacency into ``(B, max_n, max_n)`` + a ``(B, max_n)`` mask."""
+    """Stack real instances' raw b2b adjacency into
+    ``(B, max_n, max_n)`` + a ``(B, max_n)`` mask."""
     max_n = max(c.block_count for c in cases)
     adj = torch.zeros(len(cases), max_n, max_n)
     mask = torch.zeros(len(cases), max_n, dtype=torch.bool)
@@ -234,8 +235,8 @@ def _pad_batch(cases, device):
     ],
 )
 def test_batched_gpu_pe_matches_numpy(spec):
-    """The batched PE equals the per-instance numpy reference on every real block, and is
-    exactly zero on padded rows."""
+    """The batched PE equals the per-instance numpy reference
+    on every real block, and is exactly zero on padded rows."""
     builder = build(spec, GRAPH_PE)
     cases = load_validation_set(allow_download=False)[:24]
     adj, mask, _max_n = _pad_batch(cases, _PE_DEVICE)
@@ -251,7 +252,8 @@ def test_batched_gpu_pe_matches_numpy(spec):
 
 @needs_data
 def test_no_graph_pe_is_batched_noop():
-    """``graph_pe_dim == 0`` (NoGraphPE) yields an empty ``(B, N, 0)`` PE (no eigendecomposition)."""
+    """``graph_pe_dim == 0`` (NoGraphPE) yields an
+    empty ``(B, N, 0)`` PE (no eigendecomposition)."""
     builder = build("none", GRAPH_PE)
     assert builder.dim == 0
     cases = load_validation_set(allow_download=False)[:4]
@@ -261,7 +263,8 @@ def test_no_graph_pe_is_batched_noop():
 
 
 def test_release_round_trip(tmp_path):
-    """A checkpoint exported as a release reloads with the EMA weights and the same outputs."""
+    """A checkpoint exported as a release reloads
+    with the EMA weights and the same outputs."""
     model = DiffusionTrainer(
         preset="DiT-S",
         arch_overrides={"feature_dim": 19, "graph_pe_dim": 2},

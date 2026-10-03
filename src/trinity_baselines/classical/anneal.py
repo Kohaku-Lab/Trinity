@@ -1,4 +1,5 @@
-"""Records shared by the annealing solvers: a layout snapshot along a run and the run's result."""
+"""Records shared by the annealing solvers: a layout
+snapshot along a run and the run's result."""
 
 from dataclasses import dataclass, field
 

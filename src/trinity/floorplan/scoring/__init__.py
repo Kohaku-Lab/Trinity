@@ -1,9 +1,10 @@
-"""Scoring: hard feasibility, the soft count ``V_rel``, the per-case cost and set totals,
-plus the continuous metrics (``continuous``, ``severity``, ``vector``), the bookshelf
-metrics and the distribution-level metrics (``descriptors``, ``distribution``).
+"""Scoring: hard feasibility, the soft count ``V_rel``, the per-case cost and set
+totals, plus the continuous metrics (``continuous``, ``severity``, ``vector``), the
+bookshelf metrics and the distribution-level metrics (``descriptors``,
+``distribution``).
 
-Importing this package registers the ``full``, ``full_fast``, ``stub`` and ``continuous``
-scorers in :data:`trinity.floorplan.registry.SCORER`.
+Importing this package registers the ``full``, ``full_fast``, ``stub``
+and ``continuous`` scorers in :data:`trinity.floorplan.registry.SCORER`.
 """
 
 from trinity.floorplan.scoring import (

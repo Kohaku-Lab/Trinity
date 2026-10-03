@@ -1,13 +1,13 @@
 """Score cached generation shards with the soft metric vector.
 
-Reads ``GEN_DIR/<run>/<shard>.npz`` (written by ``generate.py`` / ``generate_prior.py``),
-decodes every cached draw to boxes, scores the metric columns of
-``trinity.floorplan.scoring.vector.COLS`` and writes one JSON with, per ``run|shard``, the
-mean over cases of the per-case mean over draws (``mean_k``) and of the draw with the
-lowest ``soft_cost`` (``best_k``).
+Reads ``GEN_DIR/<run>/<shard>.npz`` (written by ``generate.py`` /
+``generate_prior.py``), decodes every cached draw to boxes, scores the metric columns of
+``trinity.floorplan.scoring.vector.COLS`` and writes one JSON with, per ``run|shard``,
+the mean over cases of the per-case mean over draws (``mean_k``) and of the draw with
+the lowest ``soft_cost`` (``best_k``).
 
-Work is split into ``(run, shard, case chunk)`` tasks on a process pool; each worker opens
-its own Lance store and loads only the chunks it scores.
+Work is split into ``(run, shard, case chunk)`` tasks on a process pool;
+each worker opens its own Lance store and loads only the chunks it scores.
 
 Run::
 
@@ -66,7 +66,8 @@ def init_worker(ids, gen_dir, wire_drop, wire_drop_seed, chunk, lance) -> None:
 
 
 def chunk_cases(chunk: int, n_cases: int):
-    """The instances of case chunk ``chunk`` of a shard holding the first ``n_cases`` dev ids."""
+    """The instances of case chunk ``chunk`` of a
+    shard holding the first ``n_cases`` dev ids."""
     key = (chunk, n_cases)
     if key not in _worker["cases"]:
         size = _worker["chunk"]
@@ -85,7 +86,8 @@ def chunk_cases(chunk: int, n_cases: int):
 
 
 def score_chunk(task):
-    """``(run, shard, sum of per-case means, sum of per-case best draws, case count)``."""
+    """``(run, shard, sum of per-case means, sum
+    of per-case best draws, case count)``."""
     run, shard, chunk = task
     data = np.load(Path(_worker["gen_dir"]) / run / f"{shard}.npz")
     lat, bcount, k = data["lat"], data["bcount"], int(data["k"])

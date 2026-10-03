@@ -1,5 +1,5 @@
-"""The flagship: spectral-drawing graph PE + the info-mover residual, all six aux terms at
-weight 0.01, and the wire-dropout mixture, on the base recipe (d768 / L12).
+"""The flagship: spectral-drawing graph PE + the info-mover residual, all six aux
+terms at weight 0.01, and the wire-dropout mixture, on the base recipe (d768 / L12).
 
 Run::
 

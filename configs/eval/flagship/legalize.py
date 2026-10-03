@@ -1,6 +1,6 @@
-"""The flagship's NFE x refiner-steps grid through ``scale_pack``: hard cost per cell for a
-single sample and best of 4, with the refined latents, legalized boxes and per-draw soft
-vectors stored.
+"""The flagship's NFE x refiner-steps grid through ``scale_pack``: hard cost per cell
+for a single sample and best of 4, with the refined latents, legalized boxes and
+per-draw soft vectors stored.
 
 Run::
 

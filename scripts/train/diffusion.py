@@ -1,10 +1,12 @@
 """Train a Trinity diffusion model on FloorSet.
 
-A kohaku-engine script: every typed UPPER_CASE global below is a knob that a config file (or
-a typed ``--set``) overrides::
+A kohaku-engine script: every typed UPPER_CASE global below is
+a knob that a config file (or a typed ``--set``) overrides::
 
     kogine run scripts/train/diffusion.py --config configs/train/flagship.py
-    kogine run scripts/train/diffusion.py --config configs/train/smoke.py --set MAX_STEPS=20
+    kogine run scripts/train/diffusion.py \\
+        --config configs/train/smoke.py \\
+        --set MAX_STEPS=20
 
 The defaults form a small runnable recipe (the 100-case validation set as data). Every
 component spec (framing, losses, graph PE, refiner, ...) is resolved by the trainer.
@@ -61,10 +63,11 @@ SPLIT_SEED: int = 20090220
 ALLOW_DOWNLOAD: bool = True
 
 # ---- Model -----------------------------------------------------------------
-# A named preset plus per-field overrides (PRESET=None: ARCH_OVERRIDES is the whole arch).
+# A named preset plus per-field overrides (None: ARCH_OVERRIDES is the whole arch).
 PRESET: str | None = "ref-d384"
 ARCH_OVERRIDES: dict = {}
-# A ported baseline denoiser (trinity_baselines BASELINE_BACKBONE spec); None: Trinity's.
+# A ported baseline denoiser (trinity_baselines
+# BASELINE_BACKBONE spec); None: Trinity's.
 BACKBONE: dict | str | None = None
 
 # ---- Objective -------------------------------------------------------------
@@ -77,12 +80,14 @@ LOSSES: list = [{"name": "denoise"}]
 LATENT_PARAM: dict | str = "s_only"
 # Graph PE spec; its width must equal ARCH_OVERRIDES["graph_pe_dim"].
 GRAPH_PE: dict | str | None = None
-# Per-instance max-normalization of the pin-pull feature and of the graph-bias adjacency.
+# Per-instance max-normalization of the pin-pull
+# feature and of the graph-bias adjacency.
 PIN_PULL_NORMALIZE: bool = False
 GRAPH_BIAS_NORMALIZE: bool = False
 # Anchor of all-soft MIB groups: "group_mean" | "square" | "none".
 MIB_ANCHOR: str = "group_mean"
-# Train-time augmentation op list (None: off), e.g. [{"rot90": {...}}, {"flip": {"p": 0.5}}].
+# Train-time augmentation op list (None: off),
+# e.g. [{"rot90": {...}}, {"flip": {"p": 0.5}}].
 AUGMENT: list | None = None
 
 # ---- Compute ---------------------------------------------------------------
@@ -102,8 +107,8 @@ PRECISION: str = "bf16-mixed"
 DDP_COMPRESS_HOOK: str | None = "bf16"
 NUM_WORKERS: int = 0
 SEED: int = 20090220
-# Runtime speed options (docs/training.md): pinned loader memory, the sync-free step, and
-# CUDA graphs on the compiled blocks (needs COMPILE={"mode": "module"}).
+# Runtime speed options (docs/training.md): pinned loader memory, the sync-free
+# step, and CUDA graphs on the compiled blocks (needs COMPILE={"mode": "module"}).
 PIN_MEMORY: bool = False
 FAST_STEP: bool = False
 TRAIN_CUDA_GRAPHS: bool = False
@@ -132,9 +137,11 @@ GRAD_CKPT: bool = False
 # ---- Inference during training (sample renders + validation) ---------------
 SAMPLE_STEPS: int = 16
 SAMPLE_SOLVER: str = "euler"
-# Sampler projections; None: the default (known answers + MIB shape agreement), []: none.
+# Sampler projections; None: the default (known
+# answers + MIB shape agreement), []: none.
 SAMPLE_PROJECTIONS: list | None = None
-# Candidates sampled per case in the full solve path (the cheapest legalized one is kept).
+# Candidates sampled per case in the full solve
+# path (the cheapest legalized one is kept).
 EVAL_BEST_OF_N: int = 16
 # Rows (cases x candidates) per GPU forward.
 EVAL_MAX_BATCH: int = 2000
@@ -204,7 +211,8 @@ def _tag(spec) -> str:
 
 
 def auto_name() -> str:
-    """A run name from the arch, size and objective, e.g. ``trinity-rms-swi-tok-qk-d768L12-rf-logitn-bs256``."""
+    """A run name from the arch, size and objective, e.g.
+    ``trinity-rms-swi-tok-qk-d768L12-rf-logitn-bs256``."""
     arch = build_arch(PRESET, ARCH_OVERRIDES)
     parts = [
         "trinity",
@@ -226,7 +234,8 @@ def auto_name() -> str:
 
 
 def _config_path() -> str | None:
-    """The ``--config`` / ``-c`` path of the launching ``kogine run`` command, if any."""
+    """The ``--config`` / ``-c`` path of the
+    launching ``kogine run`` command, if any."""
     for flag in ("--config", "-c"):
         if flag in sys.argv:
             index = sys.argv.index(flag)
@@ -236,7 +245,8 @@ def _config_path() -> str | None:
 
 
 def _log_config_to_wandb(logger) -> None:
-    """Save the config file and the resolved knobs to the wandb run (failures only warn)."""
+    """Save the config file and the resolved knobs
+    to the wandb run (failures only warn)."""
     if not hasattr(logger, "experiment"):
         return
     try:
@@ -261,7 +271,8 @@ def _cond_options() -> CondOptions:
 
 
 def build_data():
-    """``(train_dataset, dev_shard_fn)``; ``dev_shard_fn(rank, world)`` is that rank's dev slice."""
+    """``(train_dataset, dev_shard_fn)``; ``dev_shard_fn(rank,
+    world)`` is that rank's dev slice."""
     if DATA == "train":
         dataset, splits = train_dataset(
             lance_path=TRAIN_LANCE,
@@ -288,7 +299,8 @@ def build_data():
 
 
 def build_model() -> DiffusionTrainer:
-    """The ``DiffusionTrainer`` of the config (weights from ``CHECKPOINT_PATH`` if set)."""
+    """The ``DiffusionTrainer`` of the config
+    (weights from ``CHECKPOINT_PATH`` if set)."""
     trainer_kwargs = dict(
         preset=PRESET,
         arch_overrides=ARCH_OVERRIDES,

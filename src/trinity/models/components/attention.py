@@ -90,7 +90,8 @@ class SDPAGraphAttention(_AttnBase):
 
 @ATTENTION.register("flex_graph")
 class FlexGraphAttention(_AttnBase):
-    """FlexAttention with the graph bias added in a ``score_mod`` closure (fused under compile)."""
+    """FlexAttention with the graph bias added in a
+    ``score_mod`` closure (fused under compile)."""
 
     def forward(
         self, x: torch.Tensor, bias: torch.Tensor | None = None
@@ -113,7 +114,8 @@ class SDPAGraphHeadsAttention(_AttnBase):
     """Head-split graph attention: ``n_graph_heads`` heads attend by the netlist alone.
 
     In the first ``n_graph_heads`` heads the queries are zeroed and the logits are
-    ``softplus(scale) * bias + shift`` (learned per head); the other heads are ``sdpa_graph``.
+    ``softplus(scale) * bias + shift`` (learned per head); the other heads are
+    ``sdpa_graph``.
     """
 
     def __init__(

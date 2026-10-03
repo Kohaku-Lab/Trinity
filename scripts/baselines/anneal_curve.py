@@ -1,32 +1,38 @@
-"""The cost-versus-time curve of a classical solver: anneal a case set at several budgets and
-seeds, snapshot the layout along every run, and score every snapshot.
+"""The cost-versus-time curve of a classical solver: anneal a case set at several
+budgets and seeds, snapshot the layout along every run, and score every snapshot.
 
-Per snapshot the record holds the soft metric vector of the raw layout, the hard cost of the
-layout after ``LEGALIZE_ROUTE`` (for bookshelf cases: the net HPWL and the outline fit), the
-annealing seconds so far (scoring excluded) and the legalizer's milliseconds. Hard metrics are
-only ever taken on legalized layouts.
+Per snapshot the record holds the soft metric vector of the raw layout, the hard cost of
+the layout after ``LEGALIZE_ROUTE`` (for bookshelf cases: the net HPWL and the outline
+fit), the annealing seconds so far (scoring excluded) and the legalizer's milliseconds.
+Hard metrics are only ever taken on legalized layouts.
 
 ``CASES`` selects the case set:
 
 * ``{"source": "official"}`` -- the 100 FloorSet validation cases;
-* ``{"source": "dev", "per_n": k, "n_list": [...]}`` -- the first ``k`` dev cases per block count;
+* ``{"source": "dev", "per_n": k, "n_list": [...]}``
+  -- the first ``k`` dev cases per block count;
 * ``{"source": "dev", "limit": m}`` -- the first ``m`` dev cases;
-* ``{"source": "dev", "spread": m}`` -- ``m`` dev cases at a constant stride by block count;
-* ``{"source": "bookshelf", "suite": "mcnc" | "gsrc", ...}`` -- MCNC / GSRC under a fixed outline
-  (``variant``, ``gamma``, ``aspect``, ``map_pins``, ``names`` / ``sizes``).
+* ``{"source": "dev", "spread": m}`` -- ``m``
+  dev cases at a constant stride by block count;
+* ``{"source": "bookshelf", "suite": "mcnc" | "gsrc", ...}`` -- MCNC / GSRC under a
+  fixed outline (``variant``, ``gamma``, ``aspect``, ``map_pins``, ``names`` /
+  ``sizes``).
 
-``INIT`` warm-starts every run from stored legalized boxes, either a ``scripts/eval/legalize.py``
-run saved with ``SAVE_LAYOUTS`` (``{"npz", "nfe", "steps", "draw"}``, dev cases) or an ``.npz``
-keyed per case (``{"npz", "key"}`` with ``{name}`` / ``{index}`` placeholders).
+``INIT`` warm-starts every run from stored legalized boxes, either a
+``scripts/eval/legalize.py`` run saved with ``SAVE_LAYOUTS`` (``{"npz", "nfe", "steps",
+"draw"}``, dev cases) or an ``.npz`` keyed per case (``{"npz", "key"}`` with ``{name}``
+/ ``{index}`` placeholders).
 
-Every job runs in its own process (PARSAC keeps a per-process wirelength normalization) with at
-most ``WORKERS`` jobs in flight. A job that raises, or is still running
-``JOB_TIMEOUT_S + JOB_TIMEOUT_PER_STEP x budget`` seconds after submission, is skipped and listed
-in ``meta["failed_jobs"]``. ``RESUME`` names a previous run's JSON over the same task list whose
-finished jobs are reused. Writes one JSON (records and per-budget summaries) and one ``.npz``
-(key ``job<i>``: every snapshot's boxes, ``(snapshots, n, 4)``). Run::
+Every job runs in its own process (PARSAC keeps a per-process wirelength normalization)
+with at most ``WORKERS`` jobs in flight. A job that raises, or is still running
+``JOB_TIMEOUT_S + JOB_TIMEOUT_PER_STEP x budget`` seconds after submission, is skipped
+and listed in ``meta["failed_jobs"]``. ``RESUME`` names a previous run's JSON over the
+same task list whose finished jobs are reused. Writes one JSON (records and per-budget
+summaries) and one ``.npz`` (key ``job<i>``: every snapshot's boxes, ``(snapshots, n,
+4)``). Run::
 
-    kogine run scripts/baselines/anneal_curve.py --config configs/baselines/anneal_parsac.py
+    kogine run scripts/baselines/anneal_curve.py \\
+        --config configs/baselines/anneal_parsac.py
 """
 
 import inspect
@@ -94,7 +100,8 @@ def dev_ids_and_counts():
 
 
 def bookshelf_cases():
-    """The MCNC / GSRC cases of ``CASES`` under the fixed-outline protocol, with labels."""
+    """The MCNC / GSRC cases of ``CASES`` under
+    the fixed-outline protocol, with labels."""
     variant = CASES.get("variant", "HARD")
     if CASES["suite"] == "mcnc":
         names = list(CASES.get("names", MCNC_NAMES))
@@ -114,8 +121,8 @@ def bookshelf_cases():
 def select_cases():
     """``(labels, loaders, cases)``: a label and a ``(kind, key)`` loader per case.
 
-    ``cases`` is the in-memory case list for the ``"official"`` loaders, ``None`` for dev cases
-    (the workers read those from the Lance set).
+    ``cases`` is the in-memory case list for the ``"official"`` loaders,
+    ``None`` for dev cases (the workers read those from the Lance set).
     """
     if CASES["source"] == "official":
         cases = load_validation_set()
@@ -177,7 +184,8 @@ def normalize_key(key):
 
 
 def resume(tasks, labels, loaders, records, arrays) -> set:
-    """Copy the finished jobs of ``RESUME`` into ``records`` / ``arrays``; return their indices."""
+    """Copy the finished jobs of ``RESUME`` into
+    ``records`` / ``arrays``; return their indices."""
     if not RESUME:
         return set()
     previous = json.loads(Path(RESUME).read_text())
@@ -267,7 +275,8 @@ def score_snapshot(inst, xywh) -> dict:
 
 
 def run_job(task):
-    """Anneal one ``(job, kind, key, seed, budget)`` task; return ``(record, snapshot boxes)``."""
+    """Anneal one ``(job, kind, key, seed, budget)``
+    task; return ``(record, snapshot boxes)``."""
     j, kind, key, seed, budget = task
     inst = load_instance(kind, key)
     solver = build(dict(_worker["spec"]), SOLVER)
@@ -307,7 +316,8 @@ def run_job(task):
 
 
 def summarize(records) -> dict:
-    """Per budget and snapshot label: mean legalized cost, feasibility, soft cost and seconds."""
+    """Per budget and snapshot label: mean legalized
+    cost, feasibility, soft cost and seconds."""
     soft_col = COLS.index("soft_cost")
     out = {}
     for budget in sorted({r["budget"] for r in records}):

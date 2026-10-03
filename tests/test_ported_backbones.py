@@ -1,4 +1,5 @@
-"""CPU gates for the ported baseline backbones: build from the registry, forward on real data."""
+"""CPU gates for the ported baseline backbones:
+build from the registry, forward on real data."""
 
 import pytest
 import torch
@@ -72,7 +73,8 @@ def test_flowplace_attgnn_forward_shapes_and_padding():
 
 @needs_data
 def test_flowplace_attgnn_rows_are_independent():
-    """Row 0's output must not change when row 1's inputs change (no cross-row leakage)."""
+    """Row 0's output must not change when row
+    1's inputs change (no cross-row leakage)."""
     cases = [load_validation_case(21), load_validation_case(60)]
     z, cond = padded_batch(cases)
     net = build(SMALL, BASELINE_BACKBONE).eval()
@@ -88,7 +90,8 @@ def test_flowplace_attgnn_rows_are_independent():
 
 @needs_data
 def test_flowplace_attgnn_paper_size_param_count():
-    """The paper 'large' configuration builds and has a parameter count in the expected range."""
+    """The paper 'large' configuration builds and
+    has a parameter count in the expected range."""
     net = build("flowplace_attgnn", BASELINE_BACKBONE)
     n_params = sum(p.numel() for p in net.parameters())
     assert 1_000_000 < n_params < 20_000_000, n_params

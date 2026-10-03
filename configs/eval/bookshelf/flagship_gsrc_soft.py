@@ -1,10 +1,12 @@
-"""The flagship pipeline (NFE 8, the 400-step refiner, ``scale_pack``) on the six GSRC cases
-under the soft-block protocol: every block soft with w/h in [1/3, 3], a square outline with
-10% white space, terminals at their file positions; 16 and 64 draws, four sampling seeds.
+"""The flagship pipeline (NFE 8, the 400-step refiner, ``scale_pack``) on the six GSRC
+cases under the soft-block protocol: every block soft with w/h in [1/3, 3], a square
+outline with 10% white space, terminals at their file positions; 16 and 64 draws, four
+sampling seeds.
 
 Run::
 
-    kogine run scripts/eval/bookshelf.py --config configs/eval/bookshelf/flagship_gsrc_soft.py
+    kogine run scripts/eval/bookshelf.py \\
+        --config configs/eval/bookshelf/flagship_gsrc_soft.py
 """
 
 CHECKPOINT = "outputs/train/flagship/checkpoints/last.ckpt"

@@ -1,4 +1,5 @@
-"""The floorplanning problem: FloorSet and bookshelf data, geometry, scoring, legalization, viz.
+"""The floorplanning problem: FloorSet and bookshelf
+data, geometry, scoring, legalization, viz.
 
 Model-agnostic. Importing the package leaves the registries
 (:data:`LEGALIZER`, :data:`RENDERER`, :data:`SCORER`, :data:`JITTER`) populated with the

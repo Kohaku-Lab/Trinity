@@ -1,20 +1,22 @@
-"""The full pipeline on the MCNC / GSRC bookshelf cases under the fixed-outline protocol.
+"""The full pipeline on the MCNC / GSRC bookshelf
+cases under the fixed-outline protocol.
 
 Cases: ``SUITE`` (``mcnc`` / ``gsrc``) in ``VARIANT`` (``HARD`` = fixed block shapes,
 ``SOFT`` = areas with the protocol's aspect bounds), with an outline of area
 ``(1 + GAMMA)`` x the block area at aspect ``ASPECT`` and the terminals at their file
 positions (``MAP_PINS`` maps them onto the outline).
 
-Per setting ``(NFE, refiner steps, draws)``, sampling seed of ``SEEDS`` and case: one sampler
-forward of the draws, the closed-form refiner (the six terms plus ``outline``), every draw
-legalized in parallel (the LP capped at the outline) and scored with the bookshelf metric
-(net HPWL, dead space, fits the outline, overlap-free, shapes kept). The case's result is the
-feasible draw with the lowest HPWL. Writes ``OUT`` (JSON: per-case rows and per-setting
-summaries) and an ``.npz`` of the kept layouts.
+Per setting ``(NFE, refiner steps, draws)``, sampling seed of ``SEEDS`` and case: one
+sampler forward of the draws, the closed-form refiner (the six terms plus ``outline``),
+every draw legalized in parallel (the LP capped at the outline) and scored with the
+bookshelf metric (net HPWL, dead space, fits the outline, overlap-free, shapes kept).
+The case's result is the feasible draw with the lowest HPWL. Writes ``OUT`` (JSON:
+per-case rows and per-setting summaries) and an ``.npz`` of the kept layouts.
 
 Run::
 
-    kogine run scripts/eval/bookshelf.py --config configs/eval/bookshelf/flagship_gsrc_soft.py
+    kogine run scripts/eval/bookshelf.py \\
+        --config configs/eval/bookshelf/flagship_gsrc_soft.py
 """
 
 import json
@@ -43,7 +45,8 @@ from trinity.sampling.refine_closed import refine_closed
 
 torch.set_float32_matmul_precision("high")
 
-# The model: a .ckpt, a release directory or a Hugging Face repo id (+ release subfolder).
+# The model: a .ckpt, a release directory or a
+# Hugging Face repo id (+ release subfolder).
 CHECKPOINT: str = "outputs/train/flagship/checkpoints/last.ckpt"
 SCALE: str | None = None
 
@@ -90,7 +93,8 @@ def init_worker(cases, route) -> None:
 
 
 def legalize_job(job):
-    """``(case, draw, boxes)`` -> ``(case, draw, score dict, legal boxes, ms, info)``."""
+    """``(case, draw, boxes)`` -> ``(case, draw,
+    score dict, legal boxes, ms, info)``."""
     i, j, boxes = job
     inst = _worker["cases"][i]
     started = time.perf_counter()

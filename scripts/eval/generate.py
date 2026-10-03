@@ -1,13 +1,14 @@
 """Cache raw diffusion samples of the dev split for every NFE and projection set.
 
-Generation only: no refiner, no legalizer, no scoring; the analysis scripts read the cache.
-For every model in ``CHECKPOINTS`` it writes ``OUT_DIR/<run>/<set>_nfe<k>.npz`` per projection
-set and NFE, plus ``meta.json``. Every shard starts from the same initial noise per case and
-draw, so shards of one run (and of runs sharing ``NOISE_SEED``) are paired.
+Generation only: no refiner, no legalizer, no scoring; the analysis scripts read the
+cache. For every model in ``CHECKPOINTS`` it writes ``OUT_DIR/<run>/<set>_nfe<k>.npz``
+per projection set and NFE, plus ``meta.json``. Every shard starts from the same initial
+noise per case and draw, so shards of one run (and of runs sharing ``NOISE_SEED``) are
+paired.
 
-Shard layout: ``lat`` holds the ``z_s`` latents case-major then draw (case ``i`` draw ``j`` is
-rows ``K * sum(bcount[:i]) + j * n_i`` onward), ``bcount`` the block count per case, ``k`` the
-draws per case.
+Shard layout: ``lat`` holds the ``z_s`` latents case-major then draw (case ``i`` draw
+``j`` is rows ``K * sum(bcount[:i]) + j * n_i`` onward), ``bcount`` the block count per
+case, ``k`` the draws per case.
 
 Run::
 
@@ -41,7 +42,8 @@ DEV_LIMIT: int = 0  # >0 keeps only the first DEV_LIMIT dev cases
 WIRE_DROP: float = 0.0  # fraction of nets and pins dropped from every dev case
 WIRE_DROP_SEED: int = 20260829
 
-# Sampling axes: {shard prefix: PROJECTION list (None = the sampler default, [] = free)}.
+# Sampling axes: {shard prefix: PROJECTION list
+# (None = the sampler default, [] = free)}.
 NFE: tuple[int, ...] = (1, 2, 4, 8, 16, 32)
 PROJECTION_SETS: dict[str, list | None] = {"projected": None}
 K: int = 4  # draws per case
@@ -62,7 +64,8 @@ def git_sha() -> str:
 
 
 def dev_cases():
-    """The dev-split instances (wires dropped when ``WIRE_DROP > 0``) and the split params."""
+    """The dev-split instances (wires dropped when
+    ``WIRE_DROP > 0``) and the split params."""
     cases, _, params = dev_split_cases(
         TRAIN_LANCE, DEV_PER_N_K, DEV_RANDOM_SIZE, SPLIT_SEED, DEV_LIMIT
     )
@@ -147,7 +150,8 @@ def generate(run: str, source: str, cases, split_params: dict) -> None:
     (out / "meta.json").write_text(json.dumps(meta, indent=2))
     size_mb = sum(p.stat().st_size for p in out.iterdir()) / 1e6
     print(
-        f"  [{run}] wrote {len(NFE) * len(PROJECTION_SETS)} shards, {size_mb:.0f} MB -> {out}"
+        f"  [{run}] wrote {len(NFE) * len(PROJECTION_SETS)} shards, "
+        f"{size_mb:.0f} MB -> {out}"
     )
 
 

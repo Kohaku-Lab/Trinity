@@ -1,11 +1,12 @@
-"""Distribution-level comparisons between two descriptor sets: Fréchet distance and kernel MMD.
+"""Distribution-level comparisons between two
+descriptor sets: Fréchet distance and kernel MMD.
 
-* :func:`frechet` -- ``||mu_a - mu_b||^2 + Tr(S_a + S_b - 2 (S_a S_b)^{1/2})`` on Gaussian fits,
-  returned as ``(total, mean_term, cov_term)``.
-* :func:`mmd2` -- the unbiased RBF-kernel MMD² estimator; :func:`median_bandwidth` gives the
-  median pairwise distance of a reference set.
-* :func:`mmd_permutation_test` -- p-value for ``MMD²(A, ref) < MMD²(B, ref)`` under label
-  permutation of A and B.
+* :func:`frechet` -- ``||mu_a - mu_b||^2 + Tr(S_a + S_b - 2 (S_a S_b)^{1/2})``
+  on Gaussian fits, returned as ``(total, mean_term, cov_term)``.
+* :func:`mmd2` -- the unbiased RBF-kernel MMD² estimator;
+  :func:`median_bandwidth` gives the median pairwise distance of a reference set.
+* :func:`mmd_permutation_test` -- p-value for ``MMD²(A,
+  ref) < MMD²(B, ref)`` under label permutation of A and B.
 """
 
 import numpy as np

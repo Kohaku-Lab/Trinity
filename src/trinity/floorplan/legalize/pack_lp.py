@@ -1,9 +1,10 @@
-"""The packing LPs of ``scale_pack`` (GLOP): positions under pair relations, and reshape.
+"""The packing LPs of ``scale_pack`` (GLOP):
+positions under pair relations, and reshape.
 
 Both LPs minimize the linearized bounding-box area ``h0 (R - L) + w0 (T - B)`` (over the
-starting box ``w0 x h0``) plus a displacement term ``mu / (n s)`` per coordinate, subject to
-the relations of :mod:`.pack_relations` (``pos[lo] + size[lo] <= pos[hi]``). Preplaced
-blocks are fixed. Abutment and boundary codes enter as hard rows, as penalties
+starting box ``w0 x h0``) plus a displacement term ``mu / (n s)`` per coordinate,
+subject to the relations of :mod:`.pack_relations` (``pos[lo] + size[lo] <= pos[hi]``).
+Preplaced blocks are fixed. Abutment and boundary codes enter as hard rows, as penalties
 (``penalty / s`` per unit), or not at all.
 """
 
@@ -17,7 +18,8 @@ TIME_LIMIT_MS = 2000
 
 
 def pinned_code_blocked(anchor: np.ndarray, pins: np.ndarray, i: int, bit: int) -> bool:
-    """Whether another preplaced block lies beyond preplaced block ``i`` on its coded side."""
+    """Whether another preplaced block lies beyond
+    preplaced block ``i`` on its coded side."""
     others = pins[pins != i]
     if others.size == 0:
         return False
@@ -33,7 +35,8 @@ def pinned_code_blocked(anchor: np.ndarray, pins: np.ndarray, i: int, bit: int) 
 
 
 class _PackingLP:
-    """A GLOP model with the shared variables, rows and objective of both packing LPs."""
+    """A GLOP model with the shared variables,
+    rows and objective of both packing LPs."""
 
     def __init__(self, inst, anchor: np.ndarray) -> None:
         self.n = len(anchor)
@@ -131,10 +134,10 @@ def solve_lp(
 ):
     """Stage D: the packing LP over positions with shapes fixed.
 
-    ``amode`` / ``bmode`` in ``hard`` | ``soft`` | ``none`` set the abutment and boundary
-    terms; ``pin_soft`` turns the relations of (free, preplaced) pairs into penalized
-    slacks; ``outline = (W, H)`` caps the outline. Returns ``(layout or None, the pinned
-    pairs whose relation the solution violates)``.
+    ``amode`` / ``bmode`` in ``hard`` | ``soft`` | ``none`` set the abutment and
+    boundary terms; ``pin_soft`` turns the relations of (free, preplaced) pairs into
+    penalized slacks; ``outline = (W, H)`` caps the outline. Returns ``(layout or None,
+    the pinned pairs whose relation the solution violates)``.
     """
     lp = _PackingLP(inst, anchor)
     if not lp.ok:
@@ -246,10 +249,10 @@ def solve_reshape_lp(
 ):
     """Stage H: the packing LP with the shapes of the soft non-MIB blocks free.
 
-    Each free width / height moves within a factor ``trust`` (and the aspect bounds), area
-    kept by the tangent ``h0 W + w0 H = 2A``; abutment and boundary are penalties and the
-    outline is capped at ``outline``. The solved shapes are projected back to exact area.
-    Returns the layout or ``None``.
+    Each free width / height moves within a factor ``trust`` (and the aspect bounds),
+    area kept by the tangent ``h0 W + w0 H = 2A``; abutment and boundary are penalties
+    and the outline is capped at ``outline``. The solved shapes are projected back to
+    exact area. Returns the layout or ``None``.
     """
     lp = _PackingLP(inst, anchor)
     if not lp.ok:

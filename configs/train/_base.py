@@ -1,9 +1,9 @@
 """The base training recipe of the paper; every training config builds on it.
 
 A plain d768 / L12 set transformer with the netlist as an additive attention bias and no
-graph PE, trained with rectified flow (x0 head against the v target, logit-normal t) and no
-aux terms. Frozen for every paper run: effective batch 256 (one card, micro-batch 128),
-200k steps. Topic configs override one axis on top, reading a dict back through
+graph PE, trained with rectified flow (x0 head against the v target, logit-normal t) and
+no aux terms. Frozen for every paper run: effective batch 256 (one card, micro-batch
+128), 200k steps. Topic configs override one axis on top, reading a dict back through
 ``use_config``::
 
     _base = use_config("_base.py")

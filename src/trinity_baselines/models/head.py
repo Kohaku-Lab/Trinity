@@ -1,13 +1,14 @@
-"""Output heads of the direct regressor: the prediction space and its decode to a layout.
+"""Output heads of the direct regressor: the
+prediction space and its decode to a layout.
 
 * ``z`` (``LatentHead``) -- predicts the latent ``(cx/s, cy/s, rho)``, decoded with
   ``z_to_xywh`` (``w * h == area`` by construction).
-* ``xywh`` (``BoxHead``) -- predicts the raw normalized box ``(cx/s, cy/s, w/s, h/s)``; the
-  area is only encouraged by the area aux term.
+* ``xywh`` (``BoxHead``) -- predicts the raw normalized box ``(cx/s,
+  cy/s, w/s, h/s)``; the area is only encouraged by the area aux term.
 
-A head declares its ``out_dim`` (the backbone's ``latent_dim``), builds its regression target
-from the ``/s`` latent ``z_s``, decodes a prediction to a normalized ``(x, y, w, h)``, and maps a
-prediction back to ``z_s`` for the refiner and legalizer.
+A head declares its ``out_dim`` (the backbone's ``latent_dim``), builds its regression
+target from the ``/s`` latent ``z_s``, decodes a prediction to a normalized ``(x, y, w,
+h)``, and maps a prediction back to ``z_s`` for the refiner and legalizer.
 """
 
 import torch
@@ -21,9 +22,10 @@ class RegressionHead:
     """Map between the backbone prediction space and normalized ``(x,y,w,h)``.
 
     ``out_dim`` is the backbone's output width. ``target_from_zs`` builds the regression
-    target (and the anchor latent) from the canonical ``/s`` latent ``z_s = (cx/s,cy/s,rho)``.
-    ``to_xywh`` decodes a ``(B,N,out_dim)`` prediction to a normalized ``(B,N,4)`` box (the
-    aux-loss / refine space: scale 1, area in ``/s^2`` units).
+    target (and the anchor latent) from the canonical ``/s`` latent ``z_s =
+    (cx/s,cy/s,rho)``. ``to_xywh`` decodes a ``(B,N,out_dim)`` prediction to a
+    normalized ``(B,N,4)`` box (the aux-loss / refine space: scale 1, area in ``/s^2``
+    units).
     """
 
     out_dim: int = 3
@@ -57,7 +59,8 @@ class RegressionHead:
 
 @HEAD.register("z")
 class LatentHead(RegressionHead):
-    """``z``: predict the area-preserving latent ``(cx/s, cy/s, rho)`` (identity target)."""
+    """``z``: predict the area-preserving latent
+    ``(cx/s, cy/s, rho)`` (identity target)."""
 
     out_dim = 3
 
@@ -82,7 +85,8 @@ class BoxHead(RegressionHead):
     """``xywh``: predict the raw normalized box ``(cx/s, cy/s, w/s, h/s)``.
 
     The target takes the centers from ``z_s`` and ``w/s = sqrt(area_norm) e^{rho/2}``,
-    ``h/s = sqrt(area_norm) e^{-rho/2}``; the decode is the corner shift ``x = cx - w/2``.
+    ``h/s = sqrt(area_norm) e^{-rho/2}``; the decode is the corner shift ``x = cx -
+    w/2``.
     """
 
     out_dim = 4

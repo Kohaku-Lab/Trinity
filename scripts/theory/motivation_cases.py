@@ -2,21 +2,22 @@
 through the closed-form refiner, on cases chosen by a stated rule.
 
 Selection: from the ported loops' legalization caches (``legalize.py`` outputs with
-``SAVE_LAYOUTS``), per case the change of ``group_gap``, ``boundary_dist`` and ``fixed_dist``
-from the raw draw 0 to the loop's final step, and the raw / final ``overlap_ratio``.
-Candidates are the cases with at least ``MIN_CLUSTERS`` clusters of at least
-``MIN_CLUSTER_SIZE`` blocks and at least one preplaced block, in each block-count band of
-``BANDS``; the chosen case of a band is the candidate at the median of the ChipDiffusion
-loop's ``group_gap`` increase.
+``SAVE_LAYOUTS``), per case the change of ``group_gap``, ``boundary_dist`` and
+``fixed_dist`` from the raw draw 0 to the loop's final step, and the raw / final
+``overlap_ratio``. Candidates are the cases with at least ``MIN_CLUSTERS`` clusters of
+at least ``MIN_CLUSTER_SIZE`` blocks and at least one preplaced block, in each
+block-count band of ``BANDS``; the chosen case of a band is the candidate at the median
+of the ChipDiffusion loop's ``group_gap`` increase.
 
-Each chosen case runs every row of ``ROWS`` (a raw run's draw 0 through one loop) and records
-the snapshots' layouts (units of ``s``), soft vectors and ``U_refine``. Writes
-``motivation_cases.npz`` and ``motivation_cases.json`` (the candidate table, the choices with
-their ranks, the per-snapshot soft vectors).
+Each chosen case runs every row of ``ROWS`` (a raw run's draw 0 through one loop) and
+records the snapshots' layouts (units of ``s``), soft vectors and ``U_refine``. Writes
+``motivation_cases.npz`` and ``motivation_cases.json`` (the candidate table, the choices
+with their ranks, the per-snapshot soft vectors).
 
 Run::
 
-    kogine run scripts/theory/motivation_cases.py --config configs/theory/motivation_cases.py
+    kogine run scripts/theory/motivation_cases.py \\
+        --config configs/theory/motivation_cases.py
 """
 
 import json
@@ -48,7 +49,8 @@ LEGALIZE_DIR: str = "outputs/eval/legalize"
 GEN_DIR: str = "outputs/gen"
 NFE: int = 32
 RAW_SHARD: str = "free_nfe32"
-# {port: (legalize cache stem, final step)}; each cache is the port's own model's NFE-32 grid.
+# {port: (legalize cache stem, final step)}; each
+# cache is the port's own model's NFE-32 grid.
 PORT_CACHES: dict[str, tuple[str, int]] = {
     "chipd_scheduled": ("baseline-chipdiffusion_port_chipd", 5000),
     "macrodiff": ("baseline-macrodiff_port_macrodiff", 500),
@@ -63,7 +65,8 @@ RAW_RUNS: dict[str, str] = {
 BANDS: tuple[tuple[int, int], ...] = ((50, 70), (25, 35), (100, 120))
 MIN_CLUSTERS: int = 2
 MIN_CLUSTER_SIZE: int = 3
-# {row name: (raw source tag, loop, steps, snapshots)}; loop "closed" = the paper refiner.
+# {row name: (raw source tag, loop, steps,
+# snapshots)}; loop "closed" = the paper refiner.
 ROWS: dict[str, tuple[str, str, int, tuple[int, ...]]] = {
     "chipd_raw__chipd_loop": ("chipd", "chipd_scheduled", 5000, (0, 50, 500, 5000)),
     "chipd_raw__ours": ("chipd", "closed", 400, (0, 10, 100, 400)),
@@ -108,7 +111,8 @@ def raw_draw0(run: str, case_index: int) -> torch.Tensor:
 
 
 def candidate_table(store, ids):
-    """Per case the loops' changes from the port caches and the cluster / preplaced counts."""
+    """Per case the loops' changes from the port
+    caches and the cluster / preplaced counts."""
     caches = {}
     for port, (stem, final) in PORT_CACHES.items():
         data = np.load(Path(LEGALIZE_DIR) / f"{stem}.npz")
@@ -232,7 +236,9 @@ def main():
             "min_clusters": MIN_CLUSTERS,
             "min_cluster_size": MIN_CLUSTER_SIZE,
             "preplaced": ">= 1",
-            "choice": "the median ChipDiffusion group_gap increase among the candidates",
+            "choice": (
+                "the median ChipDiffusion group_gap increase among the candidates"
+            ),
         },
         "candidates": {f"{lo}-{hi}": band_candidates(rows, lo, hi) for lo, hi in BANDS},
         "chosen": chosen,

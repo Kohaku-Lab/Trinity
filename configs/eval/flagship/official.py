@@ -1,7 +1,7 @@
-"""The official 100 cases with the flagship pipeline, per case and timed: free sampling, the
-closed-form refiner, ``scale_pack``, one pool worker per draw. The settings are the
-time-versus-score ladder: best of {4, 8, 16} at NFE 8 x 400 steps, then lower NFE and fewer
-refiner steps at best of 16.
+"""The official 100 cases with the flagship pipeline, per case and timed: free sampling,
+the closed-form refiner, ``scale_pack``, one pool worker per draw. The settings are the
+time-versus-score ladder: best of {4, 8, 16} at NFE 8 x 400 steps, then lower NFE and
+fewer refiner steps at best of 16.
 
 Run::
 

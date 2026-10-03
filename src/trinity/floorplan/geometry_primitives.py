@@ -2,13 +2,13 @@
 
 Each primitive maps ``xywh`` (plus per-block data) to one float: a continuous relaxation
 of one constraint (overlap, compactness, boundary, grouping, MIB, fixed / preplaced
-immutability). The continuous scorer (:mod:`trinity.floorplan.scoring.continuous`) is built
-from these; the training losses in ``trinity/losses/aux.py`` are their batched torch
-counterparts.
+immutability). The continuous scorer (:mod:`trinity.floorplan.scoring.continuous`) is
+built from these; the training losses in ``trinity/losses/aux.py`` are their batched
+torch counterparts.
 
-Conventions: ``xywh`` is ``(n, 4)`` lower-left ``(x, y, w, h)``; ``s = sqrt(sum area)`` is
-the layout scale; group-id arrays are ``(n,)`` ints (``> 0`` = member of that group). Empty
-or degenerate inputs return ``0.0``.
+Conventions: ``xywh`` is ``(n, 4)`` lower-left ``(x, y, w, h)``; ``s = sqrt(sum area)``
+is the layout scale; group-id arrays are ``(n,)`` ints (``> 0`` = member of that group).
+Empty or degenerate inputs return ``0.0``.
 """
 
 import numpy as np
@@ -47,8 +47,8 @@ def bbox_compactness(xywh: np.ndarray) -> float:
 def boundary_distance(xywh: np.ndarray, boundary_code: np.ndarray, s: float) -> float:
     """Mean distance of each boundary-coded block to its required bbox edges, ``/ s``.
 
-    ``boundary_code`` is the bitmask 1=left 2=right 4=top 8=bottom; a block's distance is
-    the mean L1 distance over its required edges.
+    ``boundary_code`` is the bitmask 1=left 2=right 4=top 8=bottom; a
+    block's distance is the mean L1 distance over its required edges.
     """
     coded = np.nonzero(boundary_code != 0)[0]
     if coded.size == 0:
@@ -74,7 +74,8 @@ def boundary_distance(xywh: np.ndarray, boundary_code: np.ndarray, s: float) -> 
 
 
 def pair_gap(a: np.ndarray, b: np.ndarray) -> float:
-    """The smallest axis translation that makes rectangles ``a`` and ``b`` touch (0 if they do)."""
+    """The smallest axis translation that makes
+    rectangles ``a`` and ``b`` touch (0 if they do)."""
     ax0, ay0, ax1, ay1 = a[0], a[1], a[0] + a[2], a[1] + a[3]
     bx0, by0, bx1, by1 = b[0], b[1], b[0] + b[2], b[1] + b[3]
     gx = max(0.0, bx0 - ax1, ax0 - bx1)
@@ -89,7 +90,8 @@ def pair_gap(a: np.ndarray, b: np.ndarray) -> float:
 
 
 def group_gap(xywh: np.ndarray, cluster_id: np.ndarray, s: float) -> float:
-    """Mean gap from each clustered block to its nearest same-cluster member, ``/ s``."""
+    """Mean gap from each clustered block to its
+    nearest same-cluster member, ``/ s``."""
     gaps = []
     for g in np.unique(cluster_id[cluster_id > 0]):
         members = np.nonzero(cluster_id == g)[0]
@@ -101,10 +103,11 @@ def group_gap(xywh: np.ndarray, cluster_id: np.ndarray, s: float) -> float:
 
 
 def group_split(xywh: np.ndarray, cluster_id: np.ndarray) -> float:
-    """The normalized grouping violation ``sum_g (components_g - 1) / sum_g (|G_g| - 1)``.
+    """The normalized grouping violation ``sum_g
+    (components_g - 1) / sum_g (|G_g| - 1)``.
 
-    A count (in ``[0, 1]``, 0 when every cluster is connected), so a hard metric, not part
-    of the continuous score.
+    A count (in ``[0, 1]``, 0 when every cluster is connected),
+    so a hard metric, not part of the continuous score.
     """
     violations = worst_case = 0
     for g in np.unique(cluster_id[cluster_id > 0]):
@@ -117,7 +120,8 @@ def group_split(xywh: np.ndarray, cluster_id: np.ndarray) -> float:
 
 
 def mib_log_shape_var(xywh: np.ndarray, mib_id: np.ndarray) -> float:
-    """Mean within-MIB-group variance of the log shape ``(log w, log h)`` (0 = identical)."""
+    """Mean within-MIB-group variance of the log
+    shape ``(log w, log h)`` (0 = identical)."""
     variances = []
     for g in np.unique(mib_id[mib_id > 0]):
         members = np.nonzero(mib_id == g)[0]

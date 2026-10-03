@@ -1,24 +1,26 @@
 """PARSAC's constraints-aware B*-tree simulated annealing as a ``SOLVER`` (``parsac``).
 
-Wraps the C++ annealer of PARSAC (https://github.com/IntelLabs/parsac, Apache-2.0,
-arXiv 2405.05495) through torch's C++ extension loader. ``scripts/baselines/build_parsac.sh``
-clones it into ``third_party/parsac`` and applies ``scripts/baselines/parsac.patch``, which adds
-two setters (``set_outline_slope``, ``set_rotate_prob``; both 0 = the published cost and move
-set). ``TRINITY_PARSAC`` overrides the source root and ``TRINITY_PARSAC_BUILD`` the ``-O3``
-build directory (default ``third_party/parsac/build``).
+Wraps the C++ annealer of PARSAC (https://github.com/IntelLabs/parsac, Apache-2.0, arXiv
+2405.05495) through torch's C++ extension loader. ``scripts/baselines/build_parsac.sh``
+clones it into ``third_party/parsac`` and applies ``scripts/baselines/parsac.patch``,
+which adds two setters (``set_outline_slope``, ``set_rotate_prob``; both 0 = the
+published cost and move set). ``TRINITY_PARSAC`` overrides the source root and
+``TRINITY_PARSAC_BUILD`` the ``-O3`` build directory (default
+``third_party/parsac/build``).
 
 A :class:`FloorplanInstance` becomes the engine's integer problem: sizes and pins at
 ``units_per_s`` units per ``s``, boundary codes and cluster ids one to one, fixed-shape,
-preplaced and MIB blocks AR-locked (MIB members share one shape), preplaced blocks anchored,
-b2b / p2b edges as 2-pin nets repeated by their rounded weight, and the pin bounding box (or a
-given outline) as the fixed outline. A run follows the repository's ``main.py``: 100 stages on
-its temperature ladder, each followed by an aspect-ratio-search stage, the budget split evenly
-over the stages; layout snapshots are taken after the listed stages.
-``anneal(..., init=placement)`` starts from the B*-tree of a legal layout (left-then-down
-compaction, then the DAC-2000 tree construction) instead of a random tree.
+preplaced and MIB blocks AR-locked (MIB members share one shape), preplaced blocks
+anchored, b2b / p2b edges as 2-pin nets repeated by their rounded weight, and the pin
+bounding box (or a given outline) as the fixed outline. A run follows the repository's
+``main.py``: 100 stages on its temperature ladder, each followed by an
+aspect-ratio-search stage, the budget split evenly over the stages; layout snapshots are
+taken after the listed stages. ``anneal(..., init=placement)`` starts from the B*-tree
+of a legal layout (left-then-down compaction, then the DAC-2000 tree construction)
+instead of a random tree.
 
-The engine keeps a process-global wirelength normalization set by the first layout it scores,
-so one process should anneal one instance.
+The engine keeps a process-global wirelength normalization set by the
+first layout it scores, so one process should anneal one instance.
 """
 
 import os
@@ -61,7 +63,8 @@ def source_root() -> Path:
 
 
 def engine():
-    """The compiled ``ca_sa`` module (built once per build directory, cached per process)."""
+    """The compiled ``ca_sa`` module (built once
+    per build directory, cached per process)."""
     global _ENGINE
     if _ENGINE is None:
         build_dir = Path(os.environ.get("TRINITY_PARSAC_BUILD", DEFAULT_BUILD))
@@ -82,7 +85,8 @@ def engine_available() -> bool:
 
 
 def block_shapes(inst: FloorplanInstance) -> np.ndarray:
-    """``(n, 2)`` starting sizes: given shapes where known, squares of the area otherwise.
+    """``(n, 2)`` starting sizes: given shapes
+    where known, squares of the area otherwise.
 
     The members of an MIB group share one shape (a shaped member's, if any).
     """
@@ -101,7 +105,8 @@ def block_shapes(inst: FloorplanInstance) -> np.ndarray:
 
 
 def net_list(inst: FloorplanInstance, net_rep_cap: int) -> tuple[list, int]:
-    """The 2-pin nets (each edge repeated by its rounded weight, capped) and the capped count."""
+    """The 2-pin nets (each edge repeated by its
+    rounded weight, capped) and the capped count."""
     n = inst.block_count
     nets, capped = [], 0
     edges = [(int(i), int(j), w) for i, j, w in inst.b2b]
@@ -120,10 +125,12 @@ def to_engine_problem(
     net_rep_cap: int = 10,
     shapes: np.ndarray | None = None,
 ) -> dict:
-    """``{"rows", "pins", "nets", "canvas", "scale", "all_fixed", "capped"}`` for the engine.
+    """``{"rows", "pins", "nets", "canvas", "scale",
+    "all_fixed", "capped"}`` for the engine.
 
-    ``outline`` = ``(W, H)`` in the instance's units; without it the pin bounding box, or a
-    square of 1.05 x the block area when there are no pins. ``shapes`` overrides the sizes.
+    ``outline`` = ``(W, H)`` in the instance's units; without it the pin bounding box,
+    or a square of 1.05 x the block area when there are no pins. ``shapes`` overrides
+    the sizes.
     """
     n = inst.block_count
     scale = units_per_s / inst.s
@@ -180,7 +187,8 @@ def to_engine_problem(
 def compact(
     xywh: np.ndarray, pinned: np.ndarray | None = None, rounds: int = 10
 ) -> np.ndarray:
-    """Move every unpinned block left, then down, as far as no overlap allows, until stable."""
+    """Move every unpinned block left, then down,
+    as far as no overlap allows, until stable."""
     out = np.array(xywh, dtype=np.int64)
     n = len(out)
     pinned = np.zeros(n, bool) if pinned is None else np.asarray(pinned, bool)
@@ -215,11 +223,12 @@ def compact(
 
 
 def tree_from_layout(xywh: np.ndarray) -> list[list[int]]:
-    """B*-tree edges ``[parent, child, 0 = left / 1 = right]`` in preorder of a compacted layout.
+    """B*-tree edges ``[parent, child, 0 = left / 1
+    = right]`` in preorder of a compacted layout.
 
-    Left child = the lowest unvisited block whose left edge is the parent's right edge; right
-    child = the lowest unvisited block above the parent with the same left edge; blocks the
-    depth-first walk does not reach are hung on the nearest free slot.
+    Left child = the lowest unvisited block whose left edge is the parent's right edge;
+    right child = the lowest unvisited block above the parent with the same left edge;
+    blocks the depth-first walk does not reach are hung on the nearest free slot.
     """
     n = len(xywh)
     x, y, w, h = (xywh[:, k].astype(np.int64) for k in range(4))
@@ -283,9 +292,10 @@ def tree_from_layout(xywh: np.ndarray) -> list[list[int]]:
 class ParsacBTree:
     """PARSAC's staged B*-tree annealer.
 
-    ``solve(inst) -> Placement``; ``anneal(inst, budget, seed, init, outline) -> AnnealResult``
-    with a snapshot after every stage in ``checkpoint_stages`` and a ``"final"`` one.
-    ``outline_slope`` and ``rotate_prob`` drive the two setters of ``parsac.patch``.
+    ``solve(inst) -> Placement``; ``anneal(inst, budget, seed, init, outline) ->
+    AnnealResult`` with a snapshot after every stage in ``checkpoint_stages`` and a
+    ``"final"`` one. ``outline_slope`` and ``rotate_prob`` drive the two setters of
+    ``parsac.patch``.
     """
 
     def __init__(
@@ -325,7 +335,8 @@ class ParsacBTree:
         init: Placement | None = None,
         outline=None,
     ) -> AnnealResult:
-        """Anneal ``inst`` for ``budget`` steps from a random tree or from ``init``'s tree."""
+        """Anneal ``inst`` for ``budget`` steps from
+        a random tree or from ``init``'s tree."""
         ca = engine()
         budget = self.budget if budget is None else budget
         seed = self.seed if seed is None else seed

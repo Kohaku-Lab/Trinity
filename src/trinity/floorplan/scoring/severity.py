@@ -1,13 +1,14 @@
-"""Severity-graded soft-constraint score ``sev_rel`` and the continuous cost ``soft_cost``.
+"""Severity-graded soft-constraint score
+``sev_rel`` and the continuous cost ``soft_cost``.
 
 ``sev_rel`` has the slots and the ``N_soft`` denominator of ``V_rel``, but each slot
-contributes its severity ``tanh(d / tau)`` in ``[0, 1)``, with ``d`` the slot's distance in
-``/ s`` units (the gap to the nearest cluster member, the log-shape deviation from the MIB
-group mean, the distance to the required bbox edges).
+contributes its severity ``tanh(d / tau)`` in ``[0, 1)``, with ``d`` the slot's distance
+in ``/ s`` units (the gap to the nearest cluster member, the log-shape deviation from
+the MIB group mean, the distance to the required bbox edges).
 
-``soft_cost = (1 + ALPHA (hpwl_gap + area_gap)) exp(BETA sev_rel) exp(BETA_OVERLAP overlap_ratio)``:
-the per-case cost with ``sev_rel`` in place of ``V_rel`` and an overlap factor in place of
-the infeasibility penalty.
+``soft_cost = (1 + ALPHA (hpwl_gap + area_gap)) exp(BETA sev_rel) exp(BETA_OVERLAP
+overlap_ratio)``: the per-case cost with ``sev_rel`` in place of ``V_rel`` and an
+overlap factor in place of the infeasibility penalty.
 """
 
 from dataclasses import dataclass
@@ -51,7 +52,8 @@ def _drop_smallest(values: np.ndarray) -> float:
 
 
 def group_severity(placement: Placement, tau: float = TAU_GROUP) -> float:
-    """Summed severity of each cluster member's gap to its nearest same-cluster member, ``/s``."""
+    """Summed severity of each cluster member's gap
+    to its nearest same-cluster member, ``/s``."""
     inst = placement.instance
     cluster = inst.cluster_id
     xywh = placement.xywh
@@ -87,7 +89,8 @@ def mib_severity(placement: Placement, tau: float = TAU_MIB) -> float:
 
 
 def boundary_severity(placement: Placement, tau: float = TAU_BOUNDARY) -> float:
-    """Summed severity of each coded block's distance from its required bbox edge, ``/s``."""
+    """Summed severity of each coded block's
+    distance from its required bbox edge, ``/s``."""
     inst = placement.instance
     codes = inst.boundary_code
     coded = np.nonzero(codes != 0)[0]
@@ -114,7 +117,8 @@ def boundary_severity(placement: Placement, tau: float = TAU_BOUNDARY) -> float:
 def score_severity(
     placement: Placement, hpwl_gap: float, area_gap: float, overlap_ratio: float = 0.0
 ) -> SeverityScore:
-    """``sev_rel`` and ``soft_cost`` of ``placement`` from its gaps and ``overlap_ratio``."""
+    """``sev_rel`` and ``soft_cost`` of ``placement``
+    from its gaps and ``overlap_ratio``."""
     grouping = group_severity(placement)
     mib = mib_severity(placement)
     boundary = boundary_severity(placement)

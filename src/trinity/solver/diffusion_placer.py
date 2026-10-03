@@ -1,11 +1,12 @@
 """The diffusion placer: sample -> refine -> legalize -> select.
 
-``solve_batch`` pads every case (x ``samples`` candidates) to a common length and runs one
-sampler + refiner forward over the whole stack, decodes the candidates, legalizes each one
-through the legalization portfolio, and keeps the cheapest legalized candidate per case.
+``solve_batch`` pads every case (x ``samples`` candidates) to a common length and runs
+one sampler + refiner forward over the whole stack, decodes the candidates, legalizes
+each one through the legalization portfolio, and keeps the cheapest legalized candidate
+per case.
 
-Legalization and scoring run on the CPU. With ``legalize_workers > 0`` the candidates of a
-batch are legalized in a process pool while the GPU works on the next batch.
+Legalization and scoring run on the CPU. With ``legalize_workers > 0`` the candidates
+of a batch are legalized in a process pool while the GPU works on the next batch.
 """
 
 import multiprocessing as mp
@@ -31,7 +32,8 @@ from trinity.sampling.refine_case import build_refine_case
 
 
 def legalize_candidate(inst, candidate_xywh, portfolio, scorer):
-    """Legalize one candidate ``(n, 4)``; return ``(feasible, cost, legalized_xywh)``."""
+    """Legalize one candidate ``(n, 4)``; return
+    ``(feasible, cost, legalized_xywh)``."""
     placement = Placement(xywh=candidate_xywh.astype(np.float64), instance=inst)
     with use_fast_hpwl():
         result = legalize(placement, portfolio=portfolio, scorer=scorer)
@@ -86,7 +88,8 @@ class DiffusionPlacer:
     def solve_batch(self, instances: list[FloorplanInstance]) -> list[Placement]:
         """Place every instance; generation runs in batches of up to ``max_batch`` rows.
 
-        Sets ``last_candidate_costs``: per case, every candidate's legalized cost, ascending.
+        Sets ``last_candidate_costs``: per case,
+        every candidate's legalized cost, ascending.
         """
         per_batch = max(1, self.max_batch // self.samples)
         pending = []
@@ -108,9 +111,9 @@ class DiffusionPlacer:
     def build_group_ctx(self, group: list[FloorplanInstance]) -> dict:
         """The padded ``len(group) x samples`` conditioning of one GPU forward.
 
-        Returns ``{"cond", "rows", "max_n", "k", "area", "scale"}``: the ``DenoiserCond`` the
-        sampler reads, the row count, padded length and candidates per case, and the per-row
-        target areas and layout scales the decoder reads.
+        Returns ``{"cond", "rows", "max_n", "k", "area", "scale"}``: the
+        ``DenoiserCond`` the sampler reads, the row count, padded length and candidates
+        per case, and the per-row target areas and layout scales the decoder reads.
         """
         k = self.samples
         max_n = max(inst.block_count for inst in group)
@@ -177,7 +180,8 @@ class DiffusionPlacer:
         }
 
     def sample_latents(self, ctx: dict, noise=None) -> torch.Tensor:
-        """Sampled ``x0`` latents ``(rows, max_n, 3)`` for ``ctx`` (``noise`` = the start state)."""
+        """Sampled ``x0`` latents ``(rows, max_n, 3)``
+        for ``ctx`` (``noise`` = the start state)."""
         shape = (ctx["rows"], ctx["max_n"], 3)
         z = self.sampler.sample(
             self.backbone, ctx["cond"], shape, self.device, noise=noise
@@ -187,7 +191,8 @@ class DiffusionPlacer:
     def refine_decode(
         self, group: list[FloorplanInstance], z: torch.Tensor, ctx: dict
     ) -> list:
-        """Refine ``z`` (when there is a refiner) and decode it: ``[(samples, n, 4)]`` per case."""
+        """Refine ``z`` (when there is a refiner) and
+        decode it: ``[(samples, n, 4)]`` per case."""
         if self.refiner is not None:
             z = self.refiner.refine(z, build_refine_case(group, ctx["k"], self.device))
         return self.decode(group, z, ctx)
@@ -204,24 +209,28 @@ class DiffusionPlacer:
         ]
 
     def candidates(self, group: list[FloorplanInstance]) -> list:
-        """Sample, refine and decode ``group``: per-case candidate boxes ``[(samples, n, 4)]``."""
+        """Sample, refine and decode ``group``: per-case
+        candidate boxes ``[(samples, n, 4)]``."""
         ctx = self.build_group_ctx(group)
         return self.refine_decode(group, self.sample_latents(ctx), ctx)
 
     def candidates_from_latents(self, group: list[FloorplanInstance], z_cached) -> list:
-        """Refine and decode pre-sampled ``x0`` latents ``(len(group) * samples, max_n, 3)``."""
+        """Refine and decode pre-sampled ``x0`` latents
+        ``(len(group) * samples, max_n, 3)``."""
         ctx = self.build_group_ctx(group)
         z = torch.as_tensor(z_cached, dtype=torch.float32, device=self.device)
         return self.refine_decode(group, z, ctx)
 
     def raw_sample_boxes(self, group: list[FloorplanInstance]) -> list[np.ndarray]:
-        """The first raw candidate (no refiner, no legalizer) of each case, ``[(n, 4)]``."""
+        """The first raw candidate (no refiner, no
+        legalizer) of each case, ``[(n, 4)]``."""
         ctx = self.build_group_ctx(group)
         boxes = self.decode(group, self.sample_latents(ctx), ctx)
         return [case_boxes[0] for case_boxes in boxes]
 
     def _start_pool(self) -> None:
-        """Start the legalization pool (``forkserver``: the workers must not inherit CUDA)."""
+        """Start the legalization pool (``forkserver``:
+        the workers must not inherit CUDA)."""
         if self.legalize_workers > 0 and self._pool is None:
             context = mp.get_context("forkserver")
             self._pool = ProcessPoolExecutor(

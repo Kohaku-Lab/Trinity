@@ -1,15 +1,17 @@
-"""Released Trinity models: export a training checkpoint, load a model back for sampling.
+"""Released Trinity models: export a training
+checkpoint, load a model back for sampling.
 
 A release is a directory with two files:
 
-* ``config.json`` -- everything needed to rebuild the model: the architecture, the latent
-  parameterization, the framing, the graph PE, the conditioning options and the sampler
-  defaults it was evaluated with.
+* ``config.json`` -- everything needed to rebuild the model: the architecture, the
+  latent parameterization, the framing, the graph PE, the conditioning options and the
+  sampler defaults it was evaluated with.
 * ``model.safetensors`` -- the EMA weights of the backbone.
 
-``load_model`` accepts a training ``.ckpt``, a release directory, or a Hugging Face repo id
-(one release per subfolder, picked with ``scale``) and returns a :class:`TrinityModel`,
-whose ``placer()`` builds a ready :class:`~trinity.solver.DiffusionPlacer`::
+``load_model`` accepts a training ``.ckpt``, a release directory, or a Hugging Face repo
+id (one release per subfolder, picked with ``scale``) and returns a
+:class:`TrinityModel`, whose ``placer()`` builds a ready
+:class:`~trinity.solver.DiffusionPlacer`::
 
     model = load_model("KBlueLeaf/Trinity", scale="flagship", device="cuda")
     placer = model.placer(samples=16)
@@ -75,7 +77,8 @@ class TrinityModel:
     def sampler(
         self, num_steps: int | None = None, solver: str | None = None, projections=None
     ):
-        """The ODE sampler (defaults from the release config; ``projections=None`` = default on)."""
+        """The ODE sampler (defaults from the release
+        config; ``projections=None`` = default on)."""
         defaults = self.config["sampler"]
         spec = {
             "name": solver or defaults["name"],
@@ -94,10 +97,11 @@ class TrinityModel:
         legalize_portfolio: list | None = None,
         **placer_kwargs,
     ) -> DiffusionPlacer:
-        """A ``DiffusionPlacer``: sampler -> ``refiner`` (``None`` for none) -> legalizer.
+        """A ``DiffusionPlacer``: sampler ->
+        ``refiner`` (``None`` for none) -> legalizer.
 
-        ``legalize_portfolio=None`` is ``scale_pack``; ``placer_kwargs`` go to the placer
-        (``scorer``, ``max_batch``, ``legalize_workers``).
+        ``legalize_portfolio=None`` is ``scale_pack``; ``placer_kwargs`` go
+        to the placer (``scorer``, ``max_batch``, ``legalize_workers``).
         """
         return DiffusionPlacer(
             self.backbone,
@@ -114,8 +118,9 @@ class TrinityModel:
 
 
 def read_checkpoint(ckpt_path: str | Path) -> tuple[dict, dict[str, torch.Tensor]]:
-    """``(hparams, weights)`` of a training checkpoint; ``weights`` is the backbone state
-    dict with the EMA weights in place of the parameters (when the run kept an EMA)."""
+    """``(hparams, weights)`` of a training checkpoint; ``weights`` is the backbone
+    state dict with the EMA weights in place of the parameters (when the run kept an
+    EMA)."""
     ckpt = torch.load(
         ckpt_path, map_location="cpu", weights_only=False, pickle_module=_RenamingPickle
     )
@@ -163,7 +168,8 @@ def release_config(hparams: dict, extra: dict | None = None) -> dict:
 def export_release(
     ckpt_path: str | Path, out_dir: str | Path, extra: dict | None = None
 ) -> Path:
-    """Write ``config.json`` + ``model.safetensors`` of ``ckpt_path`` into ``out_dir``."""
+    """Write ``config.json`` + ``model.safetensors``
+    of ``ckpt_path`` into ``out_dir``."""
     hparams, weights = read_checkpoint(ckpt_path)
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -197,7 +203,8 @@ def build_model(
 
 
 def _release_dir(source: str | Path, scale: str | None, revision: str | None) -> Path:
-    """The local release directory of ``source`` (downloading from the Hub when needed)."""
+    """The local release directory of ``source``
+    (downloading from the Hub when needed)."""
     path = Path(source)
     if not path.exists():
         patterns = [f"{scale}/*"] if scale else None
@@ -215,8 +222,8 @@ def load_model(
 ) -> TrinityModel:
     """Load a model from a ``.ckpt``, a release directory, or a Hugging Face repo id.
 
-    ``scale`` names the release subfolder (``"flagship"``, ``"d512"``, ...) of a directory
-    or repo holding several releases; ``revision`` pins a Hub revision.
+    ``scale`` names the release subfolder (``"flagship"``, ``"d512"``, ...) of a
+    directory or repo holding several releases; ``revision`` pins a Hub revision.
     """
     path = Path(source)
     if path.is_file():

@@ -1,12 +1,13 @@
 """Cache the direct regressor's layout of every dev case in the generation-cache format.
 
-The counterpart of ``scripts/eval/generate.py`` for ``RegressorTrainer`` checkpoints: the same
-dev split and the same ``.npz`` layout (``lat`` = ``z_s`` rows, ``bcount``, ``k``) plus a
-``meta.json``, so ``scripts/eval/score.py`` and ``scripts/eval/dist_metrics.py`` read it as
-they read a diffusion cache. One forward per case (``k = 1``); no refiner, no legalizer, no
-projections. Run::
+The counterpart of ``scripts/eval/generate.py`` for ``RegressorTrainer`` checkpoints:
+the same dev split and the same ``.npz`` layout (``lat`` = ``z_s`` rows, ``bcount``,
+``k``) plus a ``meta.json``, so ``scripts/eval/score.py`` and
+``scripts/eval/dist_metrics.py`` read it as they read a diffusion cache. One forward per
+case (``k = 1``); no refiner, no legalizer, no projections. Run::
 
-    kogine run scripts/baselines/generate_regressor.py --config configs/baselines/generate_reg_z.py
+    kogine run scripts/baselines/generate_regressor.py \\
+        --config configs/baselines/generate_reg_z.py
 """
 
 import json

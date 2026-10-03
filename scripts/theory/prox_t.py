@@ -1,17 +1,18 @@
 """The proximal correction against t (Proposition 1).
 
 For every model of ``MODELS``, the raw network output on the rectified-flow interpolant
-``x_t = (1 - t) z0 + t x1`` of the reference latent ``z0`` of the first ``N_CASES`` dev cases,
-at every ``t`` of ``T_GRID``, is compared with the ``REFERENCE`` model's output. Per case, t
-and model it records:
+``x_t = (1 - t) z0 + t x1`` of the reference latent ``z0`` of the first ``N_CASES`` dev
+cases, at every ``t`` of ``T_GRID``, is compared with the ``REFERENCE`` model's output.
+Per case, t and model it records:
 
 * ``disp_rms`` / ``disp_rms_all`` -- the RMS gap to the reference output over the free
   channels / over every real channel;
-* ``disp_along`` / ``disp_ortho`` -- the gap's component along ``g = -grad U_train`` of the
-  reference output (free channels) and the RMS remainder; ``gradU_norm`` = ``|g|``;
+* ``disp_along`` / ``disp_ortho`` -- the gap's component along ``g = -grad U_train`` of
+  the reference output (free channels) and the RMS remainder; ``gradU_norm`` = ``|g|``;
 * ``pred_prox`` -- the proximal prediction ``gamma_t |g|`` with
   ``gamma_t = lambda(t) t^2 / (2 c)`` (``lambda(t) = lambda t`` for a t-weighted model);
-* ``U_train`` / ``U_refine`` -- the two constraint energies of the output, and its soft vector.
+* ``U_train`` / ``U_refine`` -- the two constraint
+  energies of the output, and its soft vector.
 
 The output is the EMA backbone's ``x0`` with no projection. Writes ``prox_t.npz`` and
 ``prox_t.json`` (per model and t the means and medians).
@@ -50,8 +51,8 @@ T_GRID: tuple[float, ...] = (
     0.001, 0.002, 0.005, 0.01, 0.02, 0.03, 0.05, 0.07, 0.1,
     0.15, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0,
 )  # fmt: skip
-# {name: (checkpoint, aux weight lambda, whether lambda is multiplied by t)}; a checkpoint
-# is a .ckpt, a release directory or a Hugging Face repo id.
+# {name: (checkpoint, aux weight lambda, whether lambda is multiplied by t)};
+# a checkpoint is a .ckpt, a release directory or a Hugging Face repo id.
 MODELS: dict[str, tuple[str, float, bool]] = {
     "flagship": ("outputs/train/flagship/checkpoints/last.ckpt", 0.01, False),
     "no_aux": ("outputs/train/no_aux/checkpoints/last.ckpt", 0.0, False),
@@ -102,7 +103,8 @@ def git_sha() -> str:
 
 
 def dev_cases():
-    """The first ``N_CASES`` dev cases, their ids, and 3 x the train split's mean block count."""
+    """The first ``N_CASES`` dev cases, their ids,
+    and 3 x the train split's mean block count."""
     store, dev, _ = dev_split_ids(TRAIN_LANCE, DEV_PER_N_K, DEV_RANDOM_SIZE, SPLIT_SEED)
     block_counts = np.asarray(store.block_counts)
     is_train = np.ones(len(block_counts), bool)
@@ -122,7 +124,8 @@ def reference_latents(cases, max_n: int) -> torch.Tensor:
 
 
 def channel_masks(case) -> tuple[torch.Tensor, torch.Tensor]:
-    """``(free, real)`` ``(B, N, 3)``: movable positions and reshapeable rho / real tokens."""
+    """``(free, real)`` ``(B, N, 3)``: movable
+    positions and reshapeable rho / real tokens."""
     token = case.token_mask > 0.5
     movable = case.mob_pos > 0.5
     free = torch.stack([movable, movable, case.mob_shape > 0.5], -1) & token[..., None]
@@ -142,7 +145,8 @@ def masked_rms(d2, mask) -> torch.Tensor:
 
 
 def measure_model(name, chunks, cases, mean_elements, store, reference) -> None:
-    """Fill ``store`` with every key of model ``name``; the reference model fills ``reference``."""
+    """Fill ``store`` with every key of model ``name``;
+    the reference model fills ``reference``."""
     source, lam, t_weighted = MODELS[name]
     model = load_model(source, scale=SCALES.get(name), device=DEVICE)
     with torch.no_grad():

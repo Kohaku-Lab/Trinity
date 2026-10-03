@@ -1,14 +1,16 @@
-"""Cache the sampler's starting noise over the dev split, in the generation-cache format.
+"""Cache the sampler's starting noise over the
+dev split, in the generation-cache format.
 
 The model-free counterpart of ``generate.py``: every dev case and draw gets the same
 ``N(0, I)`` latent the sampler would start from (same chunking, same ``NOISE_SEED`` per
-chunk), written as one shard ``OUT_DIR/<NAME>/<SHARD>.npz``. ``refine.py``, ``legalize.py``,
-``score.py`` and ``dist_metrics.py`` read it unchanged; it is the input of the refiner-only
-baseline.
+chunk), written as one shard ``OUT_DIR/<NAME>/<SHARD>.npz``. ``refine.py``,
+``legalize.py``, ``score.py`` and ``dist_metrics.py`` read it unchanged; it is the input
+of the refiner-only baseline.
 
 Run::
 
-    kogine run scripts/eval/generate_prior.py --config configs/eval/prior/generate_prior.py
+    kogine run scripts/eval/generate_prior.py \\
+        --config configs/eval/prior/generate_prior.py
 """
 
 import json

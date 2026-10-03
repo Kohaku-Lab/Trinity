@@ -1,4 +1,5 @@
-"""Constraint refiner: energy equals the aux terms, descent lowers it, frozen channels stay put."""
+"""Constraint refiner: energy equals the aux terms,
+descent lowers it, frozen channels stay put."""
 
 import torch
 

@@ -1,15 +1,16 @@
 """The diffusion trainer (PyTorch Lightning, manual optimization).
 
-``DiffusionTrainer`` builds the backbone, framing, timestep sampler and loss terms once from
-their specs and runs a flat manual-optimization step. Downstream code speaks ``x0``: with
-``output_kind="x0"`` the network emits it and the framing maps it to the regression target;
-with ``output_kind="target"`` the head emits the framing's own target (eps / v) and
-``X0View`` converts it back, so the loss, the sampler and the aux terms are the same in both
-cases. The aux terms receive the decoded geometry. AnySchedule drives the learning rate and
-an EMA of the backbone is kept for sampling.
+``DiffusionTrainer`` builds the backbone, framing, timestep sampler and loss terms once
+from their specs and runs a flat manual-optimization step. Downstream code speaks
+``x0``: with ``output_kind="x0"`` the network emits it and the framing maps it to the
+regression target; with ``output_kind="target"`` the head emits the framing's own target
+(eps / v) and ``X0View`` converts it back, so the loss, the sampler and the aux terms
+are the same in both cases. The aux terms receive the decoded geometry. AnySchedule
+drives the learning rate and an EMA of the backbone is kept for sampling.
 
-The trainer also owns the inference used during training: ``solve_cases`` (sample -> refine
--> legalize -> score) and ``raw_sample_cases`` (sample only), both under the EMA weights.
+The trainer also owns the inference used during training: ``solve_cases`` (sample ->
+refine -> legalize -> score) and ``raw_sample_cases`` (sample only), both under the EMA
+weights.
 """
 
 import contextlib
@@ -68,9 +69,11 @@ _GEOMETRY_KEYS = (
 
 
 def build_backbone(arch: DenoiserArchConfig, backbone_spec=None):
-    """The denoiser of ``arch``: the Trinity set transformer, or a ported baseline backbone.
+    """The denoiser of ``arch``: the Trinity set
+    transformer, or a ported baseline backbone.
 
-    ``backbone_spec`` is a ``trinity_baselines`` ``BASELINE_BACKBONE`` spec, or ``None``.
+    ``backbone_spec`` is a ``trinity_baselines``
+    ``BASELINE_BACKBONE`` spec, or ``None``.
     """
     if backbone_spec is None:
         return SetTransformerDenoiser(arch)
@@ -88,7 +91,8 @@ def build_backbone(arch: DenoiserArchConfig, backbone_spec=None):
 
 
 def build_arch(preset: str | None, arch_overrides: dict | None) -> DenoiserArchConfig:
-    """The architecture config: a named preset plus overrides, or the overrides alone."""
+    """The architecture config: a named preset
+    plus overrides, or the overrides alone."""
     if preset is None:
         return DenoiserArchConfig(**(arch_overrides or {}))
     return get_preset(preset, **(arch_overrides or {}))
@@ -97,11 +101,11 @@ def build_arch(preset: str | None, arch_overrides: dict | None) -> DenoiserArchC
 class DiffusionTrainer(pl.LightningModule):
     """A configurable diffusion model over block-token latents.
 
-    Every component argument is a registry spec (a key, a ``{"name": ..., **kwargs}`` dict
-    or an instance). ``refiner`` / ``legalize_portfolio`` / ``sample_projections`` configure
-    only the in-training solve path: ``None`` means no refiner, ``scale_pack`` alone, and the
-    sampler's default projections respectively. Unknown keyword arguments are ignored, so
-    checkpoints written by older versions still load.
+    Every component argument is a registry spec (a key, a ``{"name": ..., **kwargs}``
+    dict or an instance). ``refiner`` / ``legalize_portfolio`` / ``sample_projections``
+    configure only the in-training solve path: ``None`` means no refiner, ``scale_pack``
+    alone, and the sampler's default projections respectively. Unknown keyword arguments
+    are ignored, so checkpoints written by older versions still load.
     """
 
     def __init__(
@@ -209,7 +213,8 @@ class DiffusionTrainer(pl.LightningModule):
         if self.graph_pe.dim != arch.graph_pe_dim:
             raise ValueError(
                 f"graph_pe builder width {self.graph_pe.dim} != arch.graph_pe_dim "
-                f"{arch.graph_pe_dim}; set ARCH_OVERRIDES['graph_pe_dim'] to match GRAPH_PE"
+                f"{arch.graph_pe_dim}; "
+                "set ARCH_OVERRIDES['graph_pe_dim'] to match GRAPH_PE"
             )
         self.log_interval = log_interval
         self.sample_block_counts = tuple(sample_block_counts)
@@ -224,8 +229,8 @@ class DiffusionTrainer(pl.LightningModule):
     # ---- runtime hooks -------------------------------------------------------
 
     def transfer_batch_to_device(self, batch, device, dataloader_idx):
-        """Copy the batch; with ``fast_step`` on CUDA, copy it and compute its graph PE on a
-        side stream."""
+        """Copy the batch; with ``fast_step`` on CUDA, copy
+        it and compute its graph PE on a side stream."""
         if not (self.fast_step and device.type == "cuda" and isinstance(batch, dict)):
             return super().transfer_batch_to_device(batch, device, dataloader_idx)
         if self._side_stream is None:
@@ -248,8 +253,9 @@ class DiffusionTrainer(pl.LightningModule):
         return out
 
     def on_fit_start(self) -> None:
-        """With ``train_cuda_graphs``: recompile the compiled blocks and aux-term functions
-        with the inductor ``triton.cudagraphs`` option (needs the ``module`` compile mode).
+        """With ``train_cuda_graphs``: recompile the compiled blocks and aux-term
+        functions with the inductor ``triton.cudagraphs`` option (needs the ``module``
+        compile mode).
         """
         if not self.train_cuda_graphs:
             return
@@ -276,7 +282,8 @@ class DiffusionTrainer(pl.LightningModule):
         self._cuda_graphs = True
 
     def on_train_start(self) -> None:
-        """Check that the loader batch divides evenly into ``gradient_accumulation_steps``."""
+        """Check that the loader batch divides evenly
+        into ``gradient_accumulation_steps``."""
         loader = self.trainer.train_dataloader
         batch_size = getattr(loader, "batch_size", None) if loader is not None else None
         if (
@@ -330,7 +337,8 @@ class DiffusionTrainer(pl.LightningModule):
     def _fill_geometry(
         self, ctx: LossContext, batch: dict, x0_pred, lo: int, hi: int
     ) -> None:
-        """Add the decoded geometry (normalized units: centers ``/s``, areas ``/s^2``) to ``ctx``."""
+        """Add the decoded geometry (normalized units:
+        centers ``/s``, areas ``/s^2``) to ``ctx``."""
         area = batch["area_targets"][lo:hi]
         scale = batch["scale"][lo:hi]
         area_norm = area / scale.unsqueeze(-1) ** 2
@@ -346,24 +354,28 @@ class DiffusionTrainer(pl.LightningModule):
             setattr(ctx, key, batch[key][lo:hi])
 
     def _split_x0_head(self, x_t, t, cond):
-        """``(x0_pred, pred)`` of an x0-emitting head (``pred`` mapped to target space)."""
+        """``(x0_pred, pred)`` of an x0-emitting
+        head (``pred`` mapped to target space)."""
         x0_pred = self.backbone(x_t, t, cond)
         return x0_pred, self.framing.pred_to_target(x_t, x0_pred, t)
 
     def _split_target_head(self, x_t, t, cond):
-        """``(x0_pred, pred)`` of a target-emitting head (``x0`` solved from the target)."""
+        """``(x0_pred, pred)`` of a target-emitting
+        head (``x0`` solved from the target)."""
         raw = self.backbone(x_t, t, cond)
         return self.framing.x0_from_target(x_t, raw, t), raw
 
     def _batch_graph_pe(self, batch: dict) -> torch.Tensor | None:
-        """The graph PE of the whole batch from the raw adjacency (``None`` without a PE)."""
+        """The graph PE of the whole batch from the
+        raw adjacency (``None`` without a PE)."""
         if self.graph_pe.dim == 0:
             return None
         return self.graph_pe.batched(batch["adj_raw"], batch["token_mask"] > 0.5)
 
     @staticmethod
     def _move_grads(params, acc):
-        """Add each parameter's ``.grad`` into ``acc``, clear ``.grad``, and return ``acc``."""
+        """Add each parameter's ``.grad`` into ``acc``,
+        clear ``.grad``, and return ``acc``."""
         if acc is None:
             acc = [None] * len(params)
         both = [
@@ -461,7 +473,8 @@ class DiffusionTrainer(pl.LightningModule):
         return self._sample_instances
 
     def _resolved_scheduler_config(self) -> dict:
-        """The scheduler config with every ``end: -1`` replaced by the total step count."""
+        """The scheduler config with every ``end:
+        -1`` replaced by the total step count."""
         try:
             total = int(self.trainer.estimated_stepping_batches)
         except (RuntimeError, ValueError, OverflowError):
@@ -499,7 +512,8 @@ class DiffusionTrainer(pl.LightningModule):
 
     @contextlib.contextmanager
     def _eval_mode(self):
-        """Backbone in eval mode under the EMA weights, without CUDA graphs, inside the context."""
+        """Backbone in eval mode under the EMA weights,
+        without CUDA graphs, inside the context."""
         was_training = self.backbone.training
         ema_ctx = (
             self.ema.use_ema(self.backbone)
@@ -518,7 +532,8 @@ class DiffusionTrainer(pl.LightningModule):
             self.backbone.train(was_training)
 
     def make_placer(self) -> DiffusionPlacer:
-        """A ``DiffusionPlacer`` over the live backbone with the eval sampler / refiner config."""
+        """A ``DiffusionPlacer`` over the live backbone
+        with the eval sampler / refiner config."""
         sampler = build(
             {
                 "name": self.sample_solver,
@@ -544,7 +559,8 @@ class DiffusionTrainer(pl.LightningModule):
         )
 
     def _ordered_chunks(self, instances):
-        """``(order, chunks)``: instances sorted by block count, cut into placer-sized chunks."""
+        """``(order, chunks)``: instances sorted by
+        block count, cut into placer-sized chunks."""
         order = sorted(range(len(instances)), key=lambda i: instances[i].block_count)
         per_chunk = max(1, self.eval_max_batch // self.eval_samples)
         ordered = [instances[i] for i in order]
@@ -553,7 +569,8 @@ class DiffusionTrainer(pl.LightningModule):
 
     @torch.no_grad()
     def solve_cases(self, instances, desc: str = "eval: solving"):
-        """Place every instance; return ``[(instance, score, placement)]`` in input order.
+        """Place every instance; return ``[(instance,
+        score, placement)]`` in input order.
 
         Sets ``last_candidate_costs``: per case, every legalized candidate's cost.
         """
@@ -584,7 +601,8 @@ class DiffusionTrainer(pl.LightningModule):
 
     @torch.no_grad()
     def raw_sample_cases(self, instances) -> list[Placement]:
-        """The first raw sample (no refiner, no legalizer) of every instance, in input order."""
+        """The first raw sample (no refiner, no
+        legalizer) of every instance, in input order."""
         order, chunks = self._ordered_chunks(instances)
         out: list = [None] * len(instances)
         position = 0
@@ -601,7 +619,8 @@ class DiffusionTrainer(pl.LightningModule):
 
     @torch.no_grad()
     def log_samples(self, instances, out_dir: str) -> list[str]:
-        """Render solved placements of ``instances`` to PNG (and wandb); return the paths."""
+        """Render solved placements of ``instances``
+        to PNG (and wandb); return the paths."""
         os.makedirs(out_dir, exist_ok=True)
         render = resolve("placement", RENDERER)
         paths = []

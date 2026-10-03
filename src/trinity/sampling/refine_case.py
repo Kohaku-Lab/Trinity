@@ -1,10 +1,10 @@
 """Build the batched :class:`RefineCase` of a group of instances (normalized units).
 
-One row per ``(case, draw)``; ``k`` consecutive rows share a case. The case carries what the
-refiners and the batched scorer read: token and mobility masks, group ids, boundary codes,
-the dense b2b matrix, the per-pin edges, the anchors, the fixed outline (``inf`` without
-one), the layout scale, the reference baselines ``hpwl_base`` / ``area_base``, ``N_soft``
-and the normalized targets. Areas are ``/ s^2`` and lengths ``/ s``.
+One row per ``(case, draw)``; ``k`` consecutive rows share a case. The case carries what
+the refiners and the batched scorer read: token and mobility masks, group ids, boundary
+codes, the dense b2b matrix, the per-pin edges, the anchors, the fixed outline (``inf``
+without one), the layout scale, the reference baselines ``hpwl_base`` / ``area_base``,
+``N_soft`` and the normalized targets. Areas are ``/ s^2`` and lengths ``/ s``.
 """
 
 import numpy as np

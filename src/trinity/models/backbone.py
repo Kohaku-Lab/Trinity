@@ -2,8 +2,8 @@
 
 The network emits the clean latent ``x0`` (per block ``(cx/s, cy/s, rho)``), or the
 framing's own target with ``output_kind="target"`` (:class:`X0View` converts it). The
-per-block features (and graph PE) are concatenated to ``z_t`` at the input projection, and
-the netlist adjacency is an additive attention bias inside each block.
+per-block features (and graph PE) are concatenated to ``z_t`` at the input projection,
+and the netlist adjacency is an additive attention bias inside each block.
 """
 
 from dataclasses import dataclass
@@ -24,8 +24,8 @@ from trinity.utils import modulate
 class DenoiserCond:
     """The conditioning of a batch.
 
-    The backbone reads ``features``, ``adjacency``, ``key_pad_mask`` and ``graph_pe``; the
-    ``anchor_*`` and ``mib_soft_group`` fields are read by the sampling projections.
+    The backbone reads ``features``, ``adjacency``, ``key_pad_mask`` and ``graph_pe``;
+    the ``anchor_*`` and ``mib_soft_group`` fields are read by the sampling projections.
     """
 
     # (B, N, FEATURE_DIM) per-block features.
@@ -46,8 +46,8 @@ class DenoiserCond:
 class FinalLayer(nn.Module):
     """Output head: norm + linear to the latent dim.
 
-    With ``modulated`` it is the DiT adaLN-Zero head (norm modulated by ``c``); otherwise a
-    plain non-affine norm and ``c`` is ignored.
+    With ``modulated`` it is the DiT adaLN-Zero head (norm modulated
+    by ``c``); otherwise a plain non-affine norm and ``c`` is ignored.
     """
 
     def __init__(self, dim: int, latent_dim: int, modulated: bool = True) -> None:
@@ -126,7 +126,8 @@ class SetTransformerDenoiser(nn.Module):
         self.initialize_weights()
 
     def initialize_weights(self) -> None:
-        """DiT initialization: xavier linears, zeroed time-conditioning projections and head."""
+        """DiT initialization: xavier linears, zeroed
+        time-conditioning projections and head."""
 
         def _basic(module: nn.Module) -> None:
             if isinstance(module, nn.Linear):
@@ -155,7 +156,8 @@ class SetTransformerDenoiser(nn.Module):
     def forward(
         self, z_t: torch.Tensor, t: torch.Tensor, cond: DenoiserCond
     ) -> torch.Tensor:
-        """``z_t``: ``(B, N, latent_dim)``; ``t``: ``(B,)``; returns ``x0`` of the same shape."""
+        """``z_t``: ``(B, N, latent_dim)``; ``t``:
+        ``(B,)``; returns ``x0`` of the same shape."""
         x = self.input_embed(z_t, cond.features, cond.graph_pe)
         c = self.t_embedder(t)
         bias = self.graph_bias(cond.adjacency, cond.key_pad_mask)

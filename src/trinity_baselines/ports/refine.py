@@ -1,22 +1,23 @@
 """The post-hoc refiners of three published placers, ported onto the batched latent.
 
 All three move block positions only (sizes and aspects stay), run with autograd and the
-optimizers of their code, and work on each row's own canvas: the raw sample's bounding box
-(5 % margin) mapped to ``[-1, 1]²``, sizes in the same units. Preplaced blocks never move but
-still collide.
+optimizers of their code, and work on each row's own canvas: the raw sample's bounding
+box (5 % margin) mapped to ``[-1, 1]²``, sizes in the same units. Preplaced blocks never
+move but still collide.
 
 * ``refine_chipdiffusion`` -- the gradient legalizer of ChipDiffusion
-  (https://github.com/vint-1/chipdiffusion, ``legalization.py``): softmax-smoothed squared
-  penetration weighted by relative mass, a squared die-boundary term and weighted Manhattan
-  wirelength; ``scheduled`` = SGD with the schedules of the ``standard`` / ``scheduled``
-  configs, ``opt`` = Adam (0.8, 0.99) with the dual-ascent legality weight of ``legalize_opt``.
+  (https://github.com/vint-1/chipdiffusion, ``legalization.py``): softmax-smoothed
+  squared penetration weighted by relative mass, a squared die-boundary term and
+  weighted Manhattan wirelength; ``scheduled`` = SGD with the schedules of the
+  ``standard`` / ``scheduled`` configs, ``opt`` = Adam (0.8, 0.99) with the dual-ascent
+  legality weight of ``legalize_opt``.
 * ``refine_diffplace`` -- the anchored overlap refinement of DiffPlace
   (https://github.com/HySonLab/DiffPlace, ``deploy_nangate45.py``): gradient steps on
   ``Σ_{i<j} relu(dx)·relu(dy) + w·MSE(x, x0)`` with a linear anchor ramp.
-* ``refine_macrodiff`` -- the guidance loop of MacroDiff+ (https://github.com/jhy00n/MacroDiff-plus,
-  MIT, ``diffuser.apply_guidance``) run once on the final sample: Adam on
-  ``w_hpwl · WA-HPWL + w_overlap · log-sum-exp overlap`` with its phase switch, gradient-norm clip
-  and die clamp.
+* ``refine_macrodiff`` -- the guidance loop of MacroDiff+
+  (https://github.com/jhy00n/MacroDiff-plus, MIT, ``diffuser.apply_guidance``) run once
+  on the final sample: Adam on ``w_hpwl · WA-HPWL + w_overlap · log-sum-exp overlap``
+  with its phase switch, gradient-norm clip and die clamp.
 
 ``PORTS`` maps a refiner name to ``fn(z0, case, steps, **kwargs)``. Licenses: NOTICE.
 """
@@ -32,7 +33,8 @@ CANVAS_MARGIN = 0.05
 
 
 def _canvas(g0, mask, margin):
-    """Per-row canvas centre ``(B,2)`` and half-extent ``(B,2)`` from the raw boxes' bounding box."""
+    """Per-row canvas centre ``(B,2)`` and half-extent
+    ``(B,2)`` from the raw boxes' bounding box."""
     xmin, ymin, xmax, ymax = C.bbox(g0, mask)
     c0 = torch.stack([(xmin + xmax) / 2, (ymin + ymax) / 2], -1)
     e = torch.stack([(xmax - xmin) / 2, (ymax - ymin) / 2], -1) * (1 + margin)
@@ -40,7 +42,8 @@ def _canvas(g0, mask, margin):
 
 
 def _setup(z0, case, margin=CANVAS_MARGIN):
-    """Canvas-space centres ``X``, sizes ``S``, pin positions ``Q``, real mask, movable mask and the canvas."""
+    """Canvas-space centres ``X``, sizes ``S``, pin positions
+    ``Q``, real mask, movable mask and the canvas."""
     g0 = z_to_xywh(z0, case.area_norm, z0.new_ones(z0.shape[0]))
     c0, e = _canvas(g0, case.token_mask, margin)
     X = (g0[..., :2] + g0[..., 2:] / 2 - c0[:, None]) / e[:, None]
@@ -58,8 +61,9 @@ def _finish(z0, X, c0, e):
 
 
 class _Snapshots:
-    """Collects ``{step: latent}`` at the requested steps of a loop; ``result`` returns the dict (with
-    the final latent under ``steps``) when snapshots were requested, else the final latent.
+    """Collects ``{step: latent}`` at the requested steps of a loop; ``result`` returns
+    the dict (with the final latent under ``steps``) when snapshots were requested, else
+    the final latent.
     """
 
     def __init__(self, snapshots, steps, z0, c0, e):
@@ -80,7 +84,8 @@ class _Snapshots:
 
 
 def _wirelength(X, Q, case, real):
-    """Weighted Manhattan net length in canvas units ``(B,)`` (b2b edges + per-pin p2b edges)."""
+    """Weighted Manhattan net length in canvas units
+    ``(B,)`` (b2b edges + per-pin p2b edges)."""
     pair = (real[:, :, None] & real[:, None, :]).to(X.dtype)
     pair = pair * (1 - torch.eye(X.shape[1], device=X.device, dtype=X.dtype))[None]
     d = (X[:, :, None] - X[:, None, :]).abs().sum(-1)
@@ -91,8 +96,9 @@ def _wirelength(X, Q, case, real):
 
 
 def _chipd_legality(X, S, real, softmax_factor):
-    """ChipDiffusion legality potential ``(B,)``: mass-weighted softmax-smoothed squared penetration
-    over real pairs (the partner detached) plus the squared die-boundary term."""
+    """ChipDiffusion legality potential ``(B,)``: mass-weighted softmax-smoothed squared
+    penetration over real pairs (the partner detached) plus the squared die-boundary
+    term."""
     delta = (X[:, :, None] - X[:, None, :].detach()).abs() - (
         S[:, :, None] + S[:, None, :]
     ) / 2
@@ -108,7 +114,8 @@ def _chipd_legality(X, S, real, softmax_factor):
 
 
 def _linear_schedule(total, start_idx, end_idx, start_val, end_val):
-    """``(total,)`` values: ``start_val``, a linear ramp over ``[start_idx, end_idx)``, then ``end_val``."""
+    """``(total,)`` values: ``start_val``, a linear ramp
+    over ``[start_idx, end_idx)``, then ``end_val``."""
     sched = torch.full((total,), float(start_val))
     if end_idx > start_idx:
         sched[start_idx:end_idx] = torch.linspace(
@@ -142,8 +149,9 @@ def refine_chipdiffusion(
     margin: float = CANVAS_MARGIN,
     snapshots: tuple[int, ...] = (),
 ):
-    """ChipDiffusion's gradient legalizer on the raw sample ``z0``; returns the refined latent, or
-    ``{step: latent}`` at the steps in ``snapshots`` (0 = the input) plus the final step when given.
+    """ChipDiffusion's gradient legalizer on the raw sample ``z0``; returns the refined
+    latent, or ``{step: latent}`` at the steps in ``snapshots`` (0 = the input) plus the
+    final step when given.
     """
     X0, S, Q, real, movable, c0, e = _setup(z0, case, margin)
     X = X0.clone().requires_grad_(True)
@@ -211,7 +219,8 @@ def refine_chipdiffusion(
 
 
 def _diffplace_overlap(X, S, real):
-    """``Σ_{i<j} relu(dx)·relu(dy)`` over real pairs ``(B,)`` on centres ``X`` and sizes ``S``."""
+    """``Σ_{i<j} relu(dx)·relu(dy)`` over real pairs
+    ``(B,)`` on centres ``X`` and sizes ``S``."""
     x1, x2 = X[..., 0] - S[..., 0] / 2, X[..., 0] + S[..., 0] / 2
     y1, y2 = X[..., 1] - S[..., 1] / 2, X[..., 1] + S[..., 1] / 2
     dx = F.relu(
@@ -237,8 +246,9 @@ def refine_diffplace(
     margin: float = CANVAS_MARGIN,
     snapshots: tuple[int, ...] = (),
 ):
-    """DiffPlace's anchored overlap refinement on the raw sample ``z0``; returns the refined latent, or
-    ``{step: latent}`` at the steps in ``snapshots`` (0 = the input) plus the final step when given.
+    """DiffPlace's anchored overlap refinement on the raw sample ``z0``; returns the
+    refined latent, or ``{step: latent}`` at the steps in ``snapshots`` (0 = the input)
+    plus the final step when given.
     """
     X0, S, _, real, movable, c0, e = _setup(z0, case, margin)
     X = X0.clone()
@@ -261,7 +271,8 @@ def refine_diffplace(
 
 
 def _wa_length(X, Q, case, real, gamma):
-    """Weighted-average (log-sum-exp) net length in canvas units ``(B,)`` over b2b and p2b nets."""
+    """Weighted-average (log-sum-exp) net length in
+    canvas units ``(B,)`` over b2b and p2b nets."""
 
     def wa(a, b):
         hi = torch.maximum(a, b)
@@ -284,7 +295,8 @@ def _wa_length(X, Q, case, real, gamma):
 
 
 def _macrodiff_overlap(P, S, real, gamma):
-    """MacroDiff+'s smooth overlap ``(B,)``: log-sum-exp max/min of the edges, clamped, summed over ordered pairs."""
+    """MacroDiff+'s smooth overlap ``(B,)``: log-sum-exp max/min
+    of the edges, clamped, summed over ordered pairs."""
 
     def smax(a, b):
         m = torch.maximum(a, b)
@@ -328,8 +340,9 @@ def refine_macrodiff(
     margin: float = CANVAS_MARGIN,
     snapshots: tuple[int, ...] = (),
 ):
-    """MacroDiff+'s guidance loop, run once on the raw sample ``z0``; returns the refined latent, or
-    ``{step: latent}`` at the steps in ``snapshots`` (0 = the input) plus the final step when given.
+    """MacroDiff+'s guidance loop, run once on the raw sample ``z0``; returns the
+    refined latent, or ``{step: latent}`` at the steps in ``snapshots`` (0 = the input)
+    plus the final step when given.
     """
     X0, S, Q, real, movable, c0, e = _setup(z0, case, margin)
     P = (X0 - S / 2).clone().requires_grad_(True)

@@ -1,6 +1,6 @@
-"""Per-unit costs on the official 100 cases: the legalizer per call on the flagship's refined
-draws (NFE 8, 400 refiner steps, 16 draws, free sampling), PARSAC per annealing step and SP-SA
-per evaluation, against the block count.
+"""Per-unit costs on the official 100 cases: the legalizer per call on the flagship's
+refined draws (NFE 8, 400 refiner steps, 16 draws, free sampling), PARSAC per annealing
+step and SP-SA per evaluation, against the block count.
 
 Run::
 

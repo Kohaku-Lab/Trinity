@@ -1,4 +1,5 @@
-"""A framing built from user-supplied coefficient functions ``a, b, c, d`` (and ``a', b'``)."""
+"""A framing built from user-supplied coefficient
+functions ``a, b, c, d`` (and ``a', b'``)."""
 
 from collections.abc import Callable
 
@@ -12,8 +13,8 @@ CoeffFn = Callable[[torch.Tensor], torch.Tensor]
 class GeneralFraming(Framing):
     """Framing built from user-supplied coefficient functions of ``t``.
 
-    ``x_t = a(t)*x0 + b(t)*x1``, ``target = c(t)*x0 + d(t)*x1``; ``a_dot`` / ``b_dot`` are
-    optional but required for ODE sampling.
+    ``x_t = a(t)*x0 + b(t)*x1``, ``target = c(t)*x0 + d(t)*x1``;
+    ``a_dot`` / ``b_dot`` are optional but required for ODE sampling.
     """
 
     def __init__(

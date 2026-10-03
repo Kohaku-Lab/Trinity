@@ -1,7 +1,7 @@
 """The denoiser architecture config and named presets.
 
-Component fields (``norm``, ``mlp``, ``attn``, ``time_cond``, ``graph_mix``) are specs (a
-registry name, a dotted path, a ``{"name": ..., **kw}`` dict or a class).
+Component fields (``norm``, ``mlp``, ``attn``, ``time_cond``, ``graph_mix``) are
+specs (a registry name, a dotted path, a ``{"name": ..., **kw}`` dict or a class).
 """
 
 from dataclasses import dataclass
@@ -27,7 +27,8 @@ class DenoiserArchConfig:
     attn: Any = "sdpa_graph"
     qk_norm: bool = False
     graph_bias: bool = True
-    # Message-passing step per block: none | mp | {"name": "mp", "normalize": row|sym|none}.
+    # Message-passing step per block: none | mp |
+    # {"name": "mp", "normalize": row|sym|none}.
     graph_mix: Any = "none"
     # adaln | adaln_shared | additive | token
     time_cond: Any = "adaln"

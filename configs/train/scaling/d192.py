@@ -1,5 +1,5 @@
-"""Scaling rung d192: the flagship recipe at hidden 192, 12 blocks, 3 heads, with the runtime
-speed options on (pinned memory, the sync-free step, CUDA graphs).
+"""Scaling rung d192: the flagship recipe at hidden 192, 12 blocks, 3 heads, with
+the runtime speed options on (pinned memory, the sync-free step, CUDA graphs).
 
 Run::
 

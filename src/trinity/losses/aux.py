@@ -1,14 +1,15 @@
 """The ``ref_*`` auxiliary losses of the FloorSet reference recipe.
 
-The terms read the normalized geometry the trainer puts in ``ctx.xywh`` (total block area
-1, so ``w * h == area / s^2``) and ``ctx.xywh_gt`` (the ground-truth decode). Grouping, MIB
-and boundary reduce globally (one ``sum / sum`` over the batch); area and overlap average
-over the batch. Each term's math is a pure ``fn`` so ``compile_loss_terms`` can compile it.
+The terms read the normalized geometry the trainer puts in ``ctx.xywh`` (total block
+area 1, so ``w * h == area / s^2``) and ``ctx.xywh_gt`` (the ground-truth decode).
+Grouping, MIB and boundary reduce globally (one ``sum / sum`` over the batch); area and
+overlap average over the batch. Each term's math is a pure ``fn`` so
+``compile_loss_terms`` can compile it.
 
 Variants (``variant=``):
 
-* ``ref_area`` -- ``relu(bbox(pred) / bbox(gt) - 1)``; ``"soft"`` uses a log-sum-exp bbox,
-  ``"reference"`` the hard bbox.
+* ``ref_area`` -- ``relu(bbox(pred) / bbox(gt) - 1)``; ``"soft"``
+  uses a log-sum-exp bbox, ``"reference"`` the hard bbox.
 * ``ref_overlap`` -- pairwise intersection area; ``"soft"`` from softplus penetrations,
   ``"reference"`` the raw ``ox * oy``.
 * ``ref_grouping`` -- same-cluster pair gap-to-contact squared (``"gap"``) or center
@@ -34,7 +35,8 @@ def _edges(xywh):
 
 
 def _abut_gap(x, y, xr, yt):
-    """``(B, N, N)`` gap to contact ``max(gap_x, gap_y)`` (0 iff touching or overlapping)."""
+    """``(B, N, N)`` gap to contact ``max(gap_x,
+    gap_y)`` (0 iff touching or overlapping)."""
     gx = (
         torch.maximum(x[:, :, None], x[:, None, :])
         - torch.minimum(xr[:, :, None], xr[:, None, :])
@@ -47,7 +49,8 @@ def _abut_gap(x, y, xr, yt):
 
 
 def _bbox_edges(xywh: torch.Tensor, mask: torch.Tensor):
-    """Per-sample bbox ``(x_min, y_min, x_max, y_max)`` over real tokens, four ``(B,)``."""
+    """Per-sample bbox ``(x_min, y_min, x_max,
+    y_max)`` over real tokens, four ``(B,)``."""
     x, y, xr, yt = _edges(xywh)
     m = mask > 0.5
     return (
@@ -103,7 +106,8 @@ def _area_reference(xywh, xywh_gt, token_mask):
 
 
 def _pair_penetration(xywh: torch.Tensor, token_mask: torch.Tensor):
-    """Per-pair axis penetrations ``(ox, oy)`` and the real-pair mask, each ``(B, N, N)``."""
+    """Per-pair axis penetrations ``(ox, oy)`` and
+    the real-pair mask, each ``(B, N, N)``."""
     x, y, xr, yt = _edges(xywh)
     m = (token_mask > 0.5).to(xywh.dtype)
     ox = (
@@ -118,7 +122,8 @@ def _pair_penetration(xywh: torch.Tensor, token_mask: torch.Tensor):
 
 
 def _overlap(xywh, token_mask, tau: float = 0.01):
-    """Batch mean of the pairwise ``softplus(ox) * softplus(oy)`` (softplus shifted to 0 at 0)."""
+    """Batch mean of the pairwise ``softplus(ox) *
+    softplus(oy)`` (softplus shifted to 0 at 0)."""
     ox, oy, pair = _pair_penetration(xywh, token_mask)
     zero = torch.nn.functional.softplus(torch.zeros_like(ox))
     sx = tau * torch.nn.functional.softplus(ox / tau) - tau * zero
@@ -169,7 +174,8 @@ def _mib_reference(xywh, mib_id, token_mask):
 def _boundary(
     xywh: torch.Tensor, boundary_code: torch.Tensor, token_mask: torch.Tensor
 ):
-    """Mean over the coded sides of the squared distance to the bbox edge (1=L 2=R 4=T 8=B)."""
+    """Mean over the coded sides of the squared
+    distance to the bbox edge (1=L 2=R 4=T 8=B)."""
     x, y, xr, yt = _edges(xywh)
     m = (token_mask > 0.5).to(x.dtype)
     x_min, y_min, x_max, y_max = (v.unsqueeze(1) for v in _bbox_edges(xywh, token_mask))
@@ -199,7 +205,8 @@ def _pin_hpwl(
 
 
 class _AuxTerm(LossTerm):
-    """An aux term: ``weight * fn(*_args(ctx))``; subclasses pick ``fn`` and ``_args``."""
+    """An aux term: ``weight * fn(*_args(ctx))``;
+    subclasses pick ``fn`` and ``_args``."""
 
     needs_geometry = True
     fn = None
@@ -222,7 +229,8 @@ def _pick(variant: str, default_fn, reference_fn):
 
 @LOSS.register("ref_area")
 class AreaLoss(_AuxTerm):
-    """Compactness against the ground truth; ``variant`` ``"soft"`` | ``"reference"``."""
+    """Compactness against the ground truth;
+    ``variant`` ``"soft"`` | ``"reference"``."""
 
     name = "area"
 

@@ -1,9 +1,9 @@
 """Legalization routes (stage lists applied left to right) and the best-of over routes.
 
-A *route* is a list of stage specs (a registry key or a ``{"name": ..., **options}`` dict)
-resolved in :data:`trinity.floorplan.registry.LEGALIZER`; a *portfolio* is a list of
-routes. :func:`legalize` applies every route of a portfolio, scores each output and returns
-the best (feasible first, then the lowest cost).
+A *route* is a list of stage specs (a registry key or a ``{"name": ..., **options}``
+dict) resolved in :data:`trinity.floorplan.registry.LEGALIZER`; a *portfolio* is a list
+of routes. :func:`legalize` applies every route of a portfolio, scores each output and
+returns the best (feasible first, then the lowest cost).
 """
 
 from dataclasses import dataclass
@@ -26,7 +26,8 @@ class LegalizeResult:
 
 
 def apply_stage(placement: Placement, stage_spec) -> Placement:
-    """Apply one stage spec (registry key or ``{"name": ..., **options}``) to ``placement``."""
+    """Apply one stage spec (registry key or
+    ``{"name": ..., **options}``) to ``placement``."""
     if isinstance(stage_spec, dict):
         opts = dict(stage_spec)
         return resolve(opts.pop("name"), LEGALIZER)(placement, **opts)
@@ -42,7 +43,8 @@ def apply_route(placement: Placement, route: list | None = None) -> Placement:
 
 
 def with_stage_options(spec, stage_name: str, options: dict):
-    """A copy of a route or portfolio with ``options`` merged into every ``stage_name`` stage.
+    """A copy of a route or portfolio with ``options``
+    merged into every ``stage_name`` stage.
 
     An option already set on the stage wins.
     """
@@ -62,9 +64,11 @@ def with_stage_options(spec, stage_name: str, options: dict):
 def legalize(
     placement: Placement, portfolio: list[list] | None = None, scorer: str = "full"
 ) -> LegalizeResult:
-    """Apply every route of ``portfolio`` (default :data:`DEFAULT_PORTFOLIO`) and keep the best.
+    """Apply every route of ``portfolio`` (default
+    :data:`DEFAULT_PORTFOLIO`) and keep the best.
 
-    Each output is scored with ``scorer``; feasible outputs come first, then the lowest cost.
+    Each output is scored with ``scorer``; feasible
+    outputs come first, then the lowest cost.
     """
     score_fn = resolve(scorer, SCORER)
     results = []

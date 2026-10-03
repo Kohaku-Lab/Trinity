@@ -1,4 +1,5 @@
-"""Configurable ``torch.compile``: the whole model, or the children of chosen containers.
+"""Configurable ``torch.compile``: the whole
+model, or the children of chosen containers.
 
 The spec is a dict (or ``None`` to disable)::
 
@@ -33,7 +34,8 @@ def apply_compile(model: nn.Module, spec: dict | None) -> nn.Module:
 
 
 def _compile_children(model, targets, exclude, opts) -> int:
-    """Compile every child of the ``targets`` containers not in ``exclude``; return the count."""
+    """Compile every child of the ``targets``
+    containers not in ``exclude``; return the count."""
     compiled = 0
     for target in targets:
         container = model.get_submodule(target) if target else model
@@ -47,7 +49,8 @@ def _compile_children(model, targets, exclude, opts) -> int:
 
 
 def compile_loss_terms(terms: list, spec: dict | None) -> None:
-    """Replace the ``fn`` of every loss term that has one by its ``torch.compile`` version.
+    """Replace the ``fn`` of every loss term that
+    has one by its ``torch.compile`` version.
 
     Uses the compile kwargs of ``spec``; does nothing when ``spec`` is empty or ``off``.
     """

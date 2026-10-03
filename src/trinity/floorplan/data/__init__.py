@@ -2,7 +2,8 @@
 
 * ``paths`` -- dataset locations and downloads;
 * ``floorset`` / ``lance_store`` -- the FloorSet validation set and the 1M train set;
-* ``bookshelf`` / ``gsrc`` / ``mcnc`` -- the Bookshelf reader and the GSRC / MCNC suites.
+* ``bookshelf`` / ``gsrc`` / ``mcnc`` -- the
+  Bookshelf reader and the GSRC / MCNC suites.
 """
 
 from trinity.floorplan.data.bookshelf import (

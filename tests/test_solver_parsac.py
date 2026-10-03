@@ -1,7 +1,7 @@
-"""Gates of the PARSAC solver: the instance-to-engine mapping, the B*-tree read from a legal layout
-(every block once, root at the bottom-left, the engine's packing of that tree reproducing an abutting
-grid), and a short anneal returning overlap-free checkpoints; the engine-bound gates skip without the
-PARSAC source tree."""
+"""Gates of the PARSAC solver: the instance-to-engine mapping, the B*-tree read from a
+legal layout (every block once, root at the bottom-left, the engine's packing of that
+tree reproducing an abutting grid), and a short anneal returning overlap-free
+checkpoints; the engine-bound gates skip without the PARSAC source tree."""
 
 import numpy as np
 import pytest

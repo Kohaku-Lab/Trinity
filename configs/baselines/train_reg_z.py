@@ -1,12 +1,13 @@
 """The direct regressor with the ``z`` head: one deterministic forward per case.
 
-Same backbone, conditioning, data, split, augmentation (the base recipe plus the wire-dropout
-mixture), batch, steps, optimizer and in-loop evaluation as the base training recipe; only the
-generation mechanism differs.
+Same backbone, conditioning, data, split, augmentation (the base recipe plus the
+wire-dropout mixture), batch, steps, optimizer and in-loop evaluation as the base
+training recipe; only the generation mechanism differs.
 
 Run::
 
-    kogine run scripts/baselines/train_regressor.py --config configs/baselines/train_reg_z.py
+    kogine run scripts/baselines/train_regressor.py \\
+        --config configs/baselines/train_reg_z.py
 """
 
 from kohakuengine import use_config

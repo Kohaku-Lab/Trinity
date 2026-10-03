@@ -93,7 +93,8 @@ def mib_var(placement: Placement) -> float:
 
 
 def fixed_dist(placement: Placement) -> float:
-    """Mean fixed / preplaced deviation from target (center / s + shape / sqrt(area))."""
+    """Mean fixed / preplaced deviation from
+    target (center / s + shape / sqrt(area))."""
     inst = placement.instance
     return gp.fixed_deviation(
         placement.xywh,

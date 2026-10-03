@@ -1,12 +1,12 @@
 """Soft-constraint violation counts (grouping, MIB, boundary) and ``V_rel``.
 
 * ``V_grouping = sum_p (c_p - 1)`` -- ``c_p`` connected components of cluster ``p``;
-* ``V_mib = sum_q (s_q - 1)`` -- ``s_q`` distinct ``(round(w, 4), round(h, 4))`` shapes of
-  MIB group ``q``;
+* ``V_mib = sum_q (s_q - 1)`` -- ``s_q`` distinct
+  ``(round(w, 4), round(h, 4))`` shapes of MIB group ``q``;
 * ``V_boundary`` -- coded blocks missing a required bbox edge (within ``1e-6``).
 
-``V_rel = (V_grouping + V_boundary + V_mib) / N_soft`` with ``N_soft`` the largest possible
-count (:func:`soft_denominator`), so ``V_rel`` lies in ``[0, 1]``.
+``V_rel = (V_grouping + V_boundary + V_mib) / N_soft`` with ``N_soft`` the largest
+possible count (:func:`soft_denominator`), so ``V_rel`` lies in ``[0, 1]``.
 """
 
 from dataclasses import dataclass, field
@@ -80,7 +80,8 @@ BOUNDARY_EPS = 1e-6
 
 
 def check_boundary(placement: Placement) -> tuple[int, list[int]]:
-    """``V_boundary``: the coded blocks missing a required bbox edge; returns ``(count, blocks)``.
+    """``V_boundary``: the coded blocks missing a
+    required bbox edge; returns ``(count, blocks)``.
 
     Codes are the bitmask 1=left 2=right 4=top 8=bottom; an edge is met when the block's
     coordinate equals the bbox coordinate within ``BOUNDARY_EPS``.

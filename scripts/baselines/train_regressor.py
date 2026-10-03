@@ -1,14 +1,17 @@
 """Train a direct-regression baseline on FloorSet.
 
-The deterministic counterpart of ``scripts/train/diffusion.py``: the same data, backbone,
-conditioning, refiner, legalizer and validation, with the diffusion objective replaced by one
-supervised regression of the ground-truth layout. Run with KohakuEngine::
+The deterministic counterpart of ``scripts/train/diffusion.py``: the same data,
+backbone, conditioning, refiner, legalizer and validation, with the diffusion objective
+replaced by one supervised regression of the ground-truth layout. Run with
+KohakuEngine::
 
-    kogine run scripts/baselines/train_regressor.py --config configs/baselines/train_reg_z.py
+    kogine run scripts/baselines/train_regressor.py \\
+        --config configs/baselines/train_reg_z.py
     kogine run scripts/baselines/train_regressor.py --set MAX_STEPS=500
 
-Every typed UPPER_CASE global below is a knob a config (or a typed ``--set``) may override.
-The defaults are a small debug recipe (the 100-case validation set, ``ref-d384``, ``head="z"``).
+Every typed UPPER_CASE global below is a knob a config (or a typed ``--set``) may
+override. The defaults are a small debug recipe (the 100-case validation set,
+``ref-d384``, ``head="z"``).
 """
 
 import os
@@ -153,7 +156,8 @@ def gpu_count() -> int:
 
 
 def auto_name() -> str:
-    """A run name from the head, arch and batch, e.g. ``reg-z-ln-gelu-adaln-d384L8-bs8``."""
+    """A run name from the head, arch and batch,
+    e.g. ``reg-z-ln-gelu-adaln-d384L8-bs8``."""
     arch = ARCH_OVERRIDES
     hidden, depth = arch.get("hidden"), arch.get("depth")
     if PRESET is not None and (hidden is None or depth is None):
@@ -212,7 +216,8 @@ def cond_options() -> CondOptions:
 
 
 def build_data():
-    """``(train dataset, dev_shard_fn)``; ``dev_shard_fn(rank, world)`` is one rank's dev cases."""
+    """``(train dataset, dev_shard_fn)``;
+    ``dev_shard_fn(rank, world)`` is one rank's dev cases."""
     if DATA == "train":
         dataset, splits = train_dataset(
             lance_path=TRAIN_LANCE,

@@ -1,10 +1,11 @@
-"""MacroDiff+: the ported ``MacroPlacer`` denoiser with its DDPM objective on the Trinity recipe.
+"""MacroDiff+: the ported ``MacroPlacer`` denoiser
+with its DDPM objective on the Trinity recipe.
 
-Backbone: ``macrodiff_hetero`` at the training configuration (a heterogeneous GATv2 cell / net
-GNN, hidden 64, 5 layers, 4 heads; a token U-Net with 32 base channels; the HPWL-composed
-epsilon). Objective: epsilon prediction on the variance-preserving schedule (``ddpm_eps``) with
-a target-emitting head, uniform t. Everything else is the base recipe plus the wire-dropout
-mixture. ``BACKBONE`` needs the ``baselines`` extra.
+Backbone: ``macrodiff_hetero`` at the training configuration (a heterogeneous GATv2 cell
+/ net GNN, hidden 64, 5 layers, 4 heads; a token U-Net with 32 base channels; the
+HPWL-composed epsilon). Objective: epsilon prediction on the variance-preserving
+schedule (``ddpm_eps``) with a target-emitting head, uniform t. Everything else is the
+base recipe plus the wire-dropout mixture. ``BACKBONE`` needs the ``baselines`` extra.
 
 Run::
 

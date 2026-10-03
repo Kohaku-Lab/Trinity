@@ -27,8 +27,8 @@ def autofill_schedule_steps(
     end_from_steps: bool = True,
     warmup_from_steps: bool = True,
 ) -> dict:
-    """Set an AnySchedule sub-config's ``end`` (and ``warmup = warmup_ratio * train_steps``)
-    from ``train_steps``; mutates and returns ``scheduler_config``."""
+    """Set an AnySchedule sub-config's ``end`` (and ``warmup = warmup_ratio *
+    train_steps``) from ``train_steps``; mutates and returns ``scheduler_config``."""
     if end_from_steps:
         scheduler_config["end"] = train_steps
     if warmup_from_steps:

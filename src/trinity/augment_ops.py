@@ -1,9 +1,9 @@
 """Training augmentations: an ordered list of registered ``AUGMENT_OP`` instance ops.
 
-Every op maps a :class:`FloorplanInstance` to a new one; the dataset applies the list, then
-encodes the result. The rigid ops (``rot90``, ``flip``, ``shift``) move blocks, pins and
-boundary codes together; ``cond_dropout`` drops constraint annotations; ``wire_dropout``
-drops nets.
+Every op maps a :class:`FloorplanInstance` to a new one; the dataset applies the list,
+then encodes the result. The rigid ops (``rot90``, ``flip``, ``shift``) move blocks,
+pins and boundary codes together; ``cond_dropout`` drops constraint annotations;
+``wire_dropout`` drops nets.
 
 Config form::
 
@@ -71,10 +71,10 @@ class ShiftOp:
 class CondDropoutOp:
     """Zero constraint columns at per-group probabilities.
 
-    Receives a drop probability per group -- ``boundary``, ``cluster``, ``mib``, ``fixed``,
-    ``preplaced`` -- and ``cluster_per_group`` / ``mib_per_group`` (per group id, or the whole
-    column). Dropping ``fixed`` / ``preplaced`` also nulls the affected ``target_positions``.
-    Returns the instance with the edited ``constraints``.
+    Receives a drop probability per group -- ``boundary``, ``cluster``, ``mib``,
+    ``fixed``, ``preplaced`` -- and ``cluster_per_group`` / ``mib_per_group`` (per group
+    id, or the whole column). Dropping ``fixed`` / ``preplaced`` also nulls the affected
+    ``target_positions``. Returns the instance with the edited ``constraints``.
     """
 
     def __init__(
@@ -144,7 +144,8 @@ class CondDropoutOp:
 def drop_wires(inst, p: float, rng):
     """Drop each b2b net and p2b pin of ``inst`` independently with probability ``p``.
 
-    Returns a new instance; the GT HPWL metric entry is recomputed on the reduced netlist.
+    Returns a new instance; the GT HPWL metric
+    entry is recomputed on the reduced netlist.
     """
     if p <= 0.0:
         return inst
@@ -165,10 +166,11 @@ def drop_wires(inst, p: float, rng):
 
 @AUGMENT_OP.register("wire_dropout")
 class WireDropoutOp:
-    """Drop b2b nets and p2b pins at a per-instance rate drawn from a three-branch mixture.
+    """Drop b2b nets and p2b pins at a per-instance
+    rate drawn from a three-branch mixture.
 
-    With probability ``keep`` the rate is 0, with probability ``packing`` it is drawn from
-    ``packing_range``, otherwise from ``Beta(*beta)``; see :func:`drop_wires`.
+    With probability ``keep`` the rate is 0, with probability ``packing`` it is drawn
+    from ``packing_range``, otherwise from ``Beta(*beta)``; see :func:`drop_wires`.
     """
 
     def __init__(
@@ -226,8 +228,8 @@ class AugmentPipeline:
 def build_pipeline(spec) -> "AugmentPipeline":
     """Build the :class:`AugmentPipeline` of an ``AUGMENT`` spec.
 
-    ``spec``: ``None`` / ``False`` (no ops) | ``True`` (rot90 + flip + shift) | a list of op
-    entries (see :func:`_normalize_entry`).
+    ``spec``: ``None`` / ``False`` (no ops) | ``True`` (rot90 + flip
+    + shift) | a list of op entries (see :func:`_normalize_entry`).
     """
     if not spec:
         spec = []
@@ -235,8 +237,10 @@ def build_pipeline(spec) -> "AugmentPipeline":
         spec = [{"rot90": {}}, {"flip": {}}, {"shift": {}}]
     if not isinstance(spec, list):
         raise TypeError(
-            f"AUGMENT must be None / True / a list of ops, got {type(spec).__name__}: {spec!r}. "
-            'Use e.g. [{"rot90": {"choices": [0,1,2,3]}}, {"flip": {"p": 0.5}}, {"shift": {"std": 0.1}}]'
+            "AUGMENT must be None / True / a list of ops, got "
+            f"{type(spec).__name__}: {spec!r}. Use e.g. "
+            '[{"rot90": {"choices": [0,1,2,3]}}, {"flip": {"p": 0.5}}, '
+            '{"shift": {"std": 0.1}}]'
         )
     ops = [build(_normalize_entry(e), AUGMENT_OP) for e in spec]
     return AugmentPipeline(ops)

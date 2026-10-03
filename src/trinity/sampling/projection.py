@@ -20,18 +20,20 @@ class AnchorClamp:
     """Overwrite anchored coordinates with their known values."""
 
     def __call__(self, z: torch.Tensor, cond) -> torch.Tensor:
-        """Return ``z`` with ``cond.anchor_z`` substituted where ``cond.anchor_mask`` is 1."""
+        """Return ``z`` with ``cond.anchor_z``
+        substituted where ``cond.anchor_mask`` is 1."""
         if cond.anchor_mask is None or cond.anchor_z is None:
             return z
         return torch.where(cond.anchor_mask > 0.5, cond.anchor_z, z)
 
 
 def project_mib_group_rho(z: torch.Tensor, group: torch.Tensor) -> torch.Tensor:
-    """Replace each MIB member's shape channels with its group's mean, by scatter-add averaging.
+    """Replace each MIB member's shape channels with
+    its group's mean, by scatter-add averaging.
 
-    ``z`` is ``(B, N, latent)``; channels ``0:2`` are the position and are left untouched, channels
-    ``2:`` are the shape. ``group`` is ``(B, N)`` group ids with 0 meaning "not a member". Returns a
-    tensor of the same shape.
+    ``z`` is ``(B, N, latent)``; channels ``0:2`` are the position and are left
+    untouched, channels ``2:`` are the shape. ``group`` is ``(B, N)`` group ids with 0
+    meaning "not a member". Returns a tensor of the same shape.
     """
     member = group > 0
     if not bool(member.any()):
@@ -58,7 +60,8 @@ class MIBGroupMean:
     """Make all-soft MIB group members share one shape, at the group's own mean."""
 
     def __call__(self, z: torch.Tensor, cond) -> torch.Tensor:
-        """Return ``z`` with the shape channels of each ``cond.mib_soft_group`` member averaged."""
+        """Return ``z`` with the shape channels of each
+        ``cond.mib_soft_group`` member averaged."""
         if cond.mib_soft_group is None:
             return z
         return project_mib_group_rho(z, cond.mib_soft_group)

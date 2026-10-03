@@ -1,10 +1,12 @@
-"""Auxiliary loss terms: one per constraint, each the constraint's own violated quantity.
+"""Auxiliary loss terms: one per constraint,
+each the constraint's own violated quantity.
 
 Definitions: ``docs/physics.md``. Six independent terms on the decoded geometry ``xywh``
-``(B, N, 4)``; each has one tunable, ``weight``, optionally applied per sample as ``weight * t``
-(``t_weight``). Every normalizer is a property of the instance: ``s² = Σ w h`` over real blocks
-and ``s = sqrt(s²)``. Fixed / preplaced channels are detached in every term. The math of each
-term is a pure function (``fn``) so ``compile_loss_terms`` can ``torch.compile`` it.
+``(B, N, 4)``; each has one tunable, ``weight``, optionally applied per sample as
+``weight * t`` (``t_weight``). Every normalizer is a property of the instance: ``s² = Σ
+w h`` over real blocks and ``s = sqrt(s²)``. Fixed / preplaced channels are detached in
+every term. The math of each term is a pure function (``fn``) so ``compile_loss_terms``
+can ``torch.compile`` it.
 
 * ``overlap``  -- Σ pairwise intersection area / s²
 * ``group``    -- Σ clusters (minimum-spanning-tree total gap-to-contact) / s
@@ -25,7 +27,8 @@ MAX_GROUP_SIZE = 16
 
 
 def _freeze(xywh, mob_pos, mob_shape):
-    """``xywh`` with the centers of position-frozen and the sizes of shape-frozen blocks detached.
+    """``xywh`` with the centers of position-frozen
+    and the sizes of shape-frozen blocks detached.
 
     The corner form is rebuilt from the (partly detached) centers and sizes.
     """
@@ -67,7 +70,8 @@ def overlap_area(g, mask):
 
 
 def _pair_overlap(lo, hi):
-    """``(B, N, N)`` overlap of every pair of intervals ``[lo, hi]`` (0 when disjoint)."""
+    """``(B, N, N)`` overlap of every pair of
+    intervals ``[lo, hi]`` (0 when disjoint)."""
     overlap = torch.minimum(hi[:, :, None], hi[:, None, :]) - torch.maximum(
         lo[:, :, None], lo[:, None, :]
     )
@@ -75,7 +79,8 @@ def _pair_overlap(lo, hi):
 
 
 def _pair_gap(lo, hi):
-    """``(B, N, N)`` gap between every pair of intervals ``[lo, hi]`` (0 when they meet)."""
+    """``(B, N, N)`` gap between every pair of
+    intervals ``[lo, hi]`` (0 when they meet)."""
     gap = torch.maximum(lo[:, :, None], lo[:, None, :]) - torch.minimum(
         hi[:, :, None], hi[:, None, :]
     )
@@ -83,13 +88,15 @@ def _pair_gap(lo, hi):
 
 
 def gap_matrix(g):
-    """``(B, N, N)`` distance to contact ``max(gap_x, gap_y)`` (0 iff touching or overlapping)."""
+    """``(B, N, N)`` distance to contact ``max(gap_x,
+    gap_y)`` (0 iff touching or overlapping)."""
     x, y, xr, yt = _edges(g)
     return torch.maximum(_pair_gap(x, xr), _pair_gap(y, yt))
 
 
 def cluster_mst_gap(g, cluster_id, mask):
-    """``(B,)`` sum over clusters of the minimum-spanning-tree total gap, by batched Prim.
+    """``(B,)`` sum over clusters of the
+    minimum-spanning-tree total gap, by batched Prim.
 
     Runs ``MAX_GROUP_SIZE - 1`` iterations; group ids are indexed up to ``N``.
     """
@@ -163,7 +170,8 @@ def bbox(g, mask):
 
 
 def boundary_distance(g, boundary_code, mask):
-    """``(B,)`` sum over coded blocks of the distance from each required side to its bbox edge."""
+    """``(B,)`` sum over coded blocks of the distance
+    from each required side to its bbox edge."""
     x, y, xr, yt = _edges(g)
     x_min, y_min, x_max, y_max = bbox(g, mask)
     code = boundary_code.long()
@@ -178,7 +186,8 @@ def boundary_distance(g, boundary_code, mask):
 
 
 def net_length(g, adjacency, pin_xy, pin_w, pin_block, mask):
-    """Per sample, the weighted Manhattan net length (b2b + per-pin p2b) and the total weight."""
+    """Per sample, the weighted Manhattan net length
+    (b2b + per-pin p2b) and the total weight."""
     c = g[..., :2] + g[..., 2:] / 2
     pair = _real_pairs(mask)
     d = (c[:, :, None, 0] - c[:, None, :, 0]).abs() + (
@@ -232,7 +241,8 @@ def _area_fn(xywh, mob_pos, mob_shape, area_targets, mask):
 
 
 class _ConstraintTerm(LossTerm):
-    """The batch mean of ``fn`` per sample, weighted by ``weight`` (or ``weight * t``)."""
+    """The batch mean of ``fn`` per sample,
+    weighted by ``weight`` (or ``weight * t``)."""
 
     needs_geometry = True
     fn = None

@@ -3,9 +3,9 @@
 * :data:`HEAD` -- the output heads of the direct regressor (``z`` / ``xywh``).
 * :data:`BASELINE_BACKBONE` -- the ported denoisers of published placers.
 
-Losses, latent parameterizations and refiners come from ``trinity.registry``. A spec is an
-instance (returned as-is), a class (instantiated), a registry key, a dotted import path, or a
-``{"name": <key|path>, **kwargs}`` dict.
+Losses, latent parameterizations and refiners come from ``trinity.registry``. A spec is
+an instance (returned as-is), a class (instantiated), a registry key, a dotted import
+path, or a ``{"name": <key|path>, **kwargs}`` dict.
 """
 
 from collections.abc import Callable

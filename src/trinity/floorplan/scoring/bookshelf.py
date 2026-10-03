@@ -17,7 +17,8 @@ from trinity.floorplan.types import Placement
 
 @dataclass
 class BookshelfScore:
-    """The bookshelf metrics of one layout (``fits_outline`` is ``None`` without an outline)."""
+    """The bookshelf metrics of one layout
+    (``fits_outline`` is ``None`` without an outline)."""
 
     hpwl: float
     area: float
@@ -31,7 +32,8 @@ class BookshelfScore:
 
 
 def orient_targets(inst, xywh) -> object:
-    """``inst`` with each fixed-shape target rotated to the orientation ``xywh`` gives it.
+    """``inst`` with each fixed-shape target
+    rotated to the orientation ``xywh`` gives it.
 
     Returns ``inst`` itself when no block is rotated.
     """
@@ -54,7 +56,8 @@ def orient_targets(inst, xywh) -> object:
 
 
 def clamp_aspect(inst, xywh) -> np.ndarray:
-    """``xywh`` with every bounded soft block's ``w/h`` clipped into its ``aspect_bounds``.
+    """``xywh`` with every bounded soft block's
+    ``w/h`` clipped into its ``aspect_bounds``.
 
     Area and center are kept.
     """
@@ -72,7 +75,8 @@ def clamp_aspect(inst, xywh) -> np.ndarray:
 
 
 def net_hpwl(placement: Placement) -> float:
-    """The sum over hyperedges of the half-perimeter of their block centers and terminals."""
+    """The sum over hyperedges of the half-perimeter
+    of their block centers and terminals."""
     inst = placement.instance
     if inst.nets is None:
         raise ValueError("the instance carries no hyperedges (not a bookshelf case)")
@@ -86,7 +90,8 @@ def net_hpwl(placement: Placement) -> float:
 
 
 def score_bookshelf(placement: Placement, outline=None) -> BookshelfScore:
-    """The bookshelf metrics of ``placement`` (``outline`` defaults to the instance's)."""
+    """The bookshelf metrics of ``placement``
+    (``outline`` defaults to the instance's)."""
     inst = placement.instance
     xywh = np.asarray(placement.xywh, dtype=np.float64)
     x0, y0, x1, y1 = bounding_box(xywh)

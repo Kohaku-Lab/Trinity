@@ -1,18 +1,19 @@
-"""DiffPlace ``VectorGNNV2Global`` denoiser, ported to the ``(z_t, t, cond) -> out`` interface.
+"""DiffPlace ``VectorGNNV2Global`` denoiser,
+ported to the ``(z_t, t, cond) -> out`` interface.
 
 Source: https://github.com/HySonLab/DiffPlace (licenses: NOTICE). Copied from
 ``engine/networks/vector_gnn.py`` at the deployed configuration (``train.py`` /
-``scripts/deploy.py``: hidden 256, 8 blocks x 2 vector message-passing layers, 8 heads, a global
-supernode after every block; ``engine/diffplace.py``: 64-d time encoding, 4-d edge features).
-Changes at the batch boundary:
+``scripts/deploy.py``: hidden 256, 8 blocks x 2 vector message-passing layers, 8 heads,
+a global supernode after every block; ``engine/diffplace.py``: 64-d time encoding, 4-d
+edge features). Changes at the batch boundary:
 
-* their message passing assumes one graph shared by the whole batch; here a batch is a padded
-  ``(B, N)`` batch with a per-row dense adjacency, so nodes are flattened to ``b * N + i`` and
-  each row's own edges (nonzero adjacency entries) are built per forward; the 4-d pin-offset
-  edge attribute becomes the b2b weight repeated 4 times;
-* node conditioning is the 19-D feature vector instead of their ``(w, h)``; the latent is 3-D
-  ``(cx, cy, rho)``: the relative-position encoding uses the first two channels, the input
-  concatenation, the output head and the skip use all three;
+* their message passing assumes one graph shared by the whole batch; here a batch is a
+  padded ``(B, N)`` batch with a per-row dense adjacency, so nodes are flattened to ``b
+  * N + i`` and each row's own edges (nonzero adjacency entries) are built per forward;
+  the 4-d pin-offset edge attribute becomes the b2b weight repeated 4 times;
+* node conditioning is the 19-D feature vector instead of their ``(w, h)``; the latent
+  is 3-D ``(cx, cy, rho)``: the relative-position encoding uses the first two channels,
+  the input concatenation, the output head and the skip use all three;
 * the discrete rotation head is dropped (FloorSet blocks are not rotated); the global
   supernode's mean pooling is masked by ``key_pad_mask``; the integer-timestep embedding
   receives ``t * 1000`` (their 1000-step range).
@@ -71,7 +72,8 @@ class SinusoidalTimeEmbedding(nn.Module):
 
 
 class FiLM(nn.Module):
-    """Their zero-initialized ``(1 + gamma) * x + beta`` with a per-node conditioning vector."""
+    """Their zero-initialized ``(1 + gamma) * x +
+    beta`` with a per-node conditioning vector."""
 
     def __init__(self, cond_dim: int, feature_dim: int) -> None:
         super().__init__()
@@ -167,7 +169,8 @@ class VectorMessagePassingLayer(nn.Module):
 
 
 class VectorGNNBlock(nn.Module):
-    """Their block: ``num_layers`` message-passing layers each followed by FiLM, then a FiLM-modulated feed-forward residual."""
+    """Their block: ``num_layers`` message-passing layers each
+    followed by FiLM, then a FiLM-modulated feed-forward residual."""
 
     def __init__(
         self,
@@ -208,8 +211,8 @@ class VectorGNNBlock(nn.Module):
 
 
 class InputProjection(nn.Module):
-    """Their input projection: sinusoidal position encoding + raw latent + conditioning, plus the
-    fixed-frequency spatial encoding of ``[latent, conditioning]``."""
+    """Their input projection: sinusoidal position encoding + raw latent + conditioning,
+    plus the fixed-frequency spatial encoding of ``[latent, conditioning]``."""
 
     def __init__(
         self, latent_dim, cond_dim, hidden_dim, pos_encoding_dim, input_encoding_dim
@@ -258,7 +261,8 @@ class OutputHead(nn.Module):
 
 
 class GlobalContextModule(nn.Module):
-    """Their virtual global supernode: masked mean pool -> MLP -> gated broadcast add -> LayerNorm."""
+    """Their virtual global supernode: masked mean pool
+    -> MLP -> gated broadcast add -> LayerNorm."""
 
     def __init__(self, hidden_dim, dropout=0.0) -> None:
         super().__init__()
@@ -340,7 +344,8 @@ class DiffPlaceVGNN(nn.Module):
     def forward(
         self, z_t: torch.Tensor, t: torch.Tensor, cond: DenoiserCond
     ) -> torch.Tensor:
-        """``z_t`` ``(B, N, latent)``, ``t`` ``(B,)`` in ``[0, 1]``; returns ``(B, N, latent)``."""
+        """``z_t`` ``(B, N, latent)``, ``t`` ``(B,)``
+        in ``[0, 1]``; returns ``(B, N, latent)``."""
         b, n, _ = z_t.shape
         real = (
             cond.key_pad_mask

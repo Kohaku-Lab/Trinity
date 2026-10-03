@@ -1,6 +1,7 @@
-"""Gates of the bookshelf protocol pieces: hyperedges kept by the parser, hard blocks as fixed shapes,
-the fixed-outline transform (outline area, pins inside the outline, reference layout dropped) and the
-net-HPWL / dead-space / fits metric; the MCNC gates skip without the data folder."""
+"""Gates of the bookshelf protocol pieces: hyperedges kept by the parser, hard blocks as
+fixed shapes, the fixed-outline transform (outline area, pins inside the outline,
+reference layout dropped) and the net-HPWL / dead-space / fits metric; the MCNC gates
+skip without the data folder."""
 
 from pathlib import Path
 
@@ -26,13 +27,21 @@ MCNC = project_data_root() / "mcnc"
 
 def _toy_bookshelf(tmp_path: Path) -> tuple[Path, Path, Path]:
     (tmp_path / "t.blocks").write_text(
-        "UCSC blocks 1.0\nNumSoftRectangularBlocks : 0\nNumHardRectilinearBlocks : 3\nNumTerminals : 2\n"
-        "a hardrectilinear 4 (0, 0) (0, 2) (4, 2) (4, 0)\nb hardrectilinear 4 (0, 0) (0, 3) (2, 3) (2, 0)\n"
-        "c hardrectilinear 4 (0, 0) (0, 1) (3, 1) (3, 0)\np1 terminal\np2 terminal\n"
+        "UCSC blocks 1.0\n"
+        "NumSoftRectangularBlocks : 0\n"
+        "NumHardRectilinearBlocks : 3\n"
+        "NumTerminals : 2\n"
+        "a hardrectilinear 4 (0, 0) (0, 2) (4, 2) (4, 0)\n"
+        "b hardrectilinear 4 (0, 0) (0, 3) (2, 3) (2, 0)\n"
+        "c hardrectilinear 4 (0, 0) (0, 1) (3, 1) (3, 0)\n"
+        "p1 terminal\n"
+        "p2 terminal\n"
     )
     (tmp_path / "t.pl").write_text("UCSC pl 1.0\na 0 0\nb 4 0\nc 0 2\np1 0 5\np2 6 0\n")
     (tmp_path / "t.nets").write_text(
-        "UCSC nets 1.0\nNumNets : 2\nNumPins : 5\nNetDegree : 3\na B\nb B\np1 B\nNetDegree : 2\nc B\np2 B\n"
+        "UCSC nets 1.0\nNumNets : 2\nNumPins : 5\n"
+        "NetDegree : 3\na B\nb B\np1 B\n"
+        "NetDegree : 2\nc B\np2 B\n"
     )
     return tmp_path / "t.blocks", tmp_path / "t.pl", tmp_path / "t.nets"
 
@@ -70,8 +79,14 @@ def test_fixed_outline_transform_and_metric(tmp_path):
 
 def _toy_soft(tmp_path: Path) -> tuple[Path, Path, Path]:
     (tmp_path / "s.blocks").write_text(
-        "UCSC blocks 1.0\nNumSoftRectangularBlocks : 3\nNumHardRectilinearBlocks : 0\nNumTerminals : 1\n"
-        "a softrectangular 8 0.5 2.0\nb softrectangular 6 1.5 1.5\nc softrectangular 3\np1 terminal\n"
+        "UCSC blocks 1.0\n"
+        "NumSoftRectangularBlocks : 3\n"
+        "NumHardRectilinearBlocks : 0\n"
+        "NumTerminals : 1\n"
+        "a softrectangular 8 0.5 2.0\n"
+        "b softrectangular 6 1.5 1.5\n"
+        "c softrectangular 3\n"
+        "p1 terminal\n"
     )
     (tmp_path / "s.pl").write_text("UCSC pl 1.0\np1 0 5\n")
     (tmp_path / "s.nets").write_text(

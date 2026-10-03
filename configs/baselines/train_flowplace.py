@@ -1,9 +1,11 @@
-"""FlowPlace: its ported ``AttGNN`` denoiser and its objective on the Trinity data and recipe.
+"""FlowPlace: its ported ``AttGNN`` denoiser and
+its objective on the Trinity data and recipe.
 
-Backbone: ``flowplace_attgnn`` at the paper's ``large`` configuration. Objective: rectified flow
-with a velocity-emitting head (``MSE(v_pred, x - x_1)``), uniform t. Data, split, augmentation
-(the base recipe plus the wire-dropout mixture), batch, steps, optimizer and evaluation are the
-base recipe's. ``BACKBONE`` needs the ``baselines`` extra (``torch_geometric``).
+Backbone: ``flowplace_attgnn`` at the paper's ``large`` configuration. Objective:
+rectified flow with a velocity-emitting head (``MSE(v_pred, x - x_1)``), uniform t.
+Data, split, augmentation (the base recipe plus the wire-dropout mixture), batch, steps,
+optimizer and evaluation are the base recipe's. ``BACKBONE`` needs the ``baselines``
+extra (``torch_geometric``).
 
 Run::
 

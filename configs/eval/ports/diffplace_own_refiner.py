@@ -1,10 +1,12 @@
-"""DiffPlace samples through its own ported anchored overlap refinement (500 steps) at NFE 32,
-then ``scale_pack``: the published generator with its own refiner, scored by the hard cost
-(single sample and best of 4). The layouts it stores feed the motivation figure.
+"""DiffPlace samples through its own ported anchored overlap refinement (500 steps) at
+NFE 32, then ``scale_pack``: the published generator with its own refiner, scored by the
+hard cost (single sample and best of 4). The layouts it stores feed the motivation
+figure.
 
 Run::
 
-    kogine run scripts/eval/legalize.py --config configs/eval/ports/diffplace_own_refiner.py
+    kogine run scripts/eval/legalize.py \\
+        --config configs/eval/ports/diffplace_own_refiner.py
 """
 
 RUN = "baseline-diffplace"

@@ -27,7 +27,8 @@ __all__ = [
 def gsrc_case_paths(
     root: Path, n_blocks: int, variant: str = "HARD"
 ) -> tuple[Path, Path, Path]:
-    """The ``(blocks, pl, nets)`` paths of one GSRC case (``variant`` = ``HARD`` / ``SOFT``)."""
+    """The ``(blocks, pl, nets)`` paths of one GSRC
+    case (``variant`` = ``HARD`` / ``SOFT``)."""
     base = root / variant / f"n{n_blocks}"
     return (
         base.with_suffix(".blocks"),
@@ -45,7 +46,8 @@ def load_gsrc_case(
 ) -> FloorplanInstance:
     """Load the GSRC case of ``n_blocks`` blocks.
 
-    Hard blocks become fixed-shape blocks when ``hard_shapes`` (default: ``variant == "HARD"``).
+    Hard blocks become fixed-shape blocks when
+    ``hard_shapes`` (default: ``variant == "HARD"``).
     """
     override = None if root is None else str(root)
     gsrc_root = find_gsrc_root(override=override, allow_download=allow_download)

@@ -1,9 +1,9 @@
 """Sampling, the sampler-state projections, and the constraint refiners.
 
-Importing this package registers the ODE samplers ``euler`` / ``heun``, the state projections
-``anchor_clamp`` / ``mib_group_mean`` (on by default in every sampler), and the refiners
-``closed`` (the closed-form refiner of the paper) and ``constraint_latent`` (its autograd
-reference).
+Importing this package registers the ODE samplers ``euler`` / ``heun``, the state
+projections ``anchor_clamp`` / ``mib_group_mean`` (on by default in every sampler), and
+the refiners ``closed`` (the closed-form refiner of the paper) and ``constraint_latent``
+(its autograd reference).
 """
 
 from trinity.sampling.ode import (

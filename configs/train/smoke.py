@@ -1,5 +1,5 @@
-"""Smoke run: a tiny flagship-shaped model on the 100-case validation set, a few steps, offline
-logging. Checks the whole training path end to end in about a minute.
+"""Smoke run: a tiny flagship-shaped model on the 100-case validation set, a few
+steps, offline logging. Checks the whole training path end to end in about a minute.
 
 Run::
 

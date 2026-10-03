@@ -1,4 +1,5 @@
-"""A validator over a :class:`Placement`: one score and a readable list of violations."""
+"""A validator over a :class:`Placement`: one
+score and a readable list of violations."""
 
 from dataclasses import dataclass
 
@@ -19,7 +20,8 @@ class ValidationResult:
         s = self.score
         lines = [
             f"feasible={self.feasible}  cost={s.cost:.4f}  "
-            f"hpwl_gap={s.hpwl_gap:+.3f}  area_gap={s.area_gap:+.3f}  V_rel={s.v_rel:.3f}",
+            f"hpwl_gap={s.hpwl_gap:+.3f}  area_gap={s.area_gap:+.3f}  "
+            f"V_rel={s.v_rel:.3f}",
         ]
         f = s.feasibility
         if f.overlap_count:
@@ -36,7 +38,8 @@ class ValidationResult:
             so = s.soft
             if so.grouping:
                 lines.append(
-                    f"  SOFT grouping: {so.grouping} (split groups {so.grouping_groups})"
+                    f"  SOFT grouping: {so.grouping} "
+                    f"(split groups {so.grouping_groups})"
                 )
             if so.mib:
                 lines.append(f"  SOFT mib: {so.mib} (groups {so.mib_groups})")
