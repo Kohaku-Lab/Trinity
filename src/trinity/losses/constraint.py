@@ -1,6 +1,6 @@
 """Auxiliary loss terms: one per constraint, each the constraint's own violated quantity.
 
-Design record: ``docs/aux-terms.md``. Six independent terms on the decoded geometry ``xywh``
+Definitions: ``docs/physics.md``. Six independent terms on the decoded geometry ``xywh``
 ``(B, N, 4)``; each has one tunable, ``weight``, optionally applied per sample as ``weight * t``
 (``t_weight``). Every normalizer is a property of the instance: ``s² = Σ w h`` over real blocks
 and ``s = sqrt(s²)``. Fixed / preplaced channels are detached in every term. The math of each
