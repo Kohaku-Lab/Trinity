@@ -54,8 +54,9 @@ p { margin: 0; }
 .hero .pitch { font-size: 1.18rem; color: var(--fg-soft); }
 .authors { font-size: 1.05rem; display: grid; gap: 0.2rem; }
 .authors .aff { color: var(--muted); font-size: 0.95rem; }
-.authors .mk { display: inline-flex; flex-direction: column; vertical-align: 0.05em; line-height: 1; font-size: 0.83em; text-align: left; }
-.authors .mk sup, .authors .mk sub { font-size: 1em; vertical-align: 0; line-height: 1; }
+.authors .au { white-space: nowrap; }
+.authors .m { font-size: smaller; vertical-align: middle; margin-left: 0.06em; }
+.authors .mk { display: inline-flex; flex-direction: column; vertical-align: middle; font-size: smaller; line-height: 1; text-align: left; margin-left: 0.08em; }
 .links { display: flex; gap: 0.6rem; flex-wrap: wrap; justify-content: center; }
 .btn { display: inline-flex; align-items: center; padding: 0.55rem 1.15rem; border-radius: 999px; font-weight: 500; font-size: 0.95rem; text-decoration: none; background: var(--btn); color: var(--btn-fg); border: none; cursor: pointer; font-family: inherit; }
 .btn[aria-disabled="true"] { opacity: 0.5; cursor: default; }
@@ -203,9 +204,9 @@ img, video, canvas, svg { max-width: 100%; }
   <header class="hero">
     <h1><span class="name">Trinity</span>: One Differentiable Physics for Training, Refining and Scoring Generative Floorplanners</h1>
     <div class="authors">
-      <span><b>Shih-Ying Yeh</b><span class="mk"><sup>♡♠</sup><sub>*†</sub></span>, <b>Tzu-Sian Wang</b><span class="mk"><sup>♡♠</sup><sub>*</sub></span>, <b>Xuehai Wang</b><span class="mk"><sup>♣</sup><sub>△</sub></span>, <b>Jia-Hua Lee</b><sup>★</sup>, <b>Daniel Z. Kaplan</b><sup>◇</sup>, <b>Ming-Qi Xu</b><sup>♡</sup>, <b>Wuqian Tang</b><sup>♡</sup>, <b>Chun-Yao Wang</b><sup>♡</sup>, <b>Shang-Hong Lai</b><sup>♡</sup>, <b>Chun-Yi Lee</b><sup>★</sup></span>
-      <span class="aff"><sup>♡</sup>National Tsing Hua University · <sup>♠</sup>Kohaku Lab · <sup>♣</sup>Karolinska Institutet · <sup>△</sup>Stockholm University · <sup>◇</sup>realiz.ai · <sup>★</sup>National Taiwan University</span>
-      <span class="aff"><sup>*</sup>Equal contribution · <sup>†</sup>Corresponding author: kohaku@kblueleaf.net</span>
+      <span><span class="au"><b>Shih-Ying Yeh</b><span class="mk"><span>♡♠</span><span>*†</span></span></span>, <span class="au"><b>Tzu-Sian Wang</b><span class="mk"><span>♡♠</span><span>*</span></span></span>, <span class="au"><b>Xuehai Wang</b><span class="m">♣△</span></span>, <span class="au"><b>Jia-Hua Lee</b><span class="m">★</span></span>, <span class="au"><b>Daniel Z. Kaplan</b><span class="m">◇</span></span>, <span class="au"><b>Ming-Qi Xu</b><span class="m">♡</span></span>, <span class="au"><b>Wuqian Tang</b><span class="m">♡</span></span>, <span class="au"><b>Chun-Yao Wang</b><span class="m">♡</span></span>, <span class="au"><b>Shang-Hong Lai</b><span class="m">♡</span></span>, <span class="au"><b>Chun-Yi Lee</b><span class="m">★</span></span></span>
+      <span class="aff"><span class="m">♡</span>National Tsing Hua University · <span class="m">♠</span>Kohaku Lab · <span class="m">♣</span>Karolinska Institutet · <span class="m">△</span>Stockholm University · <span class="m">◇</span>realiz.ai · <span class="m">★</span>National Taiwan University</span>
+      <span class="aff"><span class="m">*</span>Equal contribution · <span class="m">†</span>Corresponding author: kohaku@kblueleaf.net</span>
     </div>
     <nav class="links" aria-label="Paper links">
       <a class="btn" aria-disabled="true" role="link">Paper</a>
