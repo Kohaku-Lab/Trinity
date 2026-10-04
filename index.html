@@ -299,38 +299,33 @@ img, video, canvas, svg { max-width: 100%; }
     <!-- 4 -->
     <section aria-labelledby="s4">
       <span class="kicker">Why in training</span>
-      <h2 id="s4">A physics term in the loss is guidance the model performs for free</h2>
+      <h2 id="s4">The physics term is a self-supervised loss that carries the rules where the data stops</h2>
+      <h3>1 · What we train</h3>
+      <div class="math">
+        <div class="eq"><span class="m">ℒ</span>(θ) = 𝔼<sub>(<span class="m">c</span>, <span class="m">x</span><sub>0</sub>) ∼ data</sub> ‖ <span class="m">v̂</span> − <span class="m">v</span>(<span class="m">x</span><sub>0</sub>) ‖² + <span class="hl">λ 𝔼 [ <span class="m">U</span>(<span class="m">x̂</span><sub>0</sub> ; <span class="m">c</span>) ]</span>, &nbsp; <span class="m">x̂</span><sub>0</sub> = <span class="m">m</span><sub>θ</sub>(<span class="m">x<sub>t</sub></span>, <span class="m">t</span>, <span class="m">c</span>)</div>
+        <div class="note">Rectified flow with <span class="m">x<sub>t</sub></span> = (1 − <span class="m">t</span>) <span class="m">x</span><sub>0</sub> + <span class="m">t x</span><sub>1</sub>. The first term needs the reference layout <span class="m">x</span><sub>0</sub>. The second reads only the model's own prediction <span class="m">x̂</span><sub>0</sub> and the rules of chip <span class="m">c</span>; its constraint part is zero on every legal reference.</div>
+      </div>
+      <h3>2 · A self-supervised term</h3>
       <div class="text">
-        <p>Trinity trains with rectified flow: a clean layout <span class="m">x</span><sub>0</sub> and noise <span class="m">x</span><sub>1</sub> are mixed as <span class="m">x<sub>t</sub></span> = (1 − <span class="m">t</span>) <span class="m">x</span><sub>0</sub> + <span class="m">t x</span><sub>1</sub>, and the network predicts the clean layout <span class="m">x̂</span><sub>0</sub>. A network trained on references alone predicts the posterior mean <span class="m">x̄</span><sub>0</sub> = 𝔼[<span class="m">x</span><sub>0</sub> | <span class="m">x<sub>t</sub></span>], which can break the rules because legal layouts do not form a convex set. Adding the energy to the loss changes what the ideal network predicts:</p>
+        <p>The physics term has no label. Its target is the rule set of the chip, which exists for every chip, with or without an answer. On the training data its constraint part leaves the fitted data unchanged: a model trained on references alone predicts the posterior mean <span class="m">x̄</span><sub>0</sub>, and the mean of legal layouts is not legal, because legal layouts do not form a convex set. With the term, the best prediction is that mean pulled one proximal step toward the rules, strongest at high noise and gone at <span class="m">t</span> = 0.</p>
       </div>
       <div class="math">
-        <div class="eq"><span class="m">ℒ</span> = 𝔼 [ ‖ <span class="m">v̂</span> − <span class="m">v</span> ‖² + <span class="hl">λ <span class="m">U</span>(<span class="m">x̂</span><sub>0</sub>)</span> ]</div>
-        <div class="eq">⟹ &nbsp; <span class="m">x̂</span><sub>0</sub><sup>⋆</sup> = prox<sub><span class="m">γ<sub>t</sub> U</span></sub>(<span class="m">x̄</span><sub>0</sub>) = argmin<sub><span class="m">m</span></sub> ½‖<span class="m">m</span> − <span class="m">x̄</span><sub>0</sub>‖² + <span class="m">γ<sub>t</sub> U</span>(<span class="m">m</span>), &nbsp;&nbsp; <span class="hl"><span class="m">γ<sub>t</sub></span> = λ<span class="m">t</span>²/2</span></div>
-        <div class="note">The trained network takes the posterior mean and makes one proximal step toward the rules. The step is large when the layout is noisy and vanishes as t → 0.</div>
+        <div class="eq"><span class="m">x̂</span><sub>0</sub><sup>⋆</sup> = prox<sub><span class="m">γ<sub>t</sub> U</span></sub>(<span class="m">x̄</span><sub>0</sub>) = argmin<sub><span class="m">m</span></sub> ½‖<span class="m">m</span> − <span class="m">x̄</span><sub>0</sub>‖² + <span class="m">γ<sub>t</sub> U</span>(<span class="m">m</span>), &nbsp; <span class="hl"><span class="m">γ<sub>t</sub></span> = λ<span class="m">t</span>²/2</span></div>
       </div>
+      <h3>3 · What it does where the data is silent</h3>
       <div class="text">
-        <p>This is the correction existing placers apply by hand inside their samplers, but learned once, so <strong>sampling needs no guidance at all</strong>. And it fades in the right way. A loop of gradient steps inside the sampler applies the same push at every noise level. It substitutes a clean-space gradient for the exact guidance, an error that does not shrink as sampling ends, and it keeps moving a layout that already obeys the rules. The learned step shrinks as <span class="m">t</span>² and leaves a legal layout alone. After sampling, at <span class="m">t</span> = 0 where the learned step has vanished, the refiner simply continues descending the same <span class="m">U</span>.</p>
-      </div>
-      <div class="text">
-        <p><strong>Rules, not answers.</strong> The flow-matching loss compares the prediction with a reference layout, so it can only teach what the training chips show. The physics term compares the prediction with nothing: it checks the rules on the model's own output, using only the instance's constraints and netlist. It is a self-supervised signal, and it is just as valid on a chip the data never covered as on one it did. A model trained this way learns how a legal floorplan behaves, not only what the training floorplans looked like.</p>
-      </div>
-      <div class="cmp">
-        <div class="cmp-col">
-          <span class="tag" style="background:var(--surface-alt);color:var(--fg-soft)">flow-matching loss</span>
-          <p>‖ v̂ − v ‖², with v built from the <b>reference layout</b></p>
-          <p class="muted">Needs the answer. Teaches the distribution of training floorplans.</p>
-        </div>
-        <div class="cmp-col">
-          <span class="tag train">physics term</span>
-          <p>λ U(x̂₀), the <b>rules</b> evaluated on the model's own prediction</p>
-          <p class="muted">Needs no answer. Teaches the rules on every prediction, like a self-supervised loss.</p>
-        </div>
+        <p>On a chip without a reference the flow loss has no target. The physics term still acts there, through the weights every chip shares. One training step of the term on chip <span class="m">c</span> changes the violation on any other chip <span class="m">c</span>′ at the rate</p>
       </div>
       <div class="math">
-        <div class="eq"><span class="m">ℒ</span> = 𝔼<sub>(<span class="m">c</span>, <span class="m">x</span><sub>0</sub>) ∼ data</sub> [ ‖ <span class="m">v̂</span> − <span class="m">v</span>(<span class="m">x</span><sub>0</sub>) ‖² ] + <span class="hl">λ 𝔼<sub><span class="m">c</span></sub> [ <span class="m">U</span>(<span class="m">x̂</span><sub>0</sub> ; <span class="m">c</span>) ]</span></div>
-        <div class="note">The first term needs the reference layout x<sub>0</sub>. The second needs only the instance c, its constraints and netlist: the rules are a function of c, never of the answer.</div>
-        <div class="eq"><span class="m">x̂</span><sub>0</sub><sup>⋆</sup>(<span class="m">x<sub>t</sub></span>, <span class="m">c</span>) = prox<sub><span class="m">γ<sub>t</sub> U</span>( · ; <span class="m">c</span>)</sub> ( <span class="m">x̄</span><sub>0</sub>(<span class="m">x<sub>t</sub></span>, <span class="m">c</span>) )</div>
-        <div class="note">The data only teaches the posterior mean x̄<sub>0</sub>, which is unreliable where the data is thin. The proximal step is driven by the rule of the instance itself, so it points the right way for any c.</div>
+        <div class="eq">d<span class="m">U</span>′(<span class="m">x̂</span><sub>0</sub>(<span class="m">c</span>′)) / d<span class="m">η</span> = <span class="hl">−λ ∇<span class="m">U</span>′<sup>⊤</sup> <span class="m">K</span> ∇<span class="m">U</span></span>, &nbsp; <span class="m">K</span> = <span class="m">J</span><sub><span class="m">c</span>′</sub> <span class="m">J</span><sub><span class="m">c</span></sub><sup>⊤</sup></div>
+        <div class="note"><span class="m">J</span> is the Jacobian of the prediction in the weights. The violation on <span class="m">c</span>′ falls whenever the kernel <span class="m">K</span> aligns the two rule gradients. This and the proximal step above are checked in Lean 4 (Appendix D).</div>
+      </div>
+      <div class="text">
+        <p>The rules are local, sums over pairs of blocks and over single blocks, and the network applies the same weights to every block. That is the setting in which <span class="m">K</span> is expected to align them, so a repair learned on 60-block chips can carry to 200-block ones. The data shows legality only by example; the term states the rule, and a rule transfers where examples do not.</p>
+      </div>
+      <h3>4 · The effect, trained</h3>
+      <div class="text">
+        <p>A toy trained once per weight shows all three.</p>
       </div>
       <div class="toy">
         <h3>A trained toy: blocks as disks</h3>
@@ -399,6 +394,10 @@ img, video, canvas, svg { max-width: 100%; }
       <p class="tnote">Best legalized layout over 4 seeds × 16 draws (NFE 8, 400 refiner steps). W × H is its outline against the 10% dead-space square; red marks an outline that does not fit. At n300 no draw fits, so the row shows the best legal layout. FloorSet training chips have 21 to 120 blocks.</p>
       <div class="text">
         <p>Inside the training range the two models tie (n100: 294.7 against 293.9 mm), as expected when the data already covers the case. At 200 blocks, almost twice the largest training chip, the physics term is the difference between a floorplan that fits with 0.7% dead space and one that cannot fit at all, at shorter wirelength too. At 300 blocks neither fits. That residual is a known open problem of transformer generators on sizes far beyond training, not of the physics, and it is where we see the next step.</p>
+      </div>
+      <h3>5 · Beyond floorplans</h3>
+      <div class="text">
+        <p>Nothing in the argument is specific to chips. Any diffusion or flow model can add a reference-free term on its own prediction <span class="m">x̂</span><sub>0</sub>. It helps when the term is zero on the data, computable on <span class="m">x̂</span><sub>0</sub>, and built from local parts that shared weights can carry: collisions and valence for molecules, steric clashes for proteins, equation residuals for physical fields, foot contact for motion. Its weight needs tuning: in the toy, λ = 30 is best beyond the data at 16 and 32 steps, while λ = 100 overshoots there and helps only at 8.</p>
       </div>
     </section>
 
